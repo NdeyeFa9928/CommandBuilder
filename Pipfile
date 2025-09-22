@@ -9,6 +9,7 @@ pyside6 = "*"
 pytest = "*"
 ruff = "*"
 black = "*"
+mermaid-py = "*"
 
 [dev-packages]
 pyinstaller = "*"
