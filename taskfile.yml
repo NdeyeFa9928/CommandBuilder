@@ -1,0 +1,181 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: CommandBuilder
+  PROJECT_DESC: GUI Assistant for composing Windows CLI commands without syntax errors
+
+tasks:
+  default:
+    desc: Display project information and available commands
+    cmds:
+      - cmd: |
+          echo === {{.PROJECT_NAME}} ===
+          echo {{.PROJECT_DESC}}
+          echo Available commands:
+          echo   task install     - Complete project installation
+          echo   task lint        - Check formatting and style rules
+          echo   task fix         - Automatically fix formatting and style issues
+          echo   task build       - Build an executable
+          echo   task clean       - Clean generated files
+          echo   task test        - Run all tests
+          echo   task test:services - Run service tests only
+          echo   task test:models   - Run model tests only
+          echo   task test:components - Run component tests only
+          echo   task test:fast    - Run tests with minimal output
+          echo   task run         - Run the CommandBuilder application
+          echo   task dev         - Complete development workflow
+          echo Example: task build
+
+  install:
+    desc: Complete project installation
+    cmds:
+      - task: update-pip
+      - task: install-deps
+
+  update-pip:
+    desc: Update pip
+    cmds:
+      - cmd: python -m pip install --upgrade pip
+
+  install-deps:
+    desc: Install Python dependencies with pipenv
+    cmds:
+      - cmd: python -m pip install pipenv
+      - cmd: pipenv install --dev
+
+  shell:
+    desc: Activate pipenv shell
+    cmds:
+      - cmd: pipenv shell
+
+  # Code quality tasks
+  lint:
+    desc: Check formatting and style without fixing
+    cmds:
+      - cmd: pipenv run ruff format --check .
+      - cmd: pipenv run ruff check .
+
+  fix:
+    desc: Fix formatting and style issues
+    cmds:
+      - cmd: pipenv run ruff format .
+      - cmd: pipenv run ruff check --fix .
+      - cmd: pipenv run ruff check --unsafe-fixes --fix .
+
+  # Application tasks
+  run:
+    desc: Run the CommandBuilder application
+    cmds:
+      - cmd: pipenv run python main.py
+
+  # Build tasks
+  build:
+    desc: Build an executable
+    cmds:
+      - task: build-mkdir-dist
+      - task: build-executable
+
+  build-mkdir-dist:
+    desc: Create dist directory
+    internal: true
+    cmds:
+      - cmd: powershell "if (Test-Path dist) { Remove-Item -Path dist -Recurse -Force }"
+      - cmd: powershell "New-Item -ItemType Directory -Path dist"
+
+  build-executable:
+    desc: Create executable with PyInstaller
+    internal: true
+    cmds:
+      - cmd: pipenv run python build_executable.py
+
+  build-dev:
+    desc: Build executable for development (with console)
+    cmds:
+      - task: build-mkdir-dist
+      - cmd: pipenv run python build_executable.py --dev
+
+  clean:
+    desc: Clean generated files
+    cmds:
+      - cmd: powershell "if (Test-Path dist) { Remove-Item -Path dist -Recurse -Force }"
+      - cmd: powershell "if (Test-Path build) { Remove-Item -Path build -Recurse -Force }"
+      - cmd: powershell "if (Test-Path *.spec) { Remove-Item -Path *.spec -Force }"
+      - cmd: powershell "Get-ChildItem -Path . -Filter __pycache__ -Directory -Recurse | Remove-Item -Recurse -Force"
+
+  info:
+    desc: Display project information
+    cmds:
+      - cmd: |
+          echo === {{.PROJECT_NAME}} ===
+          echo {{.PROJECT_DESC}}
+          echo Project structure:
+          echo   - command_builder/components/ : UI components (.py, .ui, .qss)
+          echo   - command_builder/services/  : Business services and utilities
+          echo   - command_builder/models/    : Pydantic data models
+          echo   - command_builder/assets/    : Icons and graphic resources
+          echo   - command_builder/data/      : JSON command definitions
+          echo   - command_builder/ui/        : Main UI components
+          echo   - main.py                    : Application entry point
+
+  # Test tasks
+  test:
+    desc: Run all tests
+    cmds:
+      - cmd: pipenv run pytest tests
+
+  test:services:
+    desc: Run service tests only
+    cmds:
+      - cmd: pipenv run pytest command_builder/tests/services
+
+  test:models:
+    desc: Run model tests only
+    cmds:
+      - cmd: pipenv run pytest command_builder/tests/models
+
+  test:components:
+    desc: Run component tests only
+    cmds:
+      - cmd: pipenv run pytest command_builder/tests/components
+
+  test:fast:
+    desc: Run tests with minimal output
+    cmds:
+      - cmd: pipenv run pytest -q command_builder/tests
+
+  test:cov:
+    desc: Run tests with coverage
+    cmds:
+      - cmd: pipenv run pytest --cov=command_builder --cov-report=html --cov-report=term
+
+  # Command management tasks
+  add-command:
+    desc: Add a new command definition (usage task add-command -- command_name)
+    cmds:
+      - cmd: pipenv run python -m command_builder.tools.add_command {{.CLI_ARGS}}
+
+  validate-commands:
+    desc: Validate all command JSON files
+    cmds:
+      - cmd: pipenv run python -m command_builder.tools.validate_commands
+
+  # Development workflow
+  dev:
+    desc: Complete development workflow (quality + tests)
+    cmds:
+      - task: fix
+      - task: test:cov
+
+  ci:
+    desc: CI workflow (quality checks + tests)
+    cmds:
+      - task: lint
+      - task: test:cov
+
+  # Project setup
+  setup:
+    desc: Initial project setup
+    cmds:
+      - task: install
+      - task: fix
+      - cmd: echo "Project setup complete! Run 'task run' to start the application."
