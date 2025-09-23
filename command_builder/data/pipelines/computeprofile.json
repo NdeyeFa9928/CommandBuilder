@@ -1,0 +1,44 @@
+{
+  "name": "Calculer profils",
+  "description": "Calcule les indicateurs de profils",
+  "tasks": [
+    {
+      "name": "Calculer profils",
+      "description": "Calcule les indicateurs de profils dans la base de données",
+      "commands": [
+        {
+          "name": "computeprofile",
+          "description": "Calcule les indicateurs de profils",
+          "command": "computeprofile {DATABASE_FILE} --config {CONFIG_FILE} {DEBUG_FLAG}",
+          "arguments": [
+            {
+              "code": "DATABASE_FILE",
+              "name": "Base de données",
+              "description": "Fichier SQLite à traiter",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".db", ".sqlite", ".sqlite3"]
+              }
+            },
+            {
+              "code": "CONFIG_FILE",
+              "name": "Configuration",
+              "description": "Fichier de configuration",
+              "type": "file",
+              "required": 1
+            },
+            {
+              "code": "DEBUG_FLAG",
+              "name": "Mode debug",
+              "description": "Activer le mode debug (--debug)",
+              "type": "boolean",
+              "required": 0,
+              "default": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

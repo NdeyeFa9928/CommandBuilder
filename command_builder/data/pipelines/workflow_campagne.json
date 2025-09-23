@@ -1,0 +1,157 @@
+{
+  "name": "Workflow campagne complète",
+  "description": "Importe un dossier TDMS, calcule les clés et exporte les résultats",
+  "tasks": [
+    {
+      "name": "Importer dossier",
+      "description": "Importe tous les fichiers TDMS d'un répertoire",
+      "commands": [
+        {
+          "name": "tdmsdirimport",
+          "description": "Importe tous les fichiers TDMS d'un dossier vers une base SQLite",
+          "command": "tdmsdirimport {INPUT_TDMS_DIR} {DATABASE_DIR} --config {CONFIG_FILE} --keys {KEYS_FILE} --pname {PROJECT_NAME}",
+          "arguments": [
+            {
+              "code": "INPUT_TDMS_DIR",
+              "name": "Répertoire TDMS",
+              "description": "Répertoire contenant les fichiers TDMS",
+              "type": "directory",
+              "required": 1
+            },
+            {
+              "code": "DATABASE_DIR",
+              "name": "Répertoire base SQLite",
+              "description": "Répertoire pour la base de données",
+              "type": "directory",
+              "required": 1
+            },
+            {
+              "code": "CONFIG_FILE",
+              "name": "Configuration",
+              "description": "Fichier de configuration",
+              "type": "file",
+              "required": 1
+            },
+            {
+              "code": "KEYS_FILE",
+              "name": "Fichier de clés",
+              "description": "Fichier de clés pour l'import",
+              "type": "file",
+              "required": 1
+            },
+            {
+              "code": "PROJECT_NAME",
+              "name": "Nom du projet",
+              "description": "Nom du projet (--pname)",
+              "type": "string",
+              "required": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Calculer clés",
+      "description": "Recalcule les tables de clés dans la base de données",
+      "dependencies": ["Importer dossier"],
+      "commands": [
+        {
+          "name": "computekey",
+          "description": "Recalcule les tables key_point et key_segment",
+          "command": "computekey {DATABASE_FILE} --keys {KEYS_FILE}",
+          "arguments": [
+            {
+              "code": "DATABASE_FILE",
+              "name": "Base de données",
+              "description": "Fichier SQLite à traiter",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".db", ".sqlite", ".sqlite3"]
+              }
+            },
+            {
+              "code": "KEYS_FILE",
+              "name": "Fichier de clés",
+              "description": "Fichier de configuration des clés",
+              "type": "file",
+              "required": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exporter KMZ",
+      "description": "Exporte les données GPS en KMZ pour Google Earth",
+      "dependencies": ["Calculer clés"],
+      "commands": [
+        {
+          "name": "kmzexport",
+          "description": "Exporte GPS/IMU/CSV en fichier KMZ pour Google Earth",
+          "command": "kmzexport {DATABASE_FILE} {OUTPUT_FILE}",
+          "arguments": [
+            {
+              "code": "DATABASE_FILE",
+              "name": "Base de données",
+              "description": "Fichier SQLite source",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".db", ".sqlite", ".sqlite3"]
+              }
+            },
+            {
+              "code": "OUTPUT_FILE",
+              "name": "Fichier KMZ",
+              "description": "Fichier KMZ de destination",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".kmz"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exporter campagne",
+      "description": "Exporte les tables SQLite en fichiers texte + images",
+      "dependencies": ["Calculer clés"],
+      "commands": [
+        {
+          "name": "campaignexport",
+          "description": "Exporte les tables SQLite en fichiers texte + images",
+          "command": "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY}",
+          "arguments": [
+            {
+              "code": "DATABASE_FILE",
+              "name": "Base de données",
+              "description": "Fichier SQLite source",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".db", ".sqlite", ".sqlite3"]
+              }
+            },
+            {
+              "code": "TXT_OUTPUT_DIRECTORY",
+              "name": "Répertoire texte",
+              "description": "Répertoire de sortie pour les fichiers texte",
+              "type": "directory",
+              "required": 1
+            },
+            {
+              "code": "IMG_OUTPUT_DIRECTORY",
+              "name": "Répertoire images",
+              "description": "Répertoire de sortie pour les images",
+              "type": "directory",
+              "required": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

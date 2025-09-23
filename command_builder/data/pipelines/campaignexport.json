@@ -1,0 +1,51 @@
+{
+  "name": "Exporter campagne",
+  "description": "Exporte les tables SQLite en fichiers texte + images",
+  "tasks": [
+    {
+      "name": "Exporter campagne",
+      "description": "Exporte les tables SQLite en fichiers texte + images",
+      "commands": [
+        {
+          "name": "campaignexport",
+          "description": "Exporte les tables SQLite en fichiers texte + images",
+          "command": "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} {TOLIMAGE}",
+          "arguments": [
+            {
+              "code": "DATABASE_FILE",
+              "name": "Base de données",
+              "description": "Fichier SQLite source",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".db", ".sqlite", ".sqlite3"]
+              }
+            },
+            {
+              "code": "TXT_OUTPUT_DIRECTORY",
+              "name": "Répertoire texte",
+              "description": "Répertoire de sortie pour les fichiers texte",
+              "type": "directory",
+              "required": 1
+            },
+            {
+              "code": "IMG_OUTPUT_DIRECTORY",
+              "name": "Répertoire images",
+              "description": "Répertoire de sortie pour les images",
+              "type": "directory",
+              "required": 1
+            },
+            {
+              "code": "TOLIMAGE",
+              "name": "Tolérance image",
+              "description": "Valeur de tolérance pour les images (--tolimage)",
+              "type": "float",
+              "required": 0,
+              "default": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
