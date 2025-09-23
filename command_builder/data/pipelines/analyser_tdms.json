@@ -1,0 +1,29 @@
+{
+  "name": "Analyser fichier TDMS",
+  "description": "Inspecte la structure d'un fichier TDMS",
+  "tasks": [
+    {
+      "name": "Scanner TDMS",
+      "description": "Analyse la structure et les métadonnées d'un fichier TDMS",
+      "commands": [
+        {
+          "name": "tdmsscan",
+          "description": "Inspecte la structure d'un fichier TDMS",
+          "command": "tdmsscan {INPUT_TDMS_FILE}",
+          "arguments": [
+            {
+              "code": "INPUT_TDMS_FILE",
+              "name": "Fichier TDMS",
+              "description": "Fichier TDMS à analyser",
+              "type": "file",
+              "required": 1,
+              "validation": {
+                "file_extensions": [".tdms"]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

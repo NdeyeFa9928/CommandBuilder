@@ -1,0 +1,18 @@
+{
+  "name": "Test SQLite+Spatialite",
+  "description": "Vérifie que SQLite + Spatialite fonctionne correctement",
+  "tasks": [
+    {
+      "name": "Tester Spatialite",
+      "description": "Vérifie l'installation et le fonctionnement de Spatialite",
+      "commands": [
+        {
+          "name": "spatialitest",
+          "description": "Vérifie que SQLite + Spatialite fonctionne correctement",
+          "command": "spatialitest",
+          "arguments": []
+        }
+      ]
+    }
+  ]
+}
