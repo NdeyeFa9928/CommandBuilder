@@ -1,0 +1,39 @@
+{
+  "name": "csvexport",
+  "description": "Exporte une table SQLite en CSV",
+  "category": "export",
+  "executable": "csvexport",
+  "parameters": {
+    "required": [
+      {
+        "name": "DATABASE_FILE",
+        "type": "file",
+        "description": "Fichier de base de données SQLite",
+        "validation": {
+          "file_extensions": [".db", ".sqlite", ".sqlite3"]
+        }
+      },
+      {
+        "name": "OUTPUT_FILE",
+        "type": "file",
+        "description": "Fichier CSV de sortie",
+        "validation": {
+          "file_extensions": [".csv"]
+        }
+      },
+      {
+        "name": "TABLE",
+        "type": "string",
+        "description": "Nom de la table à exporter"
+      }
+    ],
+    "optional": []
+  },
+  "inputs": [
+    "Base SQLite",
+    "Nom de table"
+  ],
+  "outputs": [
+    "Fichier CSV exporté"
+  ]
+}

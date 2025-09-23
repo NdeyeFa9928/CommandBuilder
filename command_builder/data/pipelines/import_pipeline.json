@@ -1,0 +1,27 @@
+{
+  "name": "Importer TDMS → Formatage",
+  "description": "Pipeline d'importation et formatage des données TDMS",
+  "icon": "import",
+  "tasks": [
+    {
+      "name": "Décoder les TDMS",
+      "description": "Importation et décodage des fichiers TDMS",
+      "commands": ["tdmsscan", "tdmsimport"],
+      "parallel": false
+    },
+    {
+      "name": "Calculer les clés",
+      "description": "Calcul des clés et segments",
+      "commands": ["computekey"],
+      "dependencies": ["Décoder les TDMS"],
+      "parallel": false
+    },
+    {
+      "name": "Exporter CSV",
+      "description": "Export des données en format CSV",
+      "commands": ["csvexport"],
+      "dependencies": ["Calculer les clés"],
+      "parallel": false
+    }
+  ]
+}

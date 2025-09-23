@@ -1,0 +1,39 @@
+{
+  "name": "computekey",
+  "description": "Recalcule les tables key_point et key_segment",
+  "category": "analysis",
+  "executable": "computekey",
+  "parameters": {
+    "required": [
+      {
+        "name": "DATABASE_FILE",
+        "type": "file",
+        "description": "Fichier de base de données SQLite",
+        "validation": {
+          "file_extensions": [".db", ".sqlite", ".sqlite3"]
+        }
+      },
+      {
+        "name": "keys",
+        "flag": "--keys",
+        "type": "file",
+        "description": "Fichier de configuration des clés"
+      }
+    ],
+    "optional": [
+      {
+        "name": "table_name",
+        "flag": "--ptable",
+        "type": "string",
+        "description": "Nom de la table de projet"
+      }
+    ]
+  },
+  "inputs": [
+    "Base SQLite",
+    "Fichier de clés"
+  ],
+  "outputs": [
+    "Tables key_point et key_segment mises à jour"
+  ]
+}
