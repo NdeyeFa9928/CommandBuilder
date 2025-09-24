@@ -1,24 +1,15 @@
-#!/usr/bin/env python3
-"""
-CommandBuilder - GUI Assistant for Windows CLI Commands
-Entry point for the application.
-"""
-
-import sys
 from pathlib import Path
-
-# Add project root to Python path
-project_root = Path(__file__).parent
-sys.path.insert(0, str(project_root))
-
-from command_builder.app import CommandBuilderApp
-
-
-def main():
-    """Main entry point for CommandBuilder application."""
-    app = CommandBuilderApp()
-    return app.run()
-
+from command_builder.services.pipeline_loader import load_pipeline
 
 if __name__ == "__main__":
-    sys.exit(main())
+    pipelines_dir = Path(__file__).parent / "command_builder" / "data" / "pipelines"
+    pipeline_files = list(pipelines_dir.glob("*.json"))
+    
+    if not pipeline_files:
+        print(f"Aucun fichier pipeline trouvé dans {pipelines_dir}")
+    else:
+        print(f"{len(pipeline_files)} pipeline(s) trouvé(s) :")
+        for i, file in enumerate(pipeline_files, start=1):
+            print(f"{i}. {file.name}")
+
+    
