@@ -1,10 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
-class Pipeline(BaseModel):
+
+class Argument(BaseModel):
+    code: str
     name: str
     description: str
-    tasks: List[Dict[str, Any]]
-
-
 
