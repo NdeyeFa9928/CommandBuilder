@@ -1,0 +1,39 @@
+/* Style pour la sortie console */
+#ConsoleOutput {
+    background-color: #252a3b;
+    color: #ffffff;
+    border: none;
+}
+
+#labelConsole {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+QPlainTextEdit {
+    background-color: #1e2130;
+    color: #a0e0a0;
+    border: 1px solid #3a3f55;
+    border-radius: 3px;
+    font-family: "Consolas", monospace;
+    padding: 5px;
+}
+
+QPushButton {
+    background-color: #3a3f55;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 15px;
+    margin: 5px;
+}
+
+QPushButton:hover {
+    background-color: #4a4f65;
+}
+
+QPushButton:pressed {
+    background-color: #2a2f45;
+}
