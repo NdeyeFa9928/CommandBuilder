@@ -30,14 +30,22 @@ QLabel {
     padding: 5px 0;
 }
 
+/* Style pour les frames de pipeline */
+QFrame {
+    background-color: #2a2f45;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+/* Style pour les boutons de tâches */
 QPushButton {
     background-color: #3a3f55;
     color: #ffffff;
     border: none;
     border-radius: 3px;
     padding: 5px 10px;
-    margin-left: 15px;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    text-align: left;
 }
 
 QPushButton:hover {
@@ -46,4 +54,21 @@ QPushButton:hover {
 
 QPushButton:pressed {
     background-color: #2a2f45;
+}
+
+/* Style pour les boutons déroulants */
+QToolButton {
+    background-color: #3a3f55;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+QToolButton:hover {
+    background-color: #4a4f65;
+}
+
+QToolButton:checked {
+    background-color: #4a90e2;
 }

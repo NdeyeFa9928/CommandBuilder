@@ -2,8 +2,10 @@
 Module contenant la classe PipelineList qui représente la liste des pipelines disponibles.
 """
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
-from PySide6.QtCore import Signal
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QLabel, 
+                             QFrame, QToolButton, QSizePolicy, QHBoxLayout)
+from PySide6.QtCore import Signal, Qt, QSize
+from PySide6.QtGui import QIcon, QFont
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.pipeline import Pipeline
@@ -77,5 +79,93 @@ class PipelineList(QWidget):
         
     def _update_pipeline_list(self):
         """Met à jour l'affichage de la liste des pipelines."""
-        # Cette méthode sera implémentée plus tard pour afficher dynamiquement les pipelines
-        pass
+        # Effacer le contenu actuel (sauf le spacer à la fin)
+        while self.pipeline_items_layout.count() > 1:
+            item = self.pipeline_items_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        # Ajouter chaque pipeline
+        for pipeline in self.pipelines:
+            self._add_pipeline_widget(pipeline)
+    
+    def _add_pipeline_widget(self, pipeline):
+        """Ajoute un widget pour un pipeline avec un menu déroulant pour ses tâches."""
+        # Créer le widget du pipeline
+        pipeline_frame = QFrame(self)
+        pipeline_frame.setObjectName(f"pipeline_{pipeline.name}")
+        pipeline_frame.setFrameShape(QFrame.StyledPanel)
+        pipeline_frame.setFrameShadow(QFrame.Raised)
+        
+        # Layout vertical pour le pipeline et ses tâches
+        pipeline_layout = QVBoxLayout(pipeline_frame)
+        pipeline_layout.setSpacing(2)
+        pipeline_layout.setContentsMargins(5, 5, 5, 5)
+        
+        # Layout horizontal pour l'en-tête du pipeline (titre + bouton déroulant)
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(5)
+        
+        # Label pour le nom du pipeline
+        pipeline_label = QLabel(pipeline.name, pipeline_frame)
+        pipeline_label.setObjectName(f"label_{pipeline.name}")
+        font = QFont()
+        font.setBold(True)
+        pipeline_label.setFont(font)
+        
+        # Bouton déroulant
+        toggle_button = QToolButton(pipeline_frame)
+        toggle_button.setObjectName(f"toggle_{pipeline.name}")
+        toggle_button.setText("+")
+        toggle_button.setCheckable(True)
+        toggle_button.setFixedSize(QSize(24, 24))
+        
+        # Ajouter les widgets à l'en-tête
+        header_layout.addWidget(pipeline_label)
+        header_layout.addStretch()
+        header_layout.addWidget(toggle_button)
+        
+        # Ajouter l'en-tête au layout du pipeline
+        pipeline_layout.addLayout(header_layout)
+        
+        # Créer un widget pour contenir les tâches
+        tasks_container = QWidget(pipeline_frame)
+        tasks_container.setObjectName(f"tasks_{pipeline.name}")
+        tasks_layout = QVBoxLayout(tasks_container)
+        tasks_layout.setSpacing(2)
+        tasks_layout.setContentsMargins(15, 0, 5, 5)  # Indentation à gauche
+        
+        # Ajouter les tâches
+        for task in pipeline.tasks:
+            task_button = QPushButton(task.get('name', 'Tâche sans nom'), tasks_container)
+            task_button.setObjectName(f"task_{pipeline.name}_{task.get('name', '')}")
+            task_button.clicked.connect(
+                lambda checked, p=pipeline.name, t=task.get('name', ''): 
+                self.command_selected.emit(p, t)
+            )
+            tasks_layout.addWidget(task_button)
+        
+        # Cacher les tâches par défaut
+        tasks_container.setVisible(False)
+        
+        # Ajouter le conteneur de tâches au layout du pipeline
+        pipeline_layout.addWidget(tasks_container)
+        
+        # Connecter le bouton déroulant
+        toggle_button.clicked.connect(
+            lambda checked: self._toggle_tasks(tasks_container, toggle_button)
+        )
+        
+        # Ajouter le widget du pipeline au layout principal
+        self.pipeline_items_layout.insertWidget(self.pipeline_items_layout.count() - 1, pipeline_frame)
+    
+    def _toggle_tasks(self, tasks_container, toggle_button):
+        """Affiche ou cache les tâches d'un pipeline."""
+        is_visible = tasks_container.isVisible()
+        tasks_container.setVisible(not is_visible)
+        toggle_button.setText("-" if not is_visible else "+")
+        
+    def clear(self):
+        """Efface tous les pipelines de la liste."""
+        self.pipelines = []
+        self._update_pipeline_list()
