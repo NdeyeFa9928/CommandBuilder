@@ -33,52 +33,13 @@
        </size>
       </property>
       <layout class="QVBoxLayout" name="pipelineContainerLayout">
-       <item>
-        <widget class="QLabel" name="labelPipelines">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Pipelines</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLabel" name="labelCommandes">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Liste des commandes</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QWidget" name="commandFormContainer" native="true"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelConsole">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Console</string>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="QWidget" name="consoleOutputContainer" native="true">
