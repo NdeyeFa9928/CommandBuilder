@@ -30,13 +30,6 @@ QLabel {
     padding: 5px 0;
 }
 
-/* Style pour les frames de pipeline */
-QFrame {
-    background-color: #2a2f45;
-    border-radius: 5px;
-    margin-bottom: 5px;
-}
-
 /* Style pour les boutons de tâches */
 QPushButton {
     background-color: #3a3f55;
@@ -44,7 +37,8 @@ QPushButton {
     border: none;
     border-radius: 3px;
     padding: 5px 10px;
-    margin-bottom: 3px;
+    margin-left: 15px;
+    margin-bottom: 5px;
     text-align: left;
 }
 
@@ -56,19 +50,17 @@ QPushButton:pressed {
     background-color: #2a2f45;
 }
 
-/* Style pour les boutons déroulants */
-QToolButton {
-    background-color: #3a3f55;
+/* Style pour les titres de pipeline */
+QLabel {
     color: #ffffff;
-    border: none;
-    border-radius: 3px;
+    padding: 5px 0;
     font-weight: bold;
 }
 
-QToolButton:hover {
-    background-color: #4a4f65;
-}
-
-QToolButton:checked {
-    background-color: #4a90e2;
+/* Style pour le titre principal */
+#labelPipelines, #labelCommandes, #labelConsole {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px;
 }

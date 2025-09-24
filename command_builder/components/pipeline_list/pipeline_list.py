@@ -2,9 +2,8 @@
 Module contenant la classe PipelineList qui représente la liste des pipelines disponibles.
 """
 from pathlib import Path
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QLabel, 
-                             QFrame, QToolButton, QSizePolicy, QHBoxLayout)
-from PySide6.QtCore import Signal, Qt, QSize
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QFrame
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QIcon, QFont
 from PySide6.QtUiTools import QUiLoader
 
@@ -31,6 +30,9 @@ class PipelineList(QWidget):
         """
         super().__init__(parent)
         self.pipelines = []
+        self.selected_pipeline = None
+        self.pipeline_frames = {}  # Pour stocker les références aux frames de pipeline
+        self.task_containers = {}  # Pour stocker les références aux conteneurs de tâches
         self._load_ui()
         self._load_stylesheet()
         self._connect_signals()
@@ -90,57 +92,78 @@ class PipelineList(QWidget):
             self._add_pipeline_widget(pipeline)
     
     def _add_pipeline_widget(self, pipeline):
-        """Ajoute un widget pour un pipeline avec un menu déroulant pour ses tâches."""
-        # Créer le widget du pipeline
+        """Ajoute un widget pour un pipeline avec ses tâches."""
+        # Créer un frame pour contenir le pipeline et ses tâches
         pipeline_frame = QFrame(self)
-        pipeline_frame.setObjectName(f"pipeline_{pipeline.name}")
-        pipeline_frame.setFrameShape(QFrame.StyledPanel)
-        pipeline_frame.setFrameShadow(QFrame.Raised)
+        pipeline_frame.setObjectName(f"frame_{pipeline.name}")
+        pipeline_frame.setFrameShape(QFrame.NoFrame)
+        pipeline_frame.setFrameShadow(QFrame.Plain)
+        
+        # Stocker la référence au frame
+        self.pipeline_frames[pipeline.name] = pipeline_frame
         
         # Layout vertical pour le pipeline et ses tâches
         pipeline_layout = QVBoxLayout(pipeline_frame)
-        pipeline_layout.setSpacing(2)
-        pipeline_layout.setContentsMargins(5, 5, 5, 5)
+        pipeline_layout.setSpacing(0)
+        pipeline_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Layout horizontal pour l'en-tête du pipeline (titre + bouton déroulant)
-        header_layout = QHBoxLayout()
-        header_layout.setSpacing(5)
+        # Créer un séparateur pour mieux organiser visuellement
+        if self.pipeline_items_layout.count() > 1:  # Si ce n'est pas le premier pipeline
+            separator = QWidget(pipeline_frame)
+            separator.setFixedHeight(1)
+            separator.setStyleSheet("background-color: #3a3f55;")
+            pipeline_layout.addWidget(separator)
         
-        # Label pour le nom du pipeline
-        pipeline_label = QLabel(pipeline.name, pipeline_frame)
+        # Créer un widget pour l'en-tête du pipeline (cliquable)
+        header_widget = QWidget(pipeline_frame)
+        header_widget.setCursor(Qt.PointingHandCursor)
+        header_widget.setObjectName(f"header_{pipeline.name}")
+        header_layout = QVBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Ajouter le titre du pipeline
+        pipeline_label = QLabel(f"• {pipeline.name}", header_widget)
         pipeline_label.setObjectName(f"label_{pipeline.name}")
-        font = QFont()
-        font.setBold(True)
-        pipeline_label.setFont(font)
-        
-        # Bouton déroulant
-        toggle_button = QToolButton(pipeline_frame)
-        toggle_button.setObjectName(f"toggle_{pipeline.name}")
-        toggle_button.setText("+")
-        toggle_button.setCheckable(True)
-        toggle_button.setFixedSize(QSize(24, 24))
-        
-        # Ajouter les widgets à l'en-tête
+        pipeline_label.setStyleSheet("""
+            font-weight: bold; 
+            color: white; 
+            font-size: 13px; 
+            padding: 8px 5px;
+        """)
         header_layout.addWidget(pipeline_label)
-        header_layout.addStretch()
-        header_layout.addWidget(toggle_button)
         
         # Ajouter l'en-tête au layout du pipeline
-        pipeline_layout.addLayout(header_layout)
+        pipeline_layout.addWidget(header_widget)
         
-        # Créer un widget pour contenir les tâches
+        # Créer un conteneur pour les tâches
         tasks_container = QWidget(pipeline_frame)
         tasks_container.setObjectName(f"tasks_{pipeline.name}")
         tasks_layout = QVBoxLayout(tasks_container)
+        tasks_layout.setContentsMargins(0, 0, 0, 0)
         tasks_layout.setSpacing(2)
-        tasks_layout.setContentsMargins(15, 0, 5, 5)  # Indentation à gauche
         
-        # Ajouter les tâches
+        # Stocker la référence au conteneur de tâches
+        self.task_containers[pipeline.name] = tasks_container
+        
+        # Ajouter les tâches du pipeline
         for task in pipeline.tasks:
-            task_button = QPushButton(task.get('name', 'Tâche sans nom'), tasks_container)
-            task_button.setObjectName(f"task_{pipeline.name}_{task.get('name', '')}")
+            task_name = task.get('name', 'Tâche sans nom')
+            task_button = QPushButton(task_name, tasks_container)
+            task_button.setObjectName(f"task_{pipeline.name}_{task_name}")
+            task_button.setCursor(Qt.PointingHandCursor)  # Changer le curseur pour indiquer qu'il est cliquable
+            task_button.setStyleSheet("""
+                background-color: #3a3f55;
+                color: white;
+                border: none;
+                border-radius: 3px;
+                padding: 8px 10px;
+                margin-left: 20px;
+                margin-bottom: 5px;
+                text-align: left;
+                font-size: 12px;
+            """)
             task_button.clicked.connect(
-                lambda checked, p=pipeline.name, t=task.get('name', ''): 
+                lambda checked, p=pipeline.name, t=task_name: 
                 self.command_selected.emit(p, t)
             )
             tasks_layout.addWidget(task_button)
@@ -151,21 +174,53 @@ class PipelineList(QWidget):
         # Ajouter le conteneur de tâches au layout du pipeline
         pipeline_layout.addWidget(tasks_container)
         
-        # Connecter le bouton déroulant
-        toggle_button.clicked.connect(
-            lambda checked: self._toggle_tasks(tasks_container, toggle_button)
-        )
+        # Connecter l'en-tête pour afficher/masquer les tâches
+        header_widget.mousePressEvent = lambda event, p=pipeline.name: self._toggle_pipeline(p)
         
-        # Ajouter le widget du pipeline au layout principal
+        # Ajouter le frame du pipeline au layout principal
         self.pipeline_items_layout.insertWidget(self.pipeline_items_layout.count() - 1, pipeline_frame)
     
-    def _toggle_tasks(self, tasks_container, toggle_button):
-        """Affiche ou cache les tâches d'un pipeline."""
-        is_visible = tasks_container.isVisible()
-        tasks_container.setVisible(not is_visible)
-        toggle_button.setText("-" if not is_visible else "+")
+    def _toggle_pipeline(self, pipeline_name):
+        """Affiche ou masque les tâches d'un pipeline."""
+        # Si un pipeline était déjà sélectionné, masquer ses tâches
+        if self.selected_pipeline and self.selected_pipeline != pipeline_name:
+            if pipeline_name in self.task_containers:
+                self.task_containers[self.selected_pipeline].setVisible(False)
+                # Réinitialiser le style du pipeline précédemment sélectionné
+                if self.selected_pipeline in self.pipeline_frames:
+                    self.pipeline_frames[self.selected_pipeline].setStyleSheet("")
         
+        # Inverser la visibilité des tâches du pipeline sélectionné
+        if pipeline_name in self.task_containers:
+            is_visible = self.task_containers[pipeline_name].isVisible()
+            self.task_containers[pipeline_name].setVisible(not is_visible)
+            
+            # Mettre à jour le pipeline sélectionné
+            if not is_visible:
+                self.selected_pipeline = pipeline_name
+                # Mettre en évidence le pipeline sélectionné
+                if pipeline_name in self.pipeline_frames:
+                    self.pipeline_frames[pipeline_name].setStyleSheet("""
+                        QFrame {
+                            background-color: #2a3045;
+                            border-radius: 3px;
+                        }
+                    """)
+                # Émettre le signal de sélection de pipeline
+                for pipeline in self.pipelines:
+                    if pipeline.name == pipeline_name:
+                        self.pipeline_selected.emit(pipeline)
+                        break
+            else:
+                self.selected_pipeline = None
+                # Réinitialiser le style du pipeline
+                if pipeline_name in self.pipeline_frames:
+                    self.pipeline_frames[pipeline_name].setStyleSheet("")
+    
     def clear(self):
         """Efface tous les pipelines de la liste."""
         self.pipelines = []
+        self.selected_pipeline = None
+        self.pipeline_frames = {}
+        self.task_containers = {}
         self._update_pipeline_list()
