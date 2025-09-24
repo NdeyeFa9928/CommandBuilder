@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pydantic = "*"
 pyside6 = "*"
 pytest = "*"
 ruff = "*"
 black = "*"
 mermaid-py = "*"
+pydantic = "*"
 
 [dev-packages]
 pyinstaller = "*"
