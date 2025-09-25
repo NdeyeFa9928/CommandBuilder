@@ -87,8 +87,13 @@ class PipelineList(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Ajouter chaque pipeline
-        for pipeline in self.pipelines:
+        # Trier les pipelines par nom
+        sorted_pipelines = sorted(self.pipelines, key=lambda p: p.name)
+
+        # Ajouter chaque pipeline trié
+        for pipeline in sorted_pipelines:
+            # Créer un nouveau pipeline avec les tâches triées
+            pipeline.tasks = sorted(pipeline.tasks, key=lambda t: t.get('name', ''))
             self._add_pipeline_widget(pipeline)
 
     def _add_pipeline_widget(self, pipeline):

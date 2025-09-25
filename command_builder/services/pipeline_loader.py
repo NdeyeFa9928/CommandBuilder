@@ -33,13 +33,14 @@ def list_pipeline_files() -> List[Path]:
 def load_pipelines() -> List[Pipeline]:
     """Charge tous les pipelines disponibles."""
     pipeline_files = list_pipeline_files()
+    pipeline_files.sort(key=lambda x: x.name)
 
     if not pipeline_files:
         print("Aucun fichier pipeline trouvé")
         return []
 
     pipelines = []
-    for file in pipeline_files:
+    for file in pipeline_files :
         try:
             pipeline = load_pipeline(file)
             pipelines.append(pipeline)

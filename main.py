@@ -14,9 +14,7 @@ def setup_application():
 if __name__ == "__main__":
     app = setup_application()
     pipelines = load_pipelines()
-    for i in pipelines :
-        print(i.name + " " + i.description+ " " + str(len(i.tasks)))
     main_window = MainWindow()
-    #main_window.set_pipelines(pipelines)
+    main_window.set_pipelines(pipelines)
     main_window.show()
     sys.exit(app.exec())
