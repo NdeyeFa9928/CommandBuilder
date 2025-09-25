@@ -1,0 +1,66 @@
+/* Style pour la liste des pipelines */
+#PipelineList {
+    background-color: #252a3b;
+    color: #ffffff;
+    border: none;
+}
+
+#labelPipelines {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+QScrollArea {
+    border: none;
+    background-color: transparent;
+}
+
+#scrollAreaWidgetContents {
+    background-color: transparent;
+}
+
+#pipelineItemsContainer {
+    background-color: transparent;
+}
+
+QLabel {
+    color: #ffffff;
+    padding: 5px 0;
+}
+
+/* Style pour les boutons de tâches */
+QPushButton {
+    background-color: #3a3f55;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin-left: 15px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+QPushButton:hover {
+    background-color: #4a4f65;
+}
+
+QPushButton:pressed {
+    background-color: #2a2f45;
+}
+
+/* Style pour les titres de pipeline */
+QLabel {
+    color: #ffffff;
+    padding: 5px 0;
+    font-weight: bold;
+}
+
+/* Style pour le titre principal */
+#labelPipelines, #labelCommandes, #labelConsole {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px;
+}

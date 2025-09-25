@@ -1,0 +1,41 @@
+/* Style pour la fenêtre principale */
+QMainWindow {
+    background-color: #1e2130;
+    color: #ffffff;
+}
+
+QMenuBar {
+    background-color: #1e2130;
+    color: #ffffff;
+}
+
+QMenuBar::item {
+    background-color: #1e2130;
+    color: #ffffff;
+}
+
+QMenuBar::item:selected {
+    background-color: #2a2f45;
+}
+
+QMenu {
+    background-color: #1e2130;
+    color: #ffffff;
+    border: 1px solid #3a3f55;
+}
+
+QMenu::item:selected {
+    background-color: #2a2f45;
+}
+
+QStatusBar {
+    background-color: #1e2130;
+    color: #ffffff;
+}
+
+/* Style pour les conteneurs */
+#pipelineListContainer, #commandFormContainer, #consoleOutputContainer {
+    background-color: #252a3b;
+    border-radius: 5px;
+    border: 1px solid #3a3f55;
+}
