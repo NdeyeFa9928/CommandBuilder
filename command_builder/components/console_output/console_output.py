@@ -76,7 +76,6 @@ class ConsoleOutput(QWidget):
             text: Le texte à ajouter
         """
         self.text_edit_console.appendPlainText(text)
-        # Faire défiler vers le bas pour voir le texte ajouté
         self.text_edit_console.verticalScrollBar().setValue(
             self.text_edit_console.verticalScrollBar().maximum()
         )
