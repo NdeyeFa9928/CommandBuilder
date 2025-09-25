@@ -108,19 +108,15 @@ class MainWindow(QMainWindow):
             if pipeline.name == pipeline_name:
                 # Rechercher la tâche correspondante
                 for task in pipeline.tasks:
-                    if task.get('name') == command_name:
+                    if task.name == command_name:
                         # Trouver la commande dans la tâche
-                        commands = task.get('commands', [])
-                        if commands and len(commands) > 0:
+                        if task.commands and len(task.commands) > 0:
                             # Récupérer la première commande
-                            command_data = commands[0]
-                            command_code = command_data.get('name', '')
-                            command_cmd = command_data.get('command', '')
+                            command = task.commands[0]
                             
-                            # Mettre à jour uniquement le nom et le code de la commande
+                            # Passer l'objet Command directement au formulaire
                             if self.command_form:
-                                self.command_form.label_command_title.setText(command_name)
-                                self.command_form.label_command.setText(f"Commande: {command_cmd}")
+                                self.command_form.set_command(command)
                         break
 
     def set_pipelines(self, pipelines):

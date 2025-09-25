@@ -93,7 +93,7 @@ class PipelineList(QWidget):
         # Ajouter chaque pipeline trié
         for pipeline in sorted_pipelines:
             # Créer un nouveau pipeline avec les tâches triées
-            pipeline.tasks = sorted(pipeline.tasks, key=lambda t: t.get('name', ''))
+            pipeline.tasks = sorted(pipeline.tasks, key=lambda t: t.name)
             self._add_pipeline_widget(pipeline)
 
     def _add_pipeline_widget(self, pipeline):
@@ -154,7 +154,7 @@ class PipelineList(QWidget):
 
         # Ajouter les tâches du pipeline
         for task in pipeline.tasks:
-            task_name = task.get("name", "Tâche sans nom")
+            task_name = task.name
             task_button = QPushButton(task_name, tasks_container)
             task_button.setObjectName(f"task_{pipeline.name}_{task_name}")
             task_button.setCursor(
