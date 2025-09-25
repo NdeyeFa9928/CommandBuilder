@@ -121,7 +121,7 @@ tasks:
   test:
     desc: Run all tests
     cmds:
-      - cmd: pipenv run pytest tests
+      - cmd: pipenv run pytest command_builder/tests
 
   test:services:
     desc: Run service tests only
