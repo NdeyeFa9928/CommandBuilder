@@ -1,0 +1,4 @@
+name: "Exporter campagne"
+description: "Exporte les tables SQLite en fichiers texte + images"
+tasks:
+  - !include ../tasks/export_campaign_task.yaml
