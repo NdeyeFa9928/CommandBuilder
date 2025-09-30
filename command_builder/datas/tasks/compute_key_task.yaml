@@ -1,0 +1,4 @@
+name: "Calculer clés"
+description: "Recalcule les tables de clés dans la base de données"
+commands:
+  - !include ../commands/computekey_commands.yaml

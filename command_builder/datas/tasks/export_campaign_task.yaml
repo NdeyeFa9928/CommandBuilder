@@ -1,4 +1,4 @@
 name: "Exporter campagne"
 description: "Exporte les tables SQLite en fichiers texte + images"
 commands:
-  - !include ../commands/campaignexport.yaml
+  - !include ../commands/campaignexport_commands.yaml

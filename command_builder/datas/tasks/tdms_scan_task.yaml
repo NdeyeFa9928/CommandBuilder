@@ -1,0 +1,4 @@
+name: "Scanner TDMS"
+description: "Analyse la structure et les métadonnées d'un fichier TDMS"
+commands:
+  - !include ../commands/tdmsscan_commands.yaml

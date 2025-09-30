@@ -1,0 +1,4 @@
+name: "Calculer profils"
+description: "Calcule les indicateurs de profils dans la base de données"
+commands:
+  - !include ../commands/computeprofile_commands.yaml
