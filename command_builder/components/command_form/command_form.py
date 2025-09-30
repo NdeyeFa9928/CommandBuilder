@@ -54,10 +54,44 @@ class CommandForm(QWidget):
         self.setLayout(layout)
 
         # Stocker les références aux widgets importants
-        self.label_command_title = ui.findChild(QLabel, "labelCommandTitle")
-        self.label_command = ui.findChild(QLabel, "labelCommand")
         self.form_container = ui.findChild(QWidget, "formContainer")
+        if not self.form_container:
+            # Créer un conteneur pour le formulaire
+            self.form_container = QWidget(ui)
+            self.form_container.setObjectName("formContainer")
+            # Ajouter le conteneur au layout principal
+            main_layout = ui.layout()
+            if main_layout:
+                main_layout.addWidget(self.form_container)
+        
         self.form_layout = ui.findChild(QFormLayout, "formLayout")
+        if not self.form_layout:
+            # Créer un layout pour le formulaire
+            self.form_layout = QFormLayout(self.form_container)
+            self.form_layout.setObjectName("formLayout")
+            self.form_layout.setContentsMargins(10, 10, 10, 10)
+            self.form_layout.setSpacing(10)
+        
+        # Vérifier si les labels existent, sinon les créer
+        self.label_command_title = ui.findChild(QLabel, "labelCommandTitle")
+        if not self.label_command_title:
+            self.label_command_title = QLabel("Sélectionnez une commande", ui)
+            self.label_command_title.setObjectName("labelCommandTitle")
+            self.label_command_title.setStyleSheet("font-size: 16px; font-weight: bold; color: white; margin-bottom: 10px;")
+            # Ajouter le label au layout principal
+            main_layout = ui.layout()
+            if main_layout:
+                main_layout.insertWidget(0, self.label_command_title)
+        
+        self.label_command = ui.findChild(QLabel, "labelCommand")
+        if not self.label_command:
+            self.label_command = QLabel("Commande: ", ui)
+            self.label_command.setObjectName("labelCommand")
+            self.label_command.setStyleSheet("font-size: 12px; color: #a0a0a0; margin-bottom: 15px;")
+            # Ajouter le label au layout principal
+            main_layout = ui.layout()
+            if main_layout:
+                main_layout.insertWidget(1, self.label_command)
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -100,27 +134,91 @@ class CommandForm(QWidget):
 
     def set_command(self, command):
         """
-        Définit la commande à configurer.
+        Configure le formulaire pour une commande spécifique.
 
         Args:
-            command: L'objet Command à configurer
+            command: La commande à configurer (peut être un objet Command ou un dictionnaire)
         """
         self.current_command = command
-        if command:
-            self.label_command_title.setText(f"{command.name}")
+        
+        # Effacer le formulaire actuel - intégré directement ici
+        # Réinitialiser les labels
+        if hasattr(self, 'label_command_title') and self.label_command_title:
+            self.label_command_title.setText("Sélectionnez une commande")
+        
+        if hasattr(self, 'label_command') and self.label_command:
+            self.label_command.setText("Commande: ")
+        
+        # Supprimer tous les champs du formulaire
+        if hasattr(self, 'form_layout') and self.form_layout:
+            while self.form_layout.count() > 0:
+                # Récupérer le premier item
+                label_item = self.form_layout.itemAt(0, QFormLayout.LabelRole)
+                field_item = self.form_layout.itemAt(0, QFormLayout.FieldRole)
+                
+                # Supprimer les widgets
+                if label_item and label_item.widget():
+                    label_item.widget().deleteLater()
+                
+                if field_item:
+                    if field_item.layout():
+                        # Supprimer tous les widgets du layout
+                        while field_item.layout().count() > 0:
+                            widget_item = field_item.layout().takeAt(0)
+                            if widget_item.widget():
+                                widget_item.widget().deleteLater()
+                
+                # Supprimer la ligne
+                self.form_layout.takeRow(0)
+        
+        if not command:
+            return
+            
+        # Mettre à jour l'interface avec le nom et le code de la commande uniquement
+        if hasattr(command, 'name') and hasattr(command, 'command'):
+            # C'est un objet Command
+            self.label_command_title.setText(command.name)
             self.label_command.setText(f"Commande: {command.command}")
-            self._build_form(command)
+        else:
+            # C'est un dictionnaire ou autre chose
+            name = command.get('name', '') if isinstance(command, dict) else ''
+            cmd = command.get('command', '') if isinstance(command, dict) else ''
+            self.label_command_title.setText(name)
+            self.label_command.setText(f"Commande: {cmd}")
 
-    def _build_form(self, command):
+    def _clear_form(self):
         """
-        Construit le formulaire en fonction des arguments de la commande.
-
-        Args:
-            command: L'objet Command dont les arguments doivent être affichés
+        Efface tous les champs du formulaire.
         """
-        # Cette méthode sera implémentée plus tard pour construire dynamiquement le formulaire
-        pass
-
+        # Réinitialiser les labels
+        if hasattr(self, 'label_command_title') and self.label_command_title:
+            self.label_command_title.setText("Sélectionnez une commande")
+        
+        if hasattr(self, 'label_command') and self.label_command:
+            self.label_command.setText("Commande: ")
+        
+        # Supprimer tous les champs du formulaire
+        if hasattr(self, 'form_layout') and self.form_layout:
+            while self.form_layout.count() > 0:
+                # Récupérer le premier item
+                label_item = self.form_layout.itemAt(0, QFormLayout.LabelRole)
+                field_item = self.form_layout.itemAt(0, QFormLayout.FieldRole)
+                
+                # Supprimer les widgets
+                if label_item and label_item.widget():
+                    label_item.widget().deleteLater()
+                
+                if field_item:
+                    if field_item.layout():
+                        # Supprimer tous les widgets du layout
+                        while field_item.layout().count() > 0:
+                            widget_item = field_item.layout().takeAt(0)
+                            if widget_item.widget():
+                                widget_item.widget().deleteLater()
+                
+                # Supprimer la ligne
+                self.form_layout.takeRow(0)
+    
     def get_form_values(self):
         """
         Récupère les valeurs du formulaire.
@@ -143,7 +241,6 @@ class CommandForm(QWidget):
                     for j in range(field_layout.count()):
                         widget = field_layout.itemAt(j).widget()
                         if isinstance(widget, QLineEdit):
-                            # Extraire le nom du champ à partir du texte du label
                             field_name = label.text().replace("*", "").strip()
                             values[field_name] = widget.text()
                             break

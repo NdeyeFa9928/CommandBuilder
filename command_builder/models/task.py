@@ -1,8 +1,9 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
+from command_builder.models.command import Command
 
 
 class Task(BaseModel):
     name: str
     description: str
-    commands: List[Dict[str, Any]]
+    commands: List[Command]

@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
+from command_builder.models.arguments import Argument
 
 
 class Command(BaseModel):
     name: str
     description: str
     command: str
-    arguments: List[Dict[str, Any]]
+    arguments: List[Argument]

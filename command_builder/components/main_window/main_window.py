@@ -98,7 +98,26 @@ class MainWindow(QMainWindow):
 
     def _on_command_selected(self, pipeline_name, command_name):
         """Gère la sélection d'une commande dans la liste des pipelines."""
-        pass
+        # Afficher un message dans la console
+        if self.console_output:
+            #self.console_output.append_text(f"Commande sélectionnée : {command_name} (Pipeline: {pipeline_name})")
+            pass
+        
+        # Rechercher le pipeline correspondant
+        for pipeline in self.pipeline_list.pipelines:
+            if pipeline.name == pipeline_name:
+                # Rechercher la tâche correspondante
+                for task in pipeline.tasks:
+                    if task.name == command_name:
+                        # Trouver la commande dans la tâche
+                        if task.commands and len(task.commands) > 0:
+                            # Récupérer la première commande
+                            command = task.commands[0]
+                            
+                            # Passer l'objet Command directement au formulaire
+                            if self.command_form:
+                                self.command_form.set_command(command)
+                        break
 
     def set_pipelines(self, pipelines):
         """Définit les pipelines à afficher dans l'interface."""
