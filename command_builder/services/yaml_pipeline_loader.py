@@ -9,8 +9,9 @@ from command_builder.services.yaml_loader import load_yaml_with_includes
 
 def get_yaml_pipelines_directory() -> Path:
     """Retourne le chemin vers le répertoire des pipelines YAML."""
-    pipelines_dir = Path("command_builder/datas/pipelines").absolute()
-    return pipelines_dir
+    current_dir = Path(__file__).parent.parent  # Remonte au dossier command_builder
+    pipelines_dir = current_dir / "data" / "pipelines"
+    return pipelines_dir.absolute()
 
 
 def list_yaml_pipeline_files() -> List[Path]:

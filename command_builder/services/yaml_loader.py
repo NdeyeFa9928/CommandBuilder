@@ -49,22 +49,22 @@ def load_yaml_with_includes(file_path: str) -> Dict[str, Any]:
         return yaml.load(file, IncludeLoader)
 
 
-def load_pipeline(pipeline_name: str, datas_root: str = None) -> Dict[str, Any]:
+def load_pipeline(pipeline_name: str, data_root: str = None) -> Dict[str, Any]:
     """
     Charge une pipeline par son nom
     
     Args:
         pipeline_name: Nom de la pipeline (sans extension)
-        datas_root: Racine du dossier datas (optionnel)
+        data_root: Racine du dossier data (optionnel)
         
     Returns:
         Dict contenant la pipeline complète avec inclusions résolues
     """
-    if datas_root is None:
+    if data_root is None:
         current_dir = Path(__file__).parent
-        datas_root = current_dir
+        data_root = current_dir
     
-    pipeline_path = Path(datas_root) / "pipelines" / f"{pipeline_name}.yaml"
+    pipeline_path = Path(data_root) / "pipelines" / f"{pipeline_name}.yaml"
     
     if not pipeline_path.exists():
         raise FileNotFoundError(f"Pipeline non trouvée: {pipeline_path}")
