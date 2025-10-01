@@ -1,0 +1,4 @@
+name: "Importer images Streampix"
+description: "Importe des images Streampix dans une base SQLite"
+tasks:
+  - !include ../tasks/streampix_import_task.yaml

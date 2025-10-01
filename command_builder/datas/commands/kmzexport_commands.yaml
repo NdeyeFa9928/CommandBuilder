@@ -1,0 +1,19 @@
+name: "kmzexport"
+description: "Exporte GPS/IMU/CSV en fichier KMZ pour Google Earth"
+command: "kmzexport {DATABASE_FILE} {OUTPUT_FILE}"
+arguments:
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite source"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "OUTPUT_FILE"
+    name: "Fichier KMZ"
+    description: "Fichier KMZ de destination"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".kmz"]

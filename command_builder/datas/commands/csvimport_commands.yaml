@@ -1,0 +1,37 @@
+name: "csvimport"
+description: "Importe des positions GPS depuis un CSV dans SQLite"
+command: "csvimport {INPUT_CSV_FILE} {DATABASE_FILE} {TS_COLNUM} {LON_COLNUM} {LAT_COLNUM}"
+arguments:
+  - code: "INPUT_CSV_FILE"
+    name: "Fichier CSV"
+    description: "Fichier CSV source avec données GPS"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".csv"]
+  
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite de destination"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "TS_COLNUM"
+    name: "Colonne timestamp"
+    description: "Numéro de colonne pour le timestamp"
+    type: "integer"
+    required: 1
+  
+  - code: "LON_COLNUM"
+    name: "Colonne longitude"
+    description: "Numéro de colonne pour la longitude"
+    type: "integer"
+    required: 1
+  
+  - code: "LAT_COLNUM"
+    name: "Colonne latitude"
+    description: "Numéro de colonne pour la latitude"
+    type: "integer"
+    required: 1

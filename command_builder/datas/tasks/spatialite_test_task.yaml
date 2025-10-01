@@ -1,0 +1,4 @@
+name: "Tester Spatialite"
+description: "Vérifie l'installation et le fonctionnement de Spatialite"
+commands:
+  - !include ../commands/spatialitest_commands.yaml

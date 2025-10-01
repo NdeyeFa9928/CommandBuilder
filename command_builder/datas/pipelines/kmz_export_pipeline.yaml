@@ -1,0 +1,4 @@
+name: "Exporter KMZ"
+description: "Exporte GPS/IMU/CSV en fichier KMZ pour Google Earth"
+tasks:
+  - !include ../tasks/kmz_export_task.yaml
