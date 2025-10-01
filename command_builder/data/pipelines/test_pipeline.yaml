@@ -1,4 +1,0 @@
-name: "Test"
-description: "Test"
-tasks:
-  - !include ../tasks/test_task.yaml

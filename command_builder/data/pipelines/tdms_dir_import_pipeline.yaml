@@ -1,4 +1,0 @@
-name: "Importer dossier TDMS"
-description: "Importe tous les fichiers TDMS d'un dossier vers une base SQLite"
-tasks:
-  - !include ../tasks/tdms_dir_import_task.yaml

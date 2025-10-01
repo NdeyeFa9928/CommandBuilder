@@ -1,4 +1,0 @@
-name: "Calculer profils"
-description: "Calcule les indicateurs de profils"
-tasks:
-  - !include ../tasks/compute_profile_task.yaml
