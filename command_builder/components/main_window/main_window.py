@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(ui.statusBar())
 
         # Stocker les références aux conteneurs
-        self.task_list_container = self.findChild(QWidget, "pipelineListContainer")
+        self.task_list_container = self.findChild(QWidget, "taskListContainer")
         self.command_form_container = self.findChild(QWidget, "commandFormContainer")
         self.console_output_container = self.findChild(
             QWidget, "consoleOutputContainer"

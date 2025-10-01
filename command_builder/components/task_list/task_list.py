@@ -49,8 +49,8 @@ class TaskList(QWidget):
         self.setLayout(layout)
 
         # Stocker les références aux widgets importants
-        self.task_items_container = ui.findChild(QWidget, "pipelineItemsContainer")
-        self.task_items_layout = ui.findChild(QVBoxLayout, "pipelineItemsLayout")
+        self.task_items_container = ui.findChild(QWidget, "taskItemsContainer")
+        self.task_items_layout = ui.findChild(QVBoxLayout, "taskItemsLayout")
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
