@@ -1,0 +1,5 @@
+name: "Workflow Evalis 3D"
+description: "Importe les TDMS et exporte la campagne E3D_S29"
+tasks:
+  - !include ../tasks/tdms_dir_import_task.yaml
+  - !include ../tasks/export_campaign_task.yaml

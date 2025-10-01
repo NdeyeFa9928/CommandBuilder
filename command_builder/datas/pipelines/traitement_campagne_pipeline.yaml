@@ -2,18 +2,6 @@ name: "Traitement campagne complète"
 description: "Importe un dossier TDMS, calcule les clés et exporte les résultats"
 tasks:
   - !include ../tasks/tdms_dir_import_task.yaml
-  - name: "Calculer clés"
-    description: "Recalcule les tables de clés dans la base de données"
-    dependencies: ["Importer dossier"]
-    commands:
-      - !include ../commands/computekey_commands.yaml
-  - name: "Exporter KMZ"
-    description: "Exporte les données GPS en KMZ pour Google Earth"
-    dependencies: ["Calculer clés"]
-    commands:
-      - !include ../commands/kmzexport_commands.yaml
-  - name: "Exporter campagne"
-    description: "Exporte les tables SQLite en fichiers texte + images"
-    dependencies: ["Calculer clés"]
-    commands:
-      - !include ../commands/campaignexport_commands.yaml
+  - !include ../tasks/compute_key_task.yaml
+  - !include ../tasks/kmz_export_task.yaml
+  - !include ../tasks/export_campaign_task.yaml

@@ -21,6 +21,83 @@ def list_yaml_pipeline_files() -> List[Path]:
     return list(pipelines_dir.glob("*.yaml")) + list(pipelines_dir.glob("*.yml"))
 
 
+def resolve_task_includes(task_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Résout les inclusions de tâches et fusionne intelligemment les métadonnées.
+    
+    Args:
+        task_data: Données de la tâche (peut être une inclusion ou une définition complète)
+        
+    Returns:
+        Tâche complètement résolue avec toutes les commandes incluses
+    """
+    # Si c'est une tâche complètement définie, on la retourne telle quelle
+    if isinstance(task_data, dict) and 'name' in task_data:
+        return task_data
+    
+    # Si c'est une inclusion, elle a déjà été résolue par le IncludeLoader
+    # On s'assure juste que la structure est correcte
+    return task_data
+
+
+def add_automatic_dependencies(pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ajoute automatiquement des dépendances séquentielles entre les tâches si aucune n'est définie.
+    
+    Args:
+        pipeline_data: Données du pipeline
+        
+    Returns:
+        Pipeline avec dépendances automatiques
+    """
+    if 'tasks' not in pipeline_data or len(pipeline_data['tasks']) <= 1:
+        return pipeline_data
+    
+    tasks = pipeline_data['tasks']
+    
+    # Ajoute des dépendances séquentielles automatiques
+    for i in range(1, len(tasks)):
+        current_task = tasks[i]
+        previous_task = tasks[i-1]
+        
+        # Si la tâche courante n'a pas de dépendances définies
+        if isinstance(current_task, dict) and 'dependencies' not in current_task:
+            # Récupère le nom de la tâche précédente
+            if isinstance(previous_task, dict) and 'name' in previous_task:
+                previous_task_name = previous_task['name']
+            else:
+                # Si c'est une inclusion, on utilise un nom par défaut basé sur l'index
+                previous_task_name = f"Task_{i-1}"
+            
+            current_task['dependencies'] = [previous_task_name]
+    
+    return pipeline_data
+
+
+def merge_pipeline_metadata(pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Fusionne et normalise les métadonnées du pipeline.
+    
+    Args:
+        pipeline_data: Données brutes du pipeline
+        
+    Returns:
+        Pipeline avec métadonnées fusionnées et normalisées
+    """
+    # Traite chaque tâche pour résoudre les inclusions
+    if 'tasks' in pipeline_data:
+        resolved_tasks = []
+        for task in pipeline_data['tasks']:
+            resolved_task = resolve_task_includes(task)
+            resolved_tasks.append(resolved_task)
+        pipeline_data['tasks'] = resolved_tasks
+    
+    # Ajoute des dépendances automatiques si nécessaire
+    pipeline_data = add_automatic_dependencies(pipeline_data)
+    
+    return pipeline_data
+
+
 def convert_yaml_to_model(yaml_data: Dict[str, Any]) -> Pipeline:
     """
     Convertit les données YAML en modèle Pipeline.
@@ -31,7 +108,10 @@ def convert_yaml_to_model(yaml_data: Dict[str, Any]) -> Pipeline:
     Returns:
         Un objet Pipeline
     """
-    return Pipeline(**yaml_data)
+    # Fusionne les métadonnées et résout les inclusions
+    processed_data = merge_pipeline_metadata(yaml_data)
+    
+    return Pipeline(**processed_data)
 
 
 def load_yaml_pipeline(file_path: str) -> Pipeline:
