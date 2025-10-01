@@ -1,6 +1,4 @@
-"""
-Service de chargement des pipelines au format YAML avec support d'inclusion.
-"""
+"""Service de chargement des pipelines au format YAML avec support d'inclusion."""
 from pathlib import Path
 from typing import List, Dict, Any
 from command_builder.models.pipeline import Pipeline
@@ -21,6 +19,29 @@ def list_yaml_pipeline_files() -> List[Path]:
     return list(pipelines_dir.glob("*.yaml")) + list(pipelines_dir.glob("*.yml"))
 
 
+def resolve_command_includes(command_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Résout les inclusions de commandes.
+    
+    Args:
+        command_data: Données de la commande (peut être une inclusion ou une définition complète)
+        
+    Returns:
+        Liste de commandes complètement résolues
+    """
+    # Si c'est une commande complètement définie, on la retourne dans une liste
+    if isinstance(command_data, dict) and 'name' in command_data:
+        return [command_data]
+    
+    # Si c'est une inclusion qui a été résolue en liste de commandes
+    if isinstance(command_data, list):
+        # Retourner toutes les commandes de la liste
+        return command_data
+    
+    # Sinon on retourne telle quelle dans une liste
+    return [command_data] if command_data else []
+
+
 def resolve_task_includes(task_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Résout les inclusions de tâches et fusionne intelligemment les métadonnées.
@@ -31,14 +52,32 @@ def resolve_task_includes(task_data: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Tâche complètement résolue avec toutes les commandes incluses
     """
-    # Si c'est une tâche complètement définie, on la retourne telle quelle
-    if isinstance(task_data, dict) and 'name' in task_data:
+    # Si c'est une tâche complètement définie avec des commandes
+    if isinstance(task_data, dict):
+        if 'name' in task_data:
+            # Si la tâche contient des commandes qui sont des inclusions
+            if 'commands' in task_data and isinstance(task_data['commands'], list):
+                resolved_commands = []
+                for cmd in task_data['commands']:
+                    # Résoudre chaque commande et aplatir la liste
+                    cmd_list = resolve_command_includes(cmd)
+                    resolved_commands.extend(cmd_list)
+                task_data['commands'] = resolved_commands
+            return task_data
+    
+    # Si c'est une inclusion qui a déjà été résolue en une tâche
+    if isinstance(task_data, dict) and 'commands' in task_data:
+        # Résoudre récursivement les commandes incluses
+        resolved_commands = []
+        for cmd in task_data['commands']:
+            # Résoudre chaque commande et aplatir la liste
+            cmd_list = resolve_command_includes(cmd)
+            resolved_commands.extend(cmd_list)
+        task_data['commands'] = resolved_commands
         return task_data
     
-    # Si c'est une inclusion, elle a déjà été résolue par le IncludeLoader
-    # On s'assure juste que la structure est correcte
+    # Si c'est une autre forme d'inclusion
     return task_data
-
 
 def add_automatic_dependencies(pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
     """
