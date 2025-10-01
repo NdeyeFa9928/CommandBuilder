@@ -1,0 +1,4 @@
+name: "Importer PCAP"
+description: "Importe les données LIDAR depuis un fichier PCAP"
+commands:
+  - !include ../commands/pcapimport_commands.yaml

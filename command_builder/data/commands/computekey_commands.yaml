@@ -1,0 +1,24 @@
+name: "computekey"
+description: "Recalcule les tables key_point et key_segment"
+command: "computekey {DATABASE_FILE} --keys {KEYS_FILE} {TABLE_NAME}"
+arguments:
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite à traiter"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "KEYS_FILE"
+    name: "Fichier de clés"
+    description: "Fichier de configuration des clés"
+    type: "file"
+    required: 1
+  
+  - code: "TABLE_NAME"
+    name: "Nom de la table"
+    description: "Nom de la table de projet (optionnel)"
+    type: "string"
+    required: 0
+    default: ""

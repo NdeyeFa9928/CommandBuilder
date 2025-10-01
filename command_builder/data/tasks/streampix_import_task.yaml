@@ -1,0 +1,4 @@
+name: "Importer Streampix"
+description: "Importe et indexe des images Streampix"
+commands:
+  - !include ../commands/streampiximport_commands.yaml

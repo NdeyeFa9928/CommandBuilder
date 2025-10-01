@@ -35,6 +35,7 @@ class CommandForm(QWidget):
         """
         super().__init__(parent)
         self.current_command = None
+        self.current_commands = []  # Liste des commandes multiples
         self._load_ui()
         self._load_stylesheet()
         self._connect_signals()
@@ -132,59 +133,40 @@ class CommandForm(QWidget):
             if file_path:
                 line_edit.setText(file_path)
 
-    def set_command(self, command):
+    def set_commands(self, commands, task_name=None):
         """
-        Configure le formulaire pour une commande spécifique.
+        Configure le formulaire pour afficher plusieurs commandes en texte.
 
         Args:
-            command: La commande à configurer (peut être un objet Command ou un dictionnaire)
+            commands: Liste des commandes à afficher
+            task_name: Le nom de la tâche (optionnel)
         """
-        self.current_command = command
+        self.current_commands = commands
+        self.current_command = None
         
-        # Effacer le formulaire actuel - intégré directement ici
-        # Réinitialiser les labels
-        if hasattr(self, 'label_command_title') and self.label_command_title:
-            self.label_command_title.setText("Sélectionnez une commande")
+        # Effacer le formulaire actuel
+        self._clear_form()
         
-        if hasattr(self, 'label_command') and self.label_command:
-            self.label_command.setText("Commande: ")
-        
-        # Supprimer tous les champs du formulaire
-        if hasattr(self, 'form_layout') and self.form_layout:
-            while self.form_layout.count() > 0:
-                # Récupérer le premier item
-                label_item = self.form_layout.itemAt(0, QFormLayout.LabelRole)
-                field_item = self.form_layout.itemAt(0, QFormLayout.FieldRole)
-                
-                # Supprimer les widgets
-                if label_item and label_item.widget():
-                    label_item.widget().deleteLater()
-                
-                if field_item:
-                    if field_item.layout():
-                        # Supprimer tous les widgets du layout
-                        while field_item.layout().count() > 0:
-                            widget_item = field_item.layout().takeAt(0)
-                            if widget_item.widget():
-                                widget_item.widget().deleteLater()
-                
-                # Supprimer la ligne
-                self.form_layout.takeRow(0)
-        
-        if not command:
+        if not commands or len(commands) == 0:
             return
             
-        # Mettre à jour l'interface avec le nom et le code de la commande uniquement
-        if hasattr(command, 'name') and hasattr(command, 'command'):
-            # C'est un objet Command
-            self.label_command_title.setText(command.name)
-            self.label_command.setText(f"Commande: {command.command}")
-        else:
-            # C'est un dictionnaire ou autre chose
-            name = command.get('name', '') if isinstance(command, dict) else ''
-            cmd = command.get('command', '') if isinstance(command, dict) else ''
-            self.label_command_title.setText(name)
-            self.label_command.setText(f"Commande: {cmd}")
+        # Mettre à jour le titre avec le nom de la tâche
+        if hasattr(self, 'label_command_title') and self.label_command_title:
+            self.label_command_title.setText(task_name if task_name else "Commandes multiples")
+        
+        # Afficher toutes les commandes en texte
+        command_text = ""
+        for i, command in enumerate(commands, 1):
+            if hasattr(command, 'name') and hasattr(command, 'command'):
+                command_text += f"{i}. {command.name}: {command.command}\n"
+            else:
+                name = command.get('name', 'Commande sans nom') if isinstance(command, dict) else 'Commande sans nom'
+                cmd = command.get('command', '') if isinstance(command, dict) else ''
+                command_text += f"{i}. {name}: {cmd}\n"
+        
+        # Mettre à jour le label de commande avec toutes les commandes
+        if hasattr(self, 'label_command') and self.label_command:
+            self.label_command.setText(command_text.strip())
 
     def _clear_form(self):
         """
@@ -196,6 +178,7 @@ class CommandForm(QWidget):
         
         if hasattr(self, 'label_command') and self.label_command:
             self.label_command.setText("Commande: ")
+        
         
         # Supprimer tous les champs du formulaire
         if hasattr(self, 'form_layout') and self.form_layout:

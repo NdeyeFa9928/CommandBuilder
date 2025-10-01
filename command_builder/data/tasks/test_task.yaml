@@ -1,0 +1,8 @@
+name: "Test"
+description: "Test"
+commands:
+  - !include ../commands/computeprofile_commands.yaml
+  - !include ../commands/pcapimport_commands.yaml
+  - !include ../commands/kmzexport_commands.yaml
+  - !include ../commands/computecurve_commands.yaml
+  - !include ../commands/computekey_commands.yaml

@@ -1,0 +1,4 @@
+name: "Calculer virages"
+description: "Calcule les virages dans la base de données"
+commands:
+  - !include ../commands/computecurve_commands.yaml

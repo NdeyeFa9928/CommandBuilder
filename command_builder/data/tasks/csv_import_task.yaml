@@ -1,0 +1,4 @@
+name: "Importer CSV"
+description: "Importe des données GPS depuis un fichier CSV"
+commands:
+  - !include ../commands/csvimport_commands.yaml

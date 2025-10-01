@@ -1,0 +1,7 @@
+name: "Traitement campagne complète"
+description: "Importe un dossier TDMS, calcule les clés et exporte les résultats"
+tasks:
+  - !include ../tasks/tdms_dir_import_task.yaml
+  - !include ../tasks/compute_key_task.yaml
+  - !include ../tasks/kmz_export_task.yaml
+  - !include ../tasks/export_campaign_task.yaml

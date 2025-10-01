@@ -1,0 +1,38 @@
+name: "streampiximport"
+description: "Importe des images Streampix dans une base SQLite"
+command: "streampiximport {DIR} {DATABASE_FILE} {IMAGE_LAG_TIME} {TABLE_NAME} {TS_METHOD}"
+arguments:
+  - code: "DIR"
+    name: "Répertoire images"
+    description: "Répertoire contenant les images Streampix"
+    type: "directory"
+    required: 1
+  
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite de destination"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "IMAGE_LAG_TIME"
+    name: "Temps de retard image"
+    description: "Temps de retard pour les images (--image-lag-time)"
+    type: "float"
+    required: 0
+    default: ""
+  
+  - code: "TABLE_NAME"
+    name: "Nom de la table"
+    description: "Nom de la table de projet (--ptable)"
+    type: "string"
+    required: 0
+    default: ""
+  
+  - code: "TS_METHOD"
+    name: "Méthode timestamp"
+    description: "Méthode de timestamp (--ts-method)"
+    type: "string"
+    required: 0
+    default: ""

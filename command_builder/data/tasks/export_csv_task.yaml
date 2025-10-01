@@ -1,0 +1,4 @@
+name: "Exporter CSV"
+description: "Exporte les données d'une table vers un fichier CSV"
+commands:
+  - !include ../commands/csvexport_commands.yaml

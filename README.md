@@ -4,7 +4,7 @@ Assistant GUI pour composer des commandes CLI Windows sans erreurs de syntaxe.
 
 ## Description
 
-CommandBuilder est un outil qui permet de créer et exécuter des commandes complexes via une interface graphique intuitive. L'application est basée sur des définitions JSON de pipelines qui peuvent être facilement étendues.
+CommandBuilder est un outil qui permet de créer et exécuter des commandes complexes via une interface graphique intuitive. L'application est basée sur des définitions YAML de pipelines qui peuvent être facilement étendues.
 
 ## Installation
 
@@ -21,136 +21,141 @@ task build
 
 ## Structure des pipelines
 
-Les pipelines sont définis dans des fichiers JSON dans le dossier `command_builder/data/pipelines/`. Chaque pipeline peut être:
+Les pipelines sont définis dans des fichiers YAML dans le dossier `command_builder/data/pipelines/`. Chaque pipeline peut être:
 
 1. **Une commande simple** - Une seule tâche avec une seule commande
 2. **Un workflow complexe** - Plusieurs tâches avec dépendances entre elles
 
 ### Structure d'un fichier de pipeline
 
-```json
-{
-  "name": "Nom descriptif du pipeline",
-  "description": "Description détaillée",
-  "tasks": [
-    {
-      "name": "Nom de la tâche",
-      "description": "Description de la tâche",
-      "dependencies": ["Tâche précédente"],  // Optionnel
-      "commands": [
-        {
-          "name": "nom_commande",
-          "description": "Description de la commande",
-          "command": "commande {PARAM1} {PARAM2} --option {OPTION1}",
-          "arguments": [
-            {
-              "code": "PARAM1",
-              "name": "Nom lisible",
-              "description": "Description du paramètre",
-              "type": "file",  // file, directory, string, integer, float, boolean
-              "required": 1,    // 1 = requis, 0 = optionnel
-              "validation": {   // Optionnel
-                "file_extensions": [".ext"]
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
+```yaml
+name: "Nom descriptif du pipeline"
+description: "Description détaillée"
+tasks:
+  # Inclusion d'une tâche depuis un fichier séparé
+  - !include ../tasks/ma_tache.yaml
+  
+  # Définition directe d'une tâche
+  - name: "Nom de la tâche"
+    description: "Description de la tâche"
+    commands:
+      - name: "nom_commande"
+        description: "Description de la commande"
+        command: "commande {PARAM1} {PARAM2} --option {OPTION1}"
+        arguments:
+          - code: "PARAM1"
+            name: "Nom lisible"
+            description: "Description du paramètre"
 ```
+
+> **Note**: Pour une documentation complète du système YAML, voir [YAML_SYSTEM.md](docs/YAML_SYSTEM.md)
 
 ## Comment ajouter une nouvelle commande
 
 Pour ajouter une nouvelle commande à CommandBuilder, suivez ces étapes :
 
-1. **Créer un nouveau fichier JSON** dans le dossier `command_builder/data/pipelines/`
-   - Nommez le fichier de manière descriptive, par exemple `cmd_macommande.json` ou `analyser_fichier.json`
+### Option 1: Créer une commande individuelle
 
-2. **Définir la structure de base** :
-   ```json
-   {
-     "name": "Nom descriptif",
-     "description": "Description détaillée",
-     "tasks": [
-       {
-         "name": "Nom de la tâche",
-         "description": "Description de la tâche",
-         "commands": [
-           {
-             "name": "nom_commande",
-             "description": "Description de la commande",
-             "command": "commande {PARAM1} {PARAM2}",
-             "arguments": []
-           }
-         ]
-       }
-     ]
-   }
+1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/commands/`
+   - Nommez le fichier de manière descriptive, par exemple `ma_commande.yaml`
+
+2. **Définir la structure de la commande** :
+   ```yaml
+   name: "nom_commande"
+   description: "Description détaillée de la commande"
+   command: "commande {PARAM1} {PARAM2}"
+   arguments:
+     - code: "PARAM1"
+       name: "Nom lisible"
+       description: "Description du paramètre"
    ```
 
-3. **Définir les arguments** pour chaque paramètre de la commande :
-   ```json
-   "arguments": [
-     {
-       "code": "PARAM1",
-       "name": "Nom lisible",
-       "description": "Description du paramètre",
-       "type": "file",
-       "required": 1,
-       "validation": {
-         "file_extensions": [".ext"]
-       }
-     }
-   ]
+### Option 2: Créer une tâche avec commandes
+
+1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/tasks/`
+   - Nommez le fichier de manière descriptive, par exemple `ma_tache.yaml`
+
+2. **Définir la structure de la tâche** :
+   ```yaml
+   name: "Nom de la tâche"
+   description: "Description de la tâche"
+   commands:
+     # Inclure une commande existante
+     - !include ../commands/ma_commande.yaml
+     
+     # Définir une commande directement
+     - name: "autre_commande"
+       description: "Description de la commande"
+       command: "commande {PARAM1}"
+       arguments:
+         - code: "PARAM1"
+           name: "Nom lisible"
+           description: "Description du paramètre"
    ```
 
-4. **Utiliser les types appropriés** pour les arguments :
-   - `file` : Fichier à sélectionner
-   - `directory` : Répertoire à sélectionner
-   - `string` : Texte libre
-   - `integer` : Nombre entier
-   - `float` : Nombre décimal
-   - `boolean` : Valeur booléenne (case à cocher)
+### Option 3: Créer un pipeline complet
 
-5. **Indiquer si l'argument est requis** :
-   - `"required": 1` pour les arguments obligatoires
-   - `"required": 0` pour les arguments optionnels
+1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/pipelines/`
+   - Nommez le fichier de manière descriptive, par exemple `mon_pipeline.yaml`
+
+2. **Définir la structure du pipeline** :
+   ```yaml
+   name: "Nom du pipeline"
+   description: "Description du pipeline"
+   tasks:
+     # Inclure une tâche existante
+     - !include ../tasks/ma_tache.yaml
+     
+     # Définir une tâche directement
+     - name: "Autre tâche"
+       description: "Description de la tâche"
+       commands: [...]
+   ```
 
 ## Comment créer un workflow complexe
 
 Pour créer un workflow qui combine plusieurs commandes :
 
-1. **Créer un nouveau fichier JSON** dans le dossier `command_builder/data/pipelines/`
+1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/pipelines/`
    - Utilisez un préfixe comme `workflow_` pour indiquer qu'il s'agit d'un workflow
 
-2. **Définir plusieurs tâches** avec des dépendances entre elles :
-   ```json
-   {
-     "name": "Workflow complet",
-     "description": "Description du workflow",
-     "tasks": [
-       {
-         "name": "Première tâche",
-         "description": "Description",
-         "commands": [...]
-       },
-       {
-         "name": "Deuxième tâche",
-         "description": "Description",
-         "dependencies": ["Première tâche"],
-         "commands": [...]
-       }
-     ]
-   }
+2. **Définir plusieurs tâches** avec des inclusions :
+   ```yaml
+   name: "Workflow complet"
+   description: "Description du workflow"
+   tasks:
+     # Inclure des tâches existantes
+     - !include ../tasks/premiere_tache.yaml
+     - !include ../tasks/deuxieme_tache.yaml
+     
+     # Ajouter une tâche spécifique au workflow
+     - name: "Tâche finale"
+       description: "Tâche de finalisation"
+       commands: [...]
    ```
 
-3. **S'assurer que les dépendances sont correctes** pour garantir l'ordre d'exécution
+3. **Structurer les fichiers de manière modulaire** pour faciliter la réutilisation
 
 ## Exemples
 
-Voir les exemples dans le dossier `command_builder/data/pipelines/` :
+Voir les exemples dans les dossiers :
 
-- `analyser_tdms.json` - Exemple de commande simple
-- `workflow_import_export.json` - Exemple de workflow complexe
+- `command_builder/data/commands/` - Exemples de commandes individuelles
+- `command_builder/data/tasks/` - Exemples de tâches
+- `command_builder/data/pipelines/` - Exemples de pipelines et workflows
+
+## Documentation complète
+
+Pour une documentation détaillée du système YAML avec inclusions, voir [YAML_SYSTEM.md](docs/YAML_SYSTEM.md).
+
+## Tests
+
+Le système YAML est couvert par des tests unitaires et d'intégration. Pour exécuter les tests :
+
+```bash
+# Exécuter tous les tests
+task test
+
+# Exécuter uniquement les tests des services YAML
+task test:services
+```

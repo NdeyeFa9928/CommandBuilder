@@ -1,0 +1,25 @@
+name: "pcapimport"
+description: "Importe un fichier LIDAR PandarXT32 au format PCAP dans SQLite"
+command: "pcapimport {INPUT_PCAP_FILE} {DATABASE_FILE} --config {CONFIG_FILE}"
+arguments:
+  - code: "INPUT_PCAP_FILE"
+    name: "Fichier PCAP"
+    description: "Fichier PCAP à importer"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".pcap"]
+  
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite de destination"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "CONFIG_FILE"
+    name: "Configuration"
+    description: "Fichier de configuration"
+    type: "file"
+    required: 1

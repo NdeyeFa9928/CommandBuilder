@@ -1,0 +1,4 @@
+name: "Importer CSV GPS"
+description: "Importe des positions GPS depuis un CSV dans SQLite"
+tasks:
+  - !include ../tasks/csv_import_task.yaml

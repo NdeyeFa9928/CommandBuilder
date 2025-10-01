@@ -1,0 +1,4 @@
+name: "Importer dossier"
+description: "Importe tous les fichiers TDMS d'un répertoire"
+commands:
+  - !include ../commands/tdmsdirimport_commands.yaml

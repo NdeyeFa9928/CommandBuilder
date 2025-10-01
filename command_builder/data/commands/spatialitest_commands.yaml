@@ -1,0 +1,4 @@
+name: "spatialitest"
+description: "Vérifie que SQLite + Spatialite fonctionne correctement"
+command: "spatialitest"
+arguments: []

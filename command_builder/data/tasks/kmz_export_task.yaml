@@ -1,0 +1,4 @@
+name: "Exporter KMZ"
+description: "Exporte les données GPS en KMZ pour Google Earth"
+commands:
+  - !include ../commands/kmzexport_commands.yaml
