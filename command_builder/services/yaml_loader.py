@@ -49,25 +49,25 @@ def load_yaml_with_includes(file_path: str) -> Dict[str, Any]:
         return yaml.load(file, IncludeLoader)
 
 
-def load_pipeline(pipeline_name: str, data_root: str = None) -> Dict[str, Any]:
+def load_task(task_name: str, data_root: str = None) -> Dict[str, Any]:
     """
-    Charge une pipeline par son nom
+    Charge une tâche par son nom
     
     Args:
-        pipeline_name: Nom de la pipeline (sans extension)
+        task_name: Nom de la tâche (sans extension)
         data_root: Racine du dossier data (optionnel)
         
     Returns:
-        Dict contenant la pipeline complète avec inclusions résolues
+        Dict contenant la tâche complète avec inclusions résolues
     """
     if data_root is None:
         current_dir = Path(__file__).parent
         data_root = current_dir
     
-    pipeline_path = Path(data_root) / "pipelines" / f"{pipeline_name}.yaml"
+    task_path = Path(data_root) / "tasks" / f"{task_name}.yaml"
     
-    if not pipeline_path.exists():
-        raise FileNotFoundError(f"Pipeline non trouvée: {pipeline_path}")
+    if not task_path.exists():
+        raise FileNotFoundError(f"Tâche non trouvée: {task_path}")
     
-    return load_yaml_with_includes(str(pipeline_path))
+    return load_yaml_with_includes(str(task_path))
 
