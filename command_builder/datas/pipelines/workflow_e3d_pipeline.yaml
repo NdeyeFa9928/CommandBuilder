@@ -1,0 +1,122 @@
+name: "Workflow E3D"
+description: "Importe les TDMS et exporte la campagne E3D"
+tasks:
+  - name: "Importer TDMS"
+    description: "Importe tous les fichiers TDMS du dossier E3D"
+    commands:
+      - name: "tdmsdirimport"
+        description: "Importe tous les fichiers TDMS d'un dossier vers une base SQLite"
+        command: "tdmsdirimport {INPUT_TDMS_DIR} {DATABASE_DIR} --pname {PROJECT_NAME} --keys {KEYS_FILE} --config {CONFIG_FILE} --tol {TOLERANCE} --ptable {TABLE_NAME} --imu-lag-time {IMU_LAG_TIME} --imu-chan {IMU_CHAN} --gps-lag-time {GPS_LAG_TIME} --gps-chan {GPS_CHAN} --image-lag-time {IMAGE_LAG_TIME}"
+        arguments:
+          - code: "INPUT_TDMS_DIR"
+            name: "Répertoire TDMS"
+            description: "Répertoire contenant les fichiers TDMS"
+            type: "directory"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\TDMS"
+          
+          - code: "DATABASE_DIR"
+            name: "Répertoire base SQLite"
+            description: "Répertoire pour la base de données"
+            type: "directory"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\BASE"
+          
+          - code: "PROJECT_NAME"
+            name: "Nom du projet"
+            description: "Nom du projet (--pname)"
+            type: "string"
+            required: 1
+            default:  E3D"
+          
+          - code: "KEYS_FILE"
+            name: "Fichier de clés"
+            description: "Fichier de clés pour l'import"
+            type: "file"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\clavier_debut_fin_unique.csv"
+          
+          - code: "CONFIG_FILE"
+            name: "Configuration"
+            description: "Fichier de configuration"
+            type: "string"
+            required: 1
+            default: "default"
+          
+          - code: "TOLERANCE"
+            name: "Tolérance"
+            description: "Valeur de tolérance (--tol)"
+            type: "float"
+            required: 1
+            default: "0"
+          
+          - code: "TABLE_NAME"
+            name: "Nom de la table"
+            description: "Nom de la table (--ptable)"
+            type: "string"
+            required: 1
+            default: "IMU"
+          
+          - code: "IMU_LAG_TIME"
+            name: "Temps de retard IMU"
+            description: "Temps de retard IMU (--imu-lag-time)"
+            type: "float"
+            required: 1
+            default: "7"
+          
+          - code: "IMU_CHAN"
+            name: "Canal IMU"
+            description: "Canal IMU (--imu-chan)"
+            type: "string"
+            required: 1
+            default: "PPS"
+          
+          - code: "GPS_LAG_TIME"
+            name: "Temps de retard GPS"
+            description: "Temps de retard GPS (--gps-lag-time)"
+            type: "float"
+            required: 1
+            default: "7"
+          
+          - code: "GPS_CHAN"
+            name: "Canal GPS"
+            description: "Canal GPS (--gps-chan)"
+            type: "string"
+            required: 1
+            default: "PPS"
+          
+          - code: "IMAGE_LAG_TIME"
+            name: "Temps de retard image"
+            description: "Temps de retard image (--image-lag-time)"
+            type: "float"
+            required: 1
+            default: "125"
+  
+  - name: "Exporter campagne"
+    description: "Exporte les tables SQLite en fichiers texte + images"
+    dependencies: ["Importer TDMS"]
+    commands:
+      - name: "campaignexport"
+        description: "Exporte les tables SQLite en fichiers texte + images"
+        command: "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY}"
+        arguments:
+          - code: "DATABASE_FILE"
+            name: "Base de données"
+            description: "Fichier SQLite source"
+            type: "file"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\BASE\ E3D.sqlite"
+          
+          - code: "TXT_OUTPUT_DIRECTORY"
+            name: "Répertoire texte"
+            description: "Répertoire de sortie pour les fichiers texte"
+            type: "directory"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\TXT"
+          
+          - code: "IMG_OUTPUT_DIRECTORY"
+            name: "Répertoire images"
+            description: "Répertoire de sortie pour les images"
+            type: "directory"
+            required: 1
+            default: "L:\\999999_CDG_2025\ E3D\\AP\\IMAGES"
