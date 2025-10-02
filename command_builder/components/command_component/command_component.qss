@@ -1,0 +1,31 @@
+/* Styles pour CommandComponent */
+
+QLabel#labelCommandName {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 5px;
+}
+
+QLabel#labelCommandDescription {
+    font-size: 12px;
+    color: #a0a0a0;
+    margin-bottom: 5px;
+}
+
+QLabel#labelCommandCli {
+    font-size: 12px;
+    color: #a0a0a0;
+    margin-bottom: 10px;
+}
+
+QWidget#argumentsContainer {
+    background-color: transparent;
+}
+
+/* Styles pour les labels d'arguments */
+QLabel[objectName^="label_"] {
+    font-size: 12px;
+    color: white;
+    font-weight: normal;
+}
