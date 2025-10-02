@@ -20,16 +20,18 @@ class CommandComponent(QWidget):
     # Signal émis lorsque les arguments changent
     arguments_changed = Signal(dict)  # {code: value}
 
-    def __init__(self, command: Command, parent=None):
+    def __init__(self, command: Command, parent=None, simple_mode=False):
         """
         Initialise le composant CommandComponent.
 
         Args:
             command: L'objet Command à afficher
             parent: Le widget parent (par défaut: None)
+            simple_mode: Si True, affiche uniquement le texte de la commande
         """
         super().__init__(parent)
         self.command = command
+        self.simple_mode = simple_mode
         self.argument_components = {}  # {code: ArgumentComponent}
         self._load_ui()
         self._load_stylesheet()
@@ -66,20 +68,32 @@ class CommandComponent(QWidget):
 
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de la commande."""
-        # Mettre à jour les labels
-        if self.label_command_name:
-            self.label_command_name.setText(self.command.name)
+        if self.simple_mode:
+            # Mode simple : afficher uniquement le texte de la commande
+            if self.label_command_name:
+                self.label_command_name.setVisible(False)
+            if self.label_command_description:
+                self.label_command_description.setVisible(False)
+            if self.label_command_cli:
+                self.label_command_cli.setText(f"{self.command.name}: {self.command.command}")
+            # Masquer le conteneur d'arguments
+            if self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+                self.arguments_form_layout.parentWidget().setVisible(False)
+        else:
+            # Mode complet : afficher tout
+            if self.label_command_name:
+                self.label_command_name.setText(self.command.name)
 
-        if self.label_command_description:
-            self.label_command_description.setText(self.command.description)
+            if self.label_command_description:
+                self.label_command_description.setText(self.command.description)
 
-        if self.label_command_cli:
-            self.label_command_cli.setText(f"Commande: {self.command.command}")
+            if self.label_command_cli:
+                self.label_command_cli.setText(f"Commande: {self.command.command}")
 
-        # Ajouter les arguments
-        if self.arguments_form_layout and self.command.arguments:
-            for argument in self.command.arguments:
-                self._add_argument(argument)
+            # Ajouter les arguments
+            if self.arguments_form_layout and self.command.arguments:
+                for argument in self.command.arguments:
+                    self._add_argument(argument)
 
     def _add_argument(self, argument):
         """
