@@ -5,7 +5,7 @@ Module contenant la classe MainWindow qui représente la fenêtre principale de 
 from pathlib import Path
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
 from PySide6.QtUiTools import QUiLoader
-from command_builder.components.pipeline_list import PipelineList
+from command_builder.components.task_list import TaskList
 from command_builder.components.command_form import CommandForm
 from command_builder.components.console_output import ConsoleOutput
 
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(ui.statusBar())
 
         # Stocker les références aux conteneurs
-        self.pipeline_list_container = self.findChild(QWidget, "pipelineListContainer")
+        self.task_list_container = self.findChild(QWidget, "taskListContainer")
         self.command_form_container = self.findChild(QWidget, "commandFormContainer")
         self.console_output_container = self.findChild(
             QWidget, "consoleOutputContainer"
@@ -53,19 +53,19 @@ class MainWindow(QMainWindow):
 
     def _setup_components(self):
         """Configure les composants de l'interface."""
-        # Créer et configurer le composant PipelineList
-        self.pipeline_list = PipelineList()
-        if self.pipeline_list_container:
+        # Créer et configurer le composant TaskList
+        self.task_list = TaskList()
+        if self.task_list_container:
             # Trouver le layout existant
-            layout = self.pipeline_list_container.layout()
+            layout = self.task_list_container.layout()
             if layout:
                 # Ajouter le composant au layout existant
-                layout.addWidget(self.pipeline_list)
+                layout.addWidget(self.task_list)
             else:
                 # Créer un nouveau layout si nécessaire
-                layout = QVBoxLayout(self.pipeline_list_container)
+                layout = QVBoxLayout(self.task_list_container)
                 layout.setContentsMargins(0, 0, 0, 0)
-                layout.addWidget(self.pipeline_list)
+                layout.addWidget(self.task_list)
 
         # Créer et configurer le composant CommandForm
         self.command_form = CommandForm()
@@ -92,33 +92,30 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         """Connecte les signaux aux slots."""
-        if self.pipeline_list:
+        if self.task_list:
             # Connecter le signal de sélection de commande à l'affichage du formulaire
-            self.pipeline_list.command_selected.connect(self._on_command_selected)
+            self.task_list.command_selected.connect(self._on_command_selected)
 
-    def _on_command_selected(self, pipeline_name, command_name):
-        """Gère la sélection d'une commande dans la liste des pipelines."""
+    def _on_command_selected(self, task_name, command_name):
+        """Gère la sélection d'une tâche dans la liste."""
         # Afficher un message dans la console
         if self.console_output:
-            #self.console_output.append_text(f"Commande sélectionnée : {command_name} (Pipeline: {pipeline_name})")
+            #self.console_output.append_text(f"Tâche sélectionnée : {command_name}")
             pass
         
-        # Rechercher le pipeline correspondant
-        for pipeline in self.pipeline_list.pipelines:
-            if pipeline.name == pipeline_name:
-                # Rechercher la tâche correspondante
-                for task in pipeline.tasks:
-                    if task.name == command_name:
-                        # Trouver les commandes dans la tâche
-                        if task.commands and len(task.commands) > 0:
-                            # Passer toutes les commandes au formulaire avec le nom de la tâche
-                            if self.command_form:
-                                # Toujours utiliser set_commands, même pour une seule commande
-                                # pour avoir un affichage cohérent
-                                self.command_form.set_commands(task.commands, task.name)
-                        break
+        # Rechercher la tâche correspondante
+        for task in self.task_list.tasks:
+            if task.name == command_name:
+                # Trouver les commandes dans la tâche
+                if task.commands and len(task.commands) > 0:
+                    # Passer toutes les commandes au formulaire avec le nom de la tâche
+                    if self.command_form:
+                        # Toujours utiliser set_commands, même pour une seule commande
+                        # pour avoir un affichage cohérent
+                        self.command_form.set_commands(task.commands, task.name)
+                break
 
-    def set_pipelines(self, pipelines):
-        """Définit les pipelines à afficher dans l'interface."""
-        if self.pipeline_list:
-            self.pipeline_list.set_pipelines(pipelines)
+    def set_tasks(self, tasks):
+        """Définit les tâches à afficher dans l'interface."""
+        if self.task_list:
+            self.task_list.set_tasks(tasks)

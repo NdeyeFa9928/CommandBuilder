@@ -1,4 +1,0 @@
-name: "Analyser fichier TDMS"
-description: "Inspecte la structure d'un fichier TDMS"
-tasks:
-  - !include ../tasks/tdms_scan_task.yaml

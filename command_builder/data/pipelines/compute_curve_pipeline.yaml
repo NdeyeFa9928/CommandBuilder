@@ -1,4 +1,0 @@
-name: "Calculer virages"
-description: "Calcule les virages"
-tasks:
-  - !include ../tasks/compute_curve_task.yaml

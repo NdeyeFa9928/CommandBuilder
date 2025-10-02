@@ -1,0 +1,5 @@
+name: "Traitement campagne"
+description: "Import TDMS du dossier + export campagne (TXT + IMAGES)"
+commands:
+  - !include ../commands/tdmsdirimport_commands.yaml
+  - !include ../commands/campaignexport_commands.yaml

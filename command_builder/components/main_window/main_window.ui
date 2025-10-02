@@ -19,7 +19,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QWidget" name="pipelineListContainer" native="true">
+     <widget class="QWidget" name="taskListContainer" native="true">
       <property name="minimumSize">
        <size>
         <width>300</width>
@@ -32,7 +32,7 @@
         <height>16777215</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="pipelineContainerLayout">
+      <layout class="QVBoxLayout" name="taskContainerLayout">
       </layout>
      </widget>
     </item>
@@ -72,9 +72,9 @@
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionNouveau_pipeline">
+  <action name="actionNouvelle_tache">
    <property name="text">
-    <string>Nouveau pipeline...</string>
+    <string>Nouvelle tâche...</string>
    </property>
   </action>
   <action name="actionExporter_schema">

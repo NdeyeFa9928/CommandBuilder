@@ -1,4 +1,0 @@
-name: "Importer PCAP LIDAR"
-description: "Importe un fichier LIDAR PandarXT32 au format PCAP dans SQLite"
-tasks:
-  - !include ../tasks/pcap_import_task.yaml

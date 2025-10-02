@@ -1,4 +1,0 @@
-name: "Test SQLite+Spatialite"
-description: "Vérifie que SQLite + Spatialite fonctionne correctement"
-tasks:
-  - !include ../tasks/spatialite_test_task.yaml

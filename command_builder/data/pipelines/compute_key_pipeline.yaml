@@ -1,4 +1,0 @@
-name: "Calculer clés et segments"
-description: "Recalcule les tables key_point et key_segment"
-tasks:
-  - !include ../tasks/compute_key_task.yaml

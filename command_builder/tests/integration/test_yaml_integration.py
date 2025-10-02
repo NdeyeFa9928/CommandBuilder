@@ -6,77 +6,12 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from command_builder.services.yaml_pipeline_loader import load_yaml_pipeline
-from command_builder.models.pipeline import Pipeline
+from command_builder.services.yaml_task_loader import load_yaml_task
+from command_builder.models.task import Task
 
 
-def test_pipeline_with_task_inclusion():
-    """Teste un pipeline complet avec inclusion de tâches."""
-    temp_dir = Path(tempfile.mkdtemp())
-    
-    try:
-        # Créer la structure de répertoires
-        tasks_dir = temp_dir / "tasks"
-        tasks_dir.mkdir()
-        pipelines_dir = temp_dir / "pipelines"
-        pipelines_dir.mkdir()
-        
-        # Créer un fichier de tâche
-        task_content = """
-name: "Tâche incluse"
-description: "Une tâche chargée depuis un fichier séparé"
-commands:
-  - name: "commande_incluse"
-    description: "Commande de la tâche incluse"
-    command: "echo 'Tâche incluse'"
-    arguments: []
-"""
-        task_file = tasks_dir / "task_incluse.yaml"
-        task_file.write_text(task_content, encoding="utf-8")
-        
-        # Créer un pipeline qui inclut la tâche
-        pipeline_content = """
-name: "Pipeline avec inclusion"
-description: "Pipeline qui inclut une tâche externe"
-tasks:
-  - !include ../tasks/task_incluse.yaml
-  - name: "Tâche directe"
-    description: "Tâche définie directement dans le pipeline"
-    commands:
-      - name: "commande_directe"
-        description: "Commande directe"
-        command: "echo 'Tâche directe'"
-        arguments: []
-"""
-        pipeline_file = pipelines_dir / "pipeline_inclusion.yaml"
-        pipeline_file.write_text(pipeline_content, encoding="utf-8")
-        
-        # Charger le pipeline
-        pipeline = load_yaml_pipeline(pipeline_file)
-        
-        # Vérifications
-        assert isinstance(pipeline, Pipeline)
-        assert pipeline.name == "Pipeline avec inclusion"
-        assert len(pipeline.tasks) == 2
-        
-        # Vérifier la tâche incluse
-        task_incluse = pipeline.tasks[0]
-        assert task_incluse.name == "Tâche incluse"
-        assert len(task_incluse.commands) == 1
-        assert task_incluse.commands[0].name == "commande_incluse"
-        
-        # Vérifier la tâche directe
-        task_directe = pipeline.tasks[1]
-        assert task_directe.name == "Tâche directe"
-        assert len(task_directe.commands) == 1
-        assert task_directe.commands[0].name == "commande_directe"
-        
-    finally:
-        shutil.rmtree(temp_dir)
-
-
-def test_pipeline_with_nested_inclusions():
-    """Teste un pipeline avec des inclusions imbriquées."""
+def test_task_with_command_inclusion():
+    """Teste une tâche avec inclusion de commandes."""
     temp_dir = Path(tempfile.mkdtemp())
     
     try:
@@ -85,8 +20,59 @@ def test_pipeline_with_nested_inclusions():
         commands_dir.mkdir()
         tasks_dir = temp_dir / "tasks"
         tasks_dir.mkdir()
-        pipelines_dir = temp_dir / "pipelines"
-        pipelines_dir.mkdir()
+        
+        # Créer un fichier de commande
+        command_content = """
+name: "commande_incluse"
+description: "Commande chargée depuis un fichier séparé"
+command: "echo 'Commande incluse'"
+arguments: []
+"""
+        command_file = commands_dir / "commande_incluse.yaml"
+        command_file.write_text(command_content, encoding="utf-8")
+        
+        # Créer une tâche qui inclut la commande
+        task_content = """
+name: "Tâche avec inclusion"
+description: "Tâche qui inclut une commande externe"
+commands:
+  - !include ../commands/commande_incluse.yaml
+  - name: "commande_directe"
+    description: "Commande définie directement"
+    command: "echo 'Commande directe'"
+    arguments: []
+"""
+        task_file = tasks_dir / "task_inclusion.yaml"
+        task_file.write_text(task_content, encoding="utf-8")
+        
+        # Charger la tâche
+        task = load_yaml_task(task_file)
+        
+        # Vérifications
+        assert isinstance(task, Task)
+        assert task.name == "Tâche avec inclusion"
+        assert len(task.commands) == 2
+        
+        # Vérifier la commande incluse
+        commande_incluse = task.commands[0]
+        assert commande_incluse.name == "commande_incluse"
+        
+        # Vérifier la commande directe
+        commande_directe = task.commands[1]
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+def test_task_with_nested_inclusions():
+    """Teste une tâche avec des inclusions imbriquées."""
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
+        # Créer la structure de répertoires
+        commands_dir = temp_dir / "commands"
+        commands_dir.mkdir()
+        tasks_dir = temp_dir / "tasks"
+        tasks_dir.mkdir()
         
         # Créer un fichier de commande
         command_content = """
@@ -108,26 +94,11 @@ commands:
         task_file = tasks_dir / "task_avec_commande.yaml"
         task_file.write_text(task_content, encoding="utf-8")
         
-        # Créer un pipeline qui inclut la tâche
-        pipeline_content = """
-name: "Pipeline avec inclusions imbriquées"
-description: "Pipeline avec tâche qui inclut une commande"
-tasks:
-  - !include ../tasks/task_avec_commande.yaml
-"""
-        pipeline_file = pipelines_dir / "pipeline_imbrique.yaml"
-        pipeline_file.write_text(pipeline_content, encoding="utf-8")
-        
-        # Charger le pipeline
-        pipeline = load_yaml_pipeline(pipeline_file)
+        # Charger la tâche
+        task = load_yaml_task(task_file)
         
         # Vérifications
-        assert isinstance(pipeline, Pipeline)
-        assert pipeline.name == "Pipeline avec inclusions imbriquées"
-        assert len(pipeline.tasks) == 1
-        
-        # Vérifier la tâche
-        task = pipeline.tasks[0]
+        assert isinstance(task, Task)
         assert task.name == "Tâche avec commande incluse"
         assert len(task.commands) == 1
         
@@ -140,34 +111,34 @@ tasks:
         shutil.rmtree(temp_dir)
 
 
-def test_real_pipeline_structure():
-    """Teste avec la structure réelle des pipelines du projet."""
+def test_real_task_structure():
+    """Teste avec la structure réelle des tâches du projet."""
     # Ce test utilise les vrais fichiers du projet s'ils existent
-    from command_builder.services.yaml_pipeline_loader import get_yaml_pipelines_directory, list_yaml_pipeline_files
+    from command_builder.services.yaml_task_loader import get_yaml_tasks_directory, list_yaml_task_files
     
-    pipelines_dir = get_yaml_pipelines_directory()
+    tasks_dir = get_yaml_tasks_directory()
     
-    if pipelines_dir.exists():
-        pipeline_files = list_yaml_pipeline_files()
+    if tasks_dir.exists():
+        task_files = list_yaml_task_files()
         
-        if pipeline_files:
-            # Prendre le premier pipeline disponible
-            first_pipeline_file = pipeline_files[0]
+        if task_files:
+            # Prendre la première tâche disponible
+            first_task_file = task_files[0]
             
-            # Essayer de le charger
-            pipeline = load_yaml_pipeline(first_pipeline_file)
+            # Essayer de la charger
+            task = load_yaml_task(first_task_file)
             
             # Vérifications de base
-            assert isinstance(pipeline, Pipeline)
-            assert pipeline.name is not None
-            assert isinstance(pipeline.tasks, list)
+            assert isinstance(task, Task)
+            assert task.name is not None
+            assert isinstance(task.commands, list)
             
-            # Si le pipeline a des tâches, vérifier leur structure
-            if pipeline.tasks:
-                first_task = pipeline.tasks[0]
-                assert first_task.name is not None
-                assert isinstance(first_task.commands, list)
+            # Si la tâche a des commandes, vérifier leur structure
+            if task.commands:
+                first_command = task.commands[0]
+                assert first_command.name is not None
+                assert isinstance(first_command.arguments, list)
         else:
-            pytest.skip("Aucun fichier de pipeline trouvé dans le projet")
+            pytest.skip("Aucun fichier de tâche trouvé dans le projet")
     else:
-        pytest.skip("Répertoire des pipelines non trouvé")
+        pytest.skip("Répertoire des tâches non trouvé")

@@ -1,4 +1,0 @@
-name: "Exporter table en CSV"
-description: "Exporte une table SQLite en fichier CSV"
-tasks:
-  - !include ../tasks/export_csv_task.yaml

@@ -1,4 +1,0 @@
-name: "Importer fichier TDMS"
-description: "Importe un fichier TDMS dans une base SQLite"
-tasks:
-  - !include ../tasks/tdms_import_task.yaml

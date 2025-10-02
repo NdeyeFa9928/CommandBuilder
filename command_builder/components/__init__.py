@@ -4,6 +4,6 @@ Chaque composant est organisé dans son propre sous-package avec ses fichiers .u
 """
 
 from .main_window import MainWindow
-from .pipeline_list import PipelineList
+from .task_list import TaskList
 from .command_form import CommandForm
 from .console_output import ConsoleOutput

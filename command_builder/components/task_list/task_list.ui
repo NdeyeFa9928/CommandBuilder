@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PipelineList</class>
- <widget class="QWidget" name="PipelineList">
+ <class>TaskList</class>
+ <widget class="QWidget" name="TaskList">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Pipelines</string>
+   <string>Tâches</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="labelPipelines">
+    <widget class="QLabel" name="labelTasks">
      <property name="font">
       <font>
        <pointsize>12</pointsize>
@@ -23,7 +23,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Pipelines</string>
+      <string>Tâches</string>
      </property>
     </widget>
    </item>
@@ -43,8 +43,8 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QWidget" name="pipelineItemsContainer" native="true">
-         <layout class="QVBoxLayout" name="pipelineItemsLayout">
+        <widget class="QWidget" name="taskItemsContainer" native="true">
+         <layout class="QVBoxLayout" name="taskItemsLayout">
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
