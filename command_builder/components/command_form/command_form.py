@@ -6,14 +6,12 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QFormLayout,
-    QLineEdit,
-    QPushButton,
     QLabel,
-    QFileDialog,
 )
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
+
+from command_builder.components.command_component import CommandComponent
 
 
 
@@ -36,9 +34,9 @@ class CommandForm(QWidget):
         super().__init__(parent)
         self.current_command = None
         self.current_commands = []  # Liste des commandes multiples
+        self.command_components = []  # Liste des CommandComponent
         self._load_ui()
         self._load_stylesheet()
-        self._connect_signals()
 
     def _load_ui(self):
         """Charge le fichier UI du composant."""
@@ -65,34 +63,10 @@ class CommandForm(QWidget):
             if main_layout:
                 main_layout.addWidget(self.form_container)
         
-        self.form_layout = ui.findChild(QFormLayout, "formLayout")
-        if not self.form_layout:
-            # Créer un layout pour le formulaire
-            self.form_layout = QFormLayout(self.form_container)
-            self.form_layout.setObjectName("formLayout")
-            self.form_layout.setContentsMargins(10, 10, 10, 10)
-            self.form_layout.setSpacing(10)
-        
-        # Vérifier si les labels existent, sinon les créer
-        self.label_command_title = ui.findChild(QLabel, "labelCommandTitle")
-        if not self.label_command_title:
-            self.label_command_title = QLabel("Sélectionnez une commande", ui)
-            self.label_command_title.setObjectName("labelCommandTitle")
-            self.label_command_title.setStyleSheet("font-size: 16px; font-weight: bold; color: white; margin-bottom: 10px;")
-            # Ajouter le label au layout principal
-            main_layout = ui.layout()
-            if main_layout:
-                main_layout.insertWidget(0, self.label_command_title)
-        
-        self.label_command = ui.findChild(QLabel, "labelCommand")
-        if not self.label_command:
-            self.label_command = QLabel("Commande: ", ui)
-            self.label_command.setObjectName("labelCommand")
-            self.label_command.setStyleSheet("font-size: 12px; color: #a0a0a0; margin-bottom: 15px;")
-            # Ajouter le label au layout principal
-            main_layout = ui.layout()
-            if main_layout:
-                main_layout.insertWidget(1, self.label_command)
+        # Créer un layout vertical pour les CommandComponent
+        self.commands_layout = QVBoxLayout(self.form_container)
+        self.commands_layout.setContentsMargins(10, 10, 10, 10)
+        self.commands_layout.setSpacing(5)
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -103,39 +77,10 @@ class CommandForm(QWidget):
             with open(qss_file, "r") as f:
                 self.setStyleSheet(f.read())
 
-    def _connect_signals(self):
-        """Connecte les signaux aux slots."""
-        # Connecter les boutons de parcours aux fonctions de sélection de fichiers
-        browse_buttons = self.findChildren(QPushButton, "buttonParcourir*")
-        for button in browse_buttons:
-            button.clicked.connect(lambda checked, btn=button: self._browse_file(btn))
-
-    def _browse_file(self, button):
-        """
-        Ouvre une boîte de dialogue pour sélectionner un fichier.
-
-        Args:
-            button: Le bouton qui a déclenché l'action
-        """
-        # Trouver le QLineEdit associé au bouton
-        parent_layout = button.parent().layout()
-        if parent_layout:
-            for i in range(parent_layout.count()):
-                item = parent_layout.itemAt(i)
-                if item.widget() and isinstance(item.widget(), QLineEdit):
-                    line_edit = item.widget()
-                    break
-            else:
-                return
-
-            # Ouvrir la boîte de dialogue
-            file_path, _ = QFileDialog.getOpenFileName(self, "Sélectionner un fichier")
-            if file_path:
-                line_edit.setText(file_path)
 
     def set_commands(self, commands, task_name=None):
         """
-        Configure le formulaire pour afficher plusieurs commandes en texte.
+        Configure le formulaire pour afficher plusieurs commandes avec CommandComponent.
 
         Args:
             commands: Liste des commandes à afficher
@@ -149,83 +94,58 @@ class CommandForm(QWidget):
         
         if not commands or len(commands) == 0:
             return
-            
-        # Mettre à jour le titre avec le nom de la tâche
-        if hasattr(self, 'label_command_title') and self.label_command_title:
-            self.label_command_title.setText(task_name if task_name else "Commandes multiples")
         
-        # Afficher toutes les commandes en texte
-        command_text = ""
+        # Ajouter un label de titre si nécessaire
+        if task_name:
+            title_label = QLabel(task_name)
+            title_label.setObjectName("labelTaskTitle")
+            title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white; margin-bottom: 10px;")
+            self.commands_layout.addWidget(title_label)
+        
+        # Créer un CommandComponent en mode simple pour chaque commande
         for i, command in enumerate(commands, 1):
-            if hasattr(command, 'name') and hasattr(command, 'command'):
-                command_text += f"{i}. {command.name}: {command.command}\n"
-            else:
-                name = command.get('name', 'Commande sans nom') if isinstance(command, dict) else 'Commande sans nom'
-                cmd = command.get('command', '') if isinstance(command, dict) else ''
-                command_text += f"{i}. {name}: {cmd}\n"
+            # Créer un label pour le numéro
+            number_label = QLabel(f"{i}.")
+            number_label.setStyleSheet("font-size: 12px; color: #a0a0a0;")
+            self.commands_layout.addWidget(number_label)
+            
+            # Créer le CommandComponent en mode simple
+            command_component = CommandComponent(command, self, simple_mode=True)
+            self.command_components.append(command_component)
+            self.commands_layout.addWidget(command_component)
         
-        # Mettre à jour le label de commande avec toutes les commandes
-        if hasattr(self, 'label_command') and self.label_command:
-            self.label_command.setText(command_text.strip())
+        # Ajouter un spacer à la fin
+        self.commands_layout.addStretch()
 
     def _clear_form(self):
         """
-        Efface tous les champs du formulaire.
+        Efface tous les CommandComponent du formulaire.
         """
-        # Réinitialiser les labels
-        if hasattr(self, 'label_command_title') and self.label_command_title:
-            self.label_command_title.setText("Sélectionnez une commande")
+        # Supprimer tous les widgets du layout
+        while self.commands_layout.count() > 0:
+            item = self.commands_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.spacerItem():
+                # Supprimer le spacer
+                pass
         
-        if hasattr(self, 'label_command') and self.label_command:
-            self.label_command.setText("Commande: ")
-        
-        
-        # Supprimer tous les champs du formulaire
-        if hasattr(self, 'form_layout') and self.form_layout:
-            while self.form_layout.count() > 0:
-                # Récupérer le premier item
-                label_item = self.form_layout.itemAt(0, QFormLayout.LabelRole)
-                field_item = self.form_layout.itemAt(0, QFormLayout.FieldRole)
-                
-                # Supprimer les widgets
-                if label_item and label_item.widget():
-                    label_item.widget().deleteLater()
-                
-                if field_item:
-                    if field_item.layout():
-                        # Supprimer tous les widgets du layout
-                        while field_item.layout().count() > 0:
-                            widget_item = field_item.layout().takeAt(0)
-                            if widget_item.widget():
-                                widget_item.widget().deleteLater()
-                
-                # Supprimer la ligne
-                self.form_layout.takeRow(0)
+        # Vider la liste des composants
+        self.command_components.clear()
     
     def get_form_values(self):
         """
-        Récupère les valeurs du formulaire.
+        Récupère les valeurs de tous les arguments de toutes les commandes.
 
         Returns:
-            Un dictionnaire contenant les valeurs du formulaire
+            Un dictionnaire contenant les valeurs de tous les arguments
         """
         values = {}
-
-        # Parcourir tous les QLineEdit du formulaire
-        for i in range(self.form_layout.rowCount()):
-            label_item = self.form_layout.itemAt(i, QFormLayout.LabelRole)
-            field_item = self.form_layout.itemAt(i, QFormLayout.FieldRole)
-
-            if label_item and field_item:
-                label = label_item.widget()
-                field_layout = field_item.layout()
-
-                if label and field_layout:
-                    for j in range(field_layout.count()):
-                        widget = field_layout.itemAt(j).widget()
-                        if isinstance(widget, QLineEdit):
-                            field_name = label.text().replace("*", "").strip()
-                            values[field_name] = widget.text()
-                            break
-
+        
+        # Parcourir tous les CommandComponent
+        for command_component in self.command_components:
+            # Récupérer les valeurs des arguments de chaque commande
+            command_values = command_component.get_argument_values()
+            values.update(command_values)
+        
         return values
