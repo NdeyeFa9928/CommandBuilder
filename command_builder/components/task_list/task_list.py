@@ -3,11 +3,12 @@ Module contenant la classe TaskList qui affiche les tâches disponibles.
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.task import Task
+from command_builder.components.task_component import TaskComponent
 
 
 class TaskList(QWidget):
@@ -88,38 +89,17 @@ class TaskList(QWidget):
 
     def _add_task_widget(self, task):
         """Ajoute un widget pour une tâche."""
-        # Créer un bouton pour la tâche
-        task_button = QPushButton(task.name, self)
-        task_button.setObjectName(f"task_{task.name}")
-        task_button.setCursor(Qt.PointingHandCursor)
-        task_button.setStyleSheet("""
-            QPushButton {
-                background-color: #3a3f55;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 12px 15px;
-                margin: 2px;
-                text-align: left;
-                font-size: 13px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #4a5065;
-            }
-            QPushButton:pressed {
-                background-color: #2a3045;
-            }
-        """)
+        # Créer un TaskComponent pour la tâche
+        task_component = TaskComponent(task, self)
         
         # Connecter le signal pour sélectionner la tâche
-        task_button.clicked.connect(
-            lambda checked, t=task.name: self.command_selected.emit("", t)
+        task_component.task_clicked.connect(
+            lambda t: self.command_selected.emit("", t.name)
         )
         
-        # Ajouter le bouton au layout
+        # Ajouter le composant au layout
         self.task_items_layout.insertWidget(
-            self.task_items_layout.count() - 1, task_button
+            self.task_items_layout.count() - 1, task_component
         )
 
     def clear(self):

@@ -1,0 +1,21 @@
+/* Styles pour TaskComponent */
+
+QPushButton#taskButton {
+    background-color: #3a3f55;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 15px;
+    margin: 2px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+QPushButton#taskButton:hover {
+    background-color: #4a5065;
+}
+
+QPushButton#taskButton:pressed {
+    background-color: #2a3045;
+}

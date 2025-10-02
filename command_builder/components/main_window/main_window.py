@@ -96,26 +96,14 @@ class MainWindow(QMainWindow):
             # Connecter le signal de sélection de commande à l'affichage du formulaire
             self.task_list.command_selected.connect(self._on_command_selected)
 
-    def _on_command_selected(self, task_name, command_name):
+    def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
-        # Afficher un message dans la console
-        if self.console_output:
-            #self.console_output.append_text(f"Tâche sélectionnée : {command_name}")
-            pass
-        
-        # Rechercher la tâche correspondante
-        for task in self.task_list.tasks:
-            if task.name == command_name:
-                # Trouver les commandes dans la tâche
-                if task.commands and len(task.commands) > 0:
-                    # Passer toutes les commandes au formulaire avec le nom de la tâche
-                    if self.command_form:
-                        # Toujours utiliser set_commands, même pour une seule commande
-                        # pour avoir un affichage cohérent
-                        self.command_form.set_commands(task.commands, task.name)
-                break
+        if task := next((t for t in self.task_list.tasks if t.name == task_name), None):
+            if task.commands and self.command_form:
+                self.command_form.set_commands(task.commands, task.name)
 
     def set_tasks(self, tasks):
         """Définit les tâches à afficher dans l'interface."""
         if self.task_list:
             self.task_list.set_tasks(tasks)
+

@@ -1,0 +1,31 @@
+/* Styles pour ArgumentComponent */
+
+QLineEdit#argumentLineEdit {
+    background-color: #2a2f45;
+    color: white;
+    border: 1px solid #3a3f55;
+    border-radius: 3px;
+    padding: 8px;
+    font-size: 12px;
+}
+
+QLineEdit#argumentLineEdit:focus {
+    border: 1px solid #5a6f85;
+}
+
+QPushButton#browseButton {
+    background-color: #3a3f55;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+QPushButton#browseButton:hover {
+    background-color: #4a5065;
+}
+
+QPushButton#browseButton:pressed {
+    background-color: #2a3045;
+}

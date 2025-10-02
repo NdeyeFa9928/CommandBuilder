@@ -1,161 +1,143 @@
 # CommandBuilder
 
-Assistant GUI pour composer des commandes CLI Windows sans erreurs de syntaxe.
+Application graphique pour composer et exécuter des commandes CLI complexes via une interface intuitive.
 
-## Description
+**Fonctionnalités clés :**
+- Interface utilisateur moderne avec thème sombre
+- Définition des commandes via des fichiers YAML
+- Validation des entrées utilisateur
+- Génération de commandes prêtes à l'exécution
+- Support des arguments de différents types (fichier, dossier, nombre, etc.)
 
-CommandBuilder est un outil qui permet de créer et exécuter des commandes complexes via une interface graphique intuitive. L'application est basée sur des définitions YAML de pipelines qui peuvent être facilement étendues.
+## Structure
+
+```
+command_builder/
+├── assets/           # Ressources (icônes, images)
+├── components/       # Composants UI modulaires
+│   ├── task_component/     # Affichage d'une tâche
+│   ├── argument_component/ # Gestion des arguments avec validation
+│   ├── command_component/  # Affichage d'une commande et ses arguments
+│   ├── task_list/          # Liste des tâches disponibles
+│   ├── command_form/       # Formulaire de commandes
+│   └── console_output/     # Affichage des sorties console
+├── data/             # Définitions YAML
+│   ├── commands/     # Commandes individuelles
+│   └── tasks/        # Tâches (groupes de commandes)
+├── models/           # Modèles de données
+└── services/         # Logique métier
+```
 
 ## Installation
 
 ```bash
-# Installer les dépendances
+# 1. Installer les dépendances
 pipenv install
 
-# Lancer l'application en mode développement
+# 2. Lancer l'application
 task dev
-
-# Construire l'exécutable
-task build
 ```
 
-## Structure des pipelines
+## Utilisation
 
-Les pipelines sont définis dans des fichiers YAML dans le dossier `command_builder/data/pipelines/`. Chaque pipeline peut être:
-
-1. **Une commande simple** - Une seule tâche avec une seule commande
-2. **Un workflow complexe** - Plusieurs tâches avec dépendances entre elles
-
-### Structure d'un fichier de pipeline
+1. **Définir des commandes** dans `data/commands/` :
 
 ```yaml
-name: "Nom descriptif du pipeline"
-description: "Description détaillée"
-tasks:
-  # Inclusion d'une tâche depuis un fichier séparé
-  - !include ../tasks/ma_tache.yaml
+# exemple.yaml
+name: "Ma commande"
+command: "commande --input {fichier} --option {valeur}"
+arguments:
+  - code: "fichier"
+    name: "Fichier source"
+    type: "file"
+    required: true
   
-  # Définition directe d'une tâche
-  - name: "Nom de la tâche"
-    description: "Description de la tâche"
-    commands:
-      - name: "nom_commande"
-        description: "Description de la commande"
-        command: "commande {PARAM1} {PARAM2} --option {OPTION1}"
-        arguments:
-          - code: "PARAM1"
-            name: "Nom lisible"
-            description: "Description du paramètre"
+  - code: "valeur"
+    name: "Option"
+    type: "number"
+    default: "42"
 ```
 
-> **Note**: Pour une documentation complète du système YAML, voir [YAML_SYSTEM.md](docs/YAML_SYSTEM.md)
+2. **Créer des tâches** dans `data/tasks/` :
 
-## Comment ajouter une nouvelle commande
+```yaml
+# ma_tache.yaml
+name: "Ma tâche"
+commands:
+  - !include ../commands/exemple.yaml
+```
 
-Pour ajouter une nouvelle commande à CommandBuilder, suivez ces étapes :
+3. **Types d'arguments** :
+   - `text` : Champ texte
+   - `file` : Sélecteur de fichier
+   - `directory` : Sélecteur de dossier
+   - `number` : Nombre
+   - `boolean` : Case à cocher
+   - `select` : Liste déroulante
 
-### Option 1: Créer une commande individuelle
+## Bonnes pratiques
 
-1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/commands/`
-   - Nommez le fichier de manière descriptive, par exemple `ma_commande.yaml`
+1. **Organisation des commandes :**
+   - Une commande = un fichier YAML
+   - Nommer les fichiers de manière descriptive
+   - Grouper les commandes liées dans des sous-dossiers
 
-2. **Définir la structure de la commande** :
-   ```yaml
-   name: "nom_commande"
-   description: "Description détaillée de la commande"
-   command: "commande {PARAM1} {PARAM2}"
-   arguments:
-     - code: "PARAM1"
-       name: "Nom lisible"
-       description: "Description du paramètre"
-   ```
+2. **Gestion des arguments :**
+   - Toujours définir un `name` et une `description` claire
+   - Utiliser `required: true` pour les arguments obligatoires
+   - Définir des valeurs par défaut quand c'est pertinent
 
-### Option 2: Créer une tâche avec commandes
+3. **Conseils de performance :**
+   - Éviter les commandes trop complexes
+   - Privilégier plusieurs commandes simples plutôt qu'une seule complexe
+   - Tester régulièrement les commandes générées
 
-1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/tasks/`
-   - Nommez le fichier de manière descriptive, par exemple `ma_tache.yaml`
+## Développement
 
-2. **Définir la structure de la tâche** :
-   ```yaml
-   name: "Nom de la tâche"
-   description: "Description de la tâche"
-   commands:
-     # Inclure une commande existante
-     - !include ../commands/ma_commande.yaml
-     
-     # Définir une commande directement
-     - name: "autre_commande"
-       description: "Description de la commande"
-       command: "commande {PARAM1}"
-       arguments:
-         - code: "PARAM1"
-           name: "Nom lisible"
-           description: "Description du paramètre"
-   ```
-
-### Option 3: Créer un pipeline complet
-
-1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/pipelines/`
-   - Nommez le fichier de manière descriptive, par exemple `mon_pipeline.yaml`
-
-2. **Définir la structure du pipeline** :
-   ```yaml
-   name: "Nom du pipeline"
-   description: "Description du pipeline"
-   tasks:
-     # Inclure une tâche existante
-     - !include ../tasks/ma_tache.yaml
-     
-     # Définir une tâche directement
-     - name: "Autre tâche"
-       description: "Description de la tâche"
-       commands: [...]
-   ```
-
-## Comment créer un workflow complexe
-
-Pour créer un workflow qui combine plusieurs commandes :
-
-1. **Créer un nouveau fichier YAML** dans le dossier `command_builder/data/pipelines/`
-   - Utilisez un préfixe comme `workflow_` pour indiquer qu'il s'agit d'un workflow
-
-2. **Définir plusieurs tâches** avec des inclusions :
-   ```yaml
-   name: "Workflow complet"
-   description: "Description du workflow"
-   tasks:
-     # Inclure des tâches existantes
-     - !include ../tasks/premiere_tache.yaml
-     - !include ../tasks/deuxieme_tache.yaml
-     
-     # Ajouter une tâche spécifique au workflow
-     - name: "Tâche finale"
-       description: "Tâche de finalisation"
-       commands: [...]
-   ```
-
-3. **Structurer les fichiers de manière modulaire** pour faciliter la réutilisation
-
-## Exemples
-
-Voir les exemples dans les dossiers :
-
-- `command_builder/data/commands/` - Exemples de commandes individuelles
-- `command_builder/data/tasks/` - Exemples de tâches
-- `command_builder/data/pipelines/` - Exemples de pipelines et workflows
-
-## Documentation complète
-
-Pour une documentation détaillée du système YAML avec inclusions, voir [YAML_SYSTEM.md](docs/YAML_SYSTEM.md).
-
-## Tests
-
-Le système YAML est couvert par des tests unitaires et d'intégration. Pour exécuter les tests :
+### Commandes utiles
 
 ```bash
-# Exécuter tous les tests
-task test
+# Lancer les tests
+pytest
 
-# Exécuter uniquement les tests des services YAML
-task test:services
+# Vérifier le style
+ruff check .
+black .
+
+# Créer l'exécutable
+task build
+
+# Nettoyer les fichiers temporaires
+task clean
 ```
+
+### Structure recommandée pour les commandes
+
+```yaml
+# command_builder/data/commands/analyse/tdms_import.yaml
+name: "Importer TDMS"
+description: "Importe un fichier TDMS pour analyse"
+command: "tdms_import --input {input_file} --output {output_dir}"
+arguments:
+  - code: "input_file"
+    name: "Fichier source"
+    description: "Sélectionnez le fichier .tdms à importer"
+    type: "file"
+    required: true
+    filters: "*.tdms"  # Filtre d'extension de fichier
+    
+  - code: "output_dir"
+    name: "Dossier de sortie"
+    description: "Dossier où enregistrer les résultats"
+    type: "directory"
+    default: "./output"
+```
+
+### Débogage
+
+- Activer les logs détaillés :
+  ```bash
+  set LOG_LEVEL=DEBUG
+  task dev
+  ```
+- Vérifier le fichier `logs/command_builder.log` en cas d'erreur
