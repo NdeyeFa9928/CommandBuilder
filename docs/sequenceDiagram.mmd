@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant U as Utilisateur
+    participant TC as TaskComponent
+    participant TL as TaskList
+    participant MW as MainWindow
+    participant CF as CommandForm
+    participant CC as CommandComponent
+    participant AC as ArgumentComponent
+    
+    U->>TC: Clic sur tâche
+    TC->>TL: task_clicked(Task)
+    TL->>MW: command_selected(task_name, cmd_name)
+    MW->>MW: Récupère commandes
+    MW->>CF: set_commands(commands)
+    CF->>CC: Crée CommandComponent
+    CC->>AC: Crée ArgumentComponent
+    AC-->>U: Affiche champs
+    U->>AC: Saisit valeur
+    AC->>CC: value_changed(code, value)
+    CC->>CF: Stocke valeur
+    U->>MW: Clic "Exporter"
+    MW->>CF: get_form_values()
+    CF->>CC: get_argument_values()
+    CC->>AC: get_value()
+    AC-->>CC: Retourne valeur
+    CC-->>CF: Retourne dict
+    CF-->>MW: Retourne dict complet
+    MW->>ConsoleOutput: Affiche commande
