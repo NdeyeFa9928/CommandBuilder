@@ -3,6 +3,7 @@ Module contenant la classe CommandForm qui représente le formulaire de commande
 """
 
 from pathlib import Path
+from typing import Callable, Optional
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -11,32 +12,46 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
 
-from command_builder.components.command_component import CommandComponent
-
+from command_builder.models.command import Command
 
 
 class CommandForm(QWidget):
     """
     Classe représentant le composant de formulaire de commande.
     Ce composant permet de configurer les paramètres d'une commande.
+    
+    Cette classe est découplée de CommandComponent grâce à l'injection de dépendances.
     """
 
     # Signal émis lorsque le formulaire est complété
     form_completed = Signal(dict)  # Dictionnaire des valeurs du formulaire
 
-    def __init__(self, parent=None):
+    def __init__(
+        self, 
+        parent=None,
+        command_widget_factory: Optional[Callable[[Command, QWidget, bool], QWidget]] = None
+    ):
         """
         Initialise le composant CommandForm.
 
         Args:
             parent: Le widget parent (par défaut: None)
+            command_widget_factory: Fonction pour créer un widget de commande.
+                                   Signature: (command: Command, parent: QWidget, simple_mode: bool) -> QWidget
+                                   Si None, utilise CommandComponent par défaut.
         """
         super().__init__(parent)
         self.current_command = None
         self.current_commands = []  # Liste des commandes multiples
         self.command_components = []  # Liste des CommandComponent
+        self._command_widget_factory = command_widget_factory or self._default_command_widget_factory
         self._load_ui()
         self._load_stylesheet()
+    
+    def _default_command_widget_factory(self, command: Command, parent: QWidget, simple_mode: bool = False) -> QWidget:
+        """Factory par défaut pour créer un CommandComponent."""
+        from command_builder.components.command_component import CommandComponent
+        return CommandComponent(command, parent, simple_mode)
 
     def _load_ui(self):
         """Charge le fichier UI du composant."""
@@ -102,17 +117,17 @@ class CommandForm(QWidget):
             title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white; margin-bottom: 10px;")
             self.commands_layout.addWidget(title_label)
         
-        # Créer un CommandComponent en mode simple pour chaque commande
+        # Créer un widget de commande pour chaque commande
         for i, command in enumerate(commands, 1):
             # Créer un label pour le numéro
             number_label = QLabel(f"{i}.")
             number_label.setStyleSheet("font-size: 12px; color: #a0a0a0;")
             self.commands_layout.addWidget(number_label)
             
-            # Créer le CommandComponent en mode simple
-            command_component = CommandComponent(command, self, simple_mode=True)
-            self.command_components.append(command_component)
-            self.commands_layout.addWidget(command_component)
+            # Utiliser la factory pour créer le widget de commande en mode simple
+            command_widget = self._command_widget_factory(command, self, simple_mode=True)
+            self.command_components.append(command_widget)
+            self.commands_layout.addWidget(command_widget)
         
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
@@ -142,10 +157,11 @@ class CommandForm(QWidget):
         """
         values = {}
         
-        # Parcourir tous les CommandComponent
-        for command_component in self.command_components:
-            # Récupérer les valeurs des arguments de chaque commande
-            command_values = command_component.get_argument_values()
-            values.update(command_values)
+        # Parcourir tous les widgets de commande
+        for command_widget in self.command_components:
+            # Récupérer les valeurs des arguments si le widget a cette méthode
+            if hasattr(command_widget, 'get_argument_values'):
+                command_values = command_widget.get_argument_values()
+                values.update(command_values)
         
         return values
