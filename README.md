@@ -1,15 +1,15 @@
 # CommandBuilder
 
-Application graphique pour composer et exécuter des commandes CLI complexes via une interface intuitive.
-
 **Fonctionnalités clés :**
 - Interface utilisateur moderne avec thème sombre
 - Définition des commandes via des fichiers YAML
 - Validation des entrées utilisateur
-- Génération de commandes prêtes à l'exécution
+- Générateur de commandes prêtes à l'exécution
 - Support des arguments de différents types (fichier, dossier, nombre, etc.)
+- Architecture modulaire et découplée
+- Composants réutilisables et personnalisables
 
-## Structure
+## Structure du Projet
 
 ```
 command_builder/
@@ -27,6 +27,157 @@ command_builder/
 ├── models/           # Modèles de données
 └── services/         # Logique métier
 ```
+
+## Architecture
+
+### Vue d'ensemble
+
+graph TD
+    A[MainWindow] --> B[TaskList]
+    A --> C[CommandForm]
+    B --> D[TaskComponent]
+    C --> E[CommandComponent]
+    E --> F[ArgumentComponent]
+
+
+graph TB
+    subgraph "Point d'Entrée"
+        Main[main.py]
+        YamlLoader[YamlTaskLoader]
+    end
+    
+    subgraph "Fenêtre Principale"
+        MainWindow[MainWindow]
+    end
+    
+    subgraph "Composants Conteneurs"
+        TaskList[TaskList]
+        CommandForm[CommandForm]
+        ConsoleOutput[ConsoleOutput]
+    end
+    
+    subgraph "Composants Enfants"
+        TaskComponent[TaskComponent]
+        CommandComponent[CommandComponent]
+        ArgumentComponent[ArgumentComponent]
+    end
+    
+    subgraph "Modèles de Données"
+        Task[Task]
+        Command[Command]
+        Argument[Argument]
+    end
+    
+    subgraph "Injection de Dépendances"
+        TaskFactory[task_widget_factory]
+        CommandFactory[command_widget_factory]
+    end
+
+    %% Définition des styles
+    classDef container fill:#4a9eff,stroke:#333,stroke-width:3px,color:#fff
+    classDef factory fill:#90ee90,stroke:#333,stroke-width:2px
+    
+    %% Application des styles
+    class TaskList,CommandForm container
+    class TaskFactory,CommandFactory factory
+    
+    %% Connexions
+    Main -->|1. Charge| YamlLoader
+    YamlLoader -->|2. Retourne 'List of Tasks'| Main
+    Main -->|3. Crée| MainWindow
+    Main -->|4. set_tasks| MainWindow
+    
+    MainWindow -->|5. Contient| TaskList
+    MainWindow -->|6. Contient| CommandForm
+    MainWindow -->|7. Contient| ConsoleOutput
+    
+    TaskList -.->|Injection optionnelle| TaskFactory
+    TaskFactory -.->|Crée| TaskComponent
+    TaskList -->|Par défaut crée| TaskComponent
+    
+    CommandForm -.->|Injection optionnelle| CommandFactory
+    CommandFactory -.->|Crée| CommandComponent
+    CommandForm -->|Par défaut crée| CommandComponent
+    
+    CommandComponent -->|Contient N| ArgumentComponent
+    
+    %% Légende
+    legend[Legende]
+    legend --> container[Conteneur]
+    legend --> factory[Factory]
+
+### Flux d'Exécution
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant TC as TaskComponent
+    participant TL as TaskList
+    participant MW as MainWindow
+    participant CF as CommandForm
+    participant CC as CommandComponent
+    participant AC as ArgumentComponent
+    
+    U->>TC: Clic sur tâche
+    TC->>TL: task_clicked(Task)
+    TL->>MW: command_selected(task_name, cmd_name)
+    MW->>MW: Récupère commandes
+    MW->>CF: set_commands(commands)
+    CF->>CC: Crée CommandComponent
+    CC->>AC: Crée ArgumentComponent
+    AC-->>U: Affiche champs
+    U->>AC: Saisit valeur
+    AC->>CC: value_changed(code, value)
+    CC->>CF: Stocke valeur
+    U->>MW: Clic "Exporter"
+    MW->>CF: get_form_values()
+    CF->>CC: get_argument_values()
+    CC->>AC: get_value()
+    AC-->>CC: Retourne valeur
+    CC-->>CF: Retourne dict
+    CF-->>MW: Retourne dict complet
+    MW->>ConsoleOutput: Affiche commande.
+```
+
+### Responsabilités des Composants
+
+#### **main.py** (Point d'entrée)
+- Initialise l'application Qt
+- Charge les tâches depuis YAML
+- Crée et affiche la fenêtre principale
+
+#### **MainWindow** (Orchestrateur)
+- Contient tous les composants principaux
+- Coordonne la communication entre composants
+- Gère les événements globaux (menus, actions)
+- Connecte les signaux entre TaskList et CommandForm
+
+#### **TaskList** (Conteneur découplé)
+- Affiche une liste de tâches
+- Gère le tri des tâches
+- Crée des widgets enfants via factory
+- Émet des signaux quand une tâche est sélectionnée
+
+####  **CommandForm** (Conteneur découplé)
+- Affiche une liste de commandes
+- Gère l'affichage en mode simple/complet
+- Crée des widgets enfants via factory
+- Collecte les valeurs des arguments
+
+#### **TaskComponent** (Widget enfant)
+- Affiche UNE tâche (bouton cliquable)
+- Émet signal `task_clicked(Task)`
+- Gère son propre style (.ui, .qss)
+
+#### **CommandComponent** (Widget enfant)
+- Affiche UNE commande (simple/complet)
+- Crée des ArgumentComponent
+- Collecte les valeurs des arguments
+
+#### **ArgumentComponent** (Widget enfant)
+- Affiche UN argument (champ de saisie)
+- Gère la validation
+- Bouton parcours pour fichiers/dossiers
 
 ## Installation
 
