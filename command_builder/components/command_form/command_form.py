@@ -8,8 +8,10 @@ from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLabel,
+    QScrollArea,
+    QHBoxLayout,
 )
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.command import Command
@@ -67,21 +69,28 @@ class CommandForm(QWidget):
         layout.addWidget(ui)
         self.setLayout(layout)
 
-        # Stocker les références aux widgets importants
-        self.form_container = ui.findChild(QWidget, "formContainer")
-        if not self.form_container:
-            # Créer un conteneur pour le formulaire
-            self.form_container = QWidget(ui)
-            self.form_container.setObjectName("formContainer")
-            # Ajouter le conteneur au layout principal
-            main_layout = ui.layout()
-            if main_layout:
-                main_layout.addWidget(self.form_container)
+        # Créer un scroll area pour le formulaire
+        self.scroll_area = QScrollArea(ui)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setObjectName("scrollArea")
+        
+        # Créer un conteneur pour le formulaire
+        self.form_container = QWidget()
+        self.form_container.setObjectName("formContainer")
         
         # Créer un layout vertical pour les CommandComponent
         self.commands_layout = QVBoxLayout(self.form_container)
         self.commands_layout.setContentsMargins(10, 10, 10, 10)
-        self.commands_layout.setSpacing(5)
+        self.commands_layout.setSpacing(10)
+        self.commands_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        # Ajouter le conteneur au scroll area
+        self.scroll_area.setWidget(self.form_container)
+        
+        # Ajouter le scroll area au layout principal
+        main_layout = ui.layout()
+        if main_layout:
+            main_layout.addWidget(self.scroll_area)
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -119,15 +128,24 @@ class CommandForm(QWidget):
         
         # Créer un widget de commande pour chaque commande
         for i, command in enumerate(commands, 1):
+            # Créer un layout horizontal pour chaque ligne de commande
+            command_row_layout = QHBoxLayout()
+            command_row_layout.setSpacing(10)
+            
             # Créer un label pour le numéro
             number_label = QLabel(f"{i}.")
-            number_label.setStyleSheet("font-size: 12px; color: #a0a0a0;")
-            self.commands_layout.addWidget(number_label)
+            number_label.setStyleSheet("font-size: 12px; color: #a0a0a0; font-weight: bold;")
+            number_label.setFixedWidth(25)
+            number_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+            command_row_layout.addWidget(number_label)
             
             # Utiliser la factory pour créer le widget de commande en mode simple
             command_widget = self._command_widget_factory(command, self, simple_mode=True)
             self.command_components.append(command_widget)
-            self.commands_layout.addWidget(command_widget)
+            command_row_layout.addWidget(command_widget, 1)  # stretch factor de 1 pour prendre tout l'espace
+            
+            # Ajouter le layout horizontal au layout vertical principal
+            self.commands_layout.addLayout(command_row_layout)
         
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
