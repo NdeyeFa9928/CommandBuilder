@@ -76,7 +76,8 @@ class CommandComponent(QWidget):
             if self.label_command_description:
                 self.label_command_description.setVisible(False)
             if self.label_command_cli:
-                self.label_command_cli.setText(f"{self.command.name}: {self.command.command}")
+                # Initialiser avec la commande de base
+                self._update_command_display()
             
             # Afficher les arguments en mode simple
             if self.arguments_form_layout and self.command.arguments:
@@ -94,7 +95,7 @@ class CommandComponent(QWidget):
                 self.label_command_description.setText(self.command.description)
 
             if self.label_command_cli:
-                self.label_command_cli.setText(f"Commande: {self.command.command}")
+                self._update_command_display()
 
             # Ajouter les arguments
             if self.arguments_form_layout and self.command.arguments:
@@ -110,9 +111,9 @@ class CommandComponent(QWidget):
             argument: L'objet Argument à ajouter
         """
         # Créer le label pour l'argument
-        label = QLabel(f"{argument.name}:")
+        label = QLabel(f"{argument.name} :")
         label.setObjectName(f"label_{argument.code}")
-        label.setWordWrap(False)  # Désactiver le word wrap pour éviter les problèmes
+        label.setWordWrap(False) 
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         
         # Forcer une taille fixe pour éviter les chevauchements
@@ -139,6 +140,9 @@ class CommandComponent(QWidget):
             code: Le code de l'argument
             value: La nouvelle valeur
         """
+        # Mettre à jour l'affichage de la commande
+        self._update_command_display()
+        
         # Émettre le signal avec tous les arguments
         self.arguments_changed.emit(self.get_argument_values())
 
@@ -190,3 +194,48 @@ class CommandComponent(QWidget):
         
         # Vider le dictionnaire des composants
         self.argument_components.clear()
+    
+    def _update_command_display(self):
+        """Met à jour l'affichage de la commande avec les valeurs actuelles des arguments."""
+        if not self.label_command_cli:
+            return
+        
+        # Construire la commande complète
+        full_command = self._build_full_command()
+        
+        # Mettre à jour le label selon le mode
+        if self.simple_mode:
+            self.label_command_cli.setText(full_command)
+        else:
+            self.label_command_cli.setText(f"Commande: {full_command}")
+    
+    def _build_full_command(self) -> str:
+        """
+        Construit la commande complète avec les valeurs des arguments.
+        
+        Returns:
+            La commande complète sous forme de chaîne
+        """
+        # Commencer avec la commande de base
+        full_command = self.command.command
+        
+        # Remplacer chaque placeholder par sa valeur
+        if self.command.arguments:
+            for argument in self.command.arguments:
+                # Récupérer la valeur actuelle de l'argument
+                value = ""
+                if argument.code in self.argument_components:
+                    value = self.argument_components[argument.code].get_value()
+                
+                # Créer le placeholder
+                placeholder = f"{{{argument.code}}}"
+                
+                # Remplacer le placeholder par la valeur ou un texte indicatif
+                if value:
+                    full_command = full_command.replace(placeholder, value)
+                else:
+                    # Afficher un placeholder stylisé si pas de valeur
+                    display_placeholder = argument.name
+                    full_command = full_command.replace(placeholder, f"{{{display_placeholder}}}")
+        
+        return full_command

@@ -119,8 +119,12 @@ class CommandForm(QWidget):
         if not commands or len(commands) == 0:
             return
         
-        # Le titre de la tâche n'est plus affiché ici pour éviter la redondance
-        
+        # titre de la tâche 
+        if task_name:
+            task_label = QLabel(task_name)
+            task_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+            self.commands_layout.addWidget(task_label)
+
         # Créer un widget de commande pour chaque commande
         for i, command in enumerate(commands, 1):
             # Créer un layout horizontal pour chaque ligne de commande

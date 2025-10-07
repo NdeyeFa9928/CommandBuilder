@@ -18,6 +18,38 @@ QMenuBar::item:selected {
     background-color: #2a2f45;
 }
 
+/* Style pour les séparateurs */
+QSplitter::handle {
+    background-color: #2a2f45;
+    width: 1px;
+    height: 1px;
+}
+
+QSplitter::handle:hover {
+    background-color: #3a3f55;
+}
+
+/* Style spécifique pour le séparateur horizontal */
+QSplitter[orientation="1"]::handle {
+    height: 1px;
+    background-color: #2a2f45;
+}
+
+/* Style spécifique pour le séparateur vertical */
+QSplitter[orientation="2"]::handle {
+    width: 1px;
+    background-color: #2a2f45;
+}
+
+/* Style pour la poignée du séparateur */
+QSplitterHandle {
+    background-color: #2a2f45;
+}
+
+QSplitterHandle:hover {
+    background-color: #3a3f55;
+}
+
 /* Style des scrollbars */
 QScrollBar:horizontal {
     border: none;
