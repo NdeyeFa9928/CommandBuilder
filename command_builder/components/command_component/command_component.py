@@ -3,8 +3,8 @@ Module contenant la classe CommandComponent qui représente un composant de comm
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout
-from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout, QHBoxLayout
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.command import Command
@@ -56,6 +56,7 @@ class CommandComponent(QWidget):
         self.label_command_description = ui.findChild(QLabel, "labelCommandDescription")
         self.label_command_cli = ui.findChild(QLabel, "labelCommandCli")
         self.arguments_form_layout = ui.findChild(QFormLayout, "argumentsFormLayout")
+        self.arguments_container = ui.findChild(QWidget, "argumentsContainer")
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -76,8 +77,13 @@ class CommandComponent(QWidget):
                 self.label_command_description.setVisible(False)
             if self.label_command_cli:
                 self.label_command_cli.setText(f"{self.command.name}: {self.command.command}")
-            # Masquer le conteneur d'arguments
-            if self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+            
+            # Afficher les arguments en mode simple
+            if self.arguments_form_layout and self.command.arguments:
+                for argument in self.command.arguments:
+                    self._add_argument(argument)
+            elif self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+                # Pas d'arguments, masquer le conteneur
                 self.arguments_form_layout.parentWidget().setVisible(False)
         else:
             # Mode complet : afficher tout
@@ -95,6 +101,7 @@ class CommandComponent(QWidget):
                 for argument in self.command.arguments:
                     self._add_argument(argument)
 
+
     def _add_argument(self, argument):
         """
         Ajoute un argument au formulaire.
@@ -105,6 +112,13 @@ class CommandComponent(QWidget):
         # Créer le label pour l'argument
         label = QLabel(f"{argument.name}:")
         label.setObjectName(f"label_{argument.code}")
+        label.setWordWrap(False)  # Désactiver le word wrap pour éviter les problèmes
+        label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        
+        # Forcer une taille fixe pour éviter les chevauchements
+        label.setMinimumWidth(150)
+        label.setMaximumWidth(150)
+        label.setSizePolicy(label.sizePolicy().horizontalPolicy(), label.sizePolicy().verticalPolicy())
 
         # Créer le composant d'argument
         arg_component = ArgumentComponent(argument, self)
@@ -164,3 +178,15 @@ class CommandComponent(QWidget):
         """Efface toutes les valeurs des arguments."""
         for component in self.argument_components.values():
             component.set_value("")
+    
+    def remove_all_arguments(self):
+        """Supprime complètement tous les arguments du formulaire."""
+        if self.arguments_form_layout:
+            # Supprimer tous les widgets du QFormLayout
+            while self.arguments_form_layout.count() > 0:
+                item = self.arguments_form_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+        
+        # Vider le dictionnaire des composants
+        self.argument_components.clear()

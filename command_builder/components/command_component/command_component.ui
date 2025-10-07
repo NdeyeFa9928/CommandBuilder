@@ -54,22 +54,31 @@
     <widget class="QWidget" name="argumentsContainer" native="true">
      <layout class="QFormLayout" name="argumentsFormLayout">
       <property name="horizontalSpacing">
-       <number>10</number>
+       <number>20</number>
       </property>
       <property name="verticalSpacing">
-       <number>10</number>
+       <number>15</number>
       </property>
       <property name="leftMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>5</number>
+      </property>
+      <property name="labelAlignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <property name="formAlignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
      </layout>
     </widget>

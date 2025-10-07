@@ -18,6 +18,34 @@ QMenuBar::item:selected {
     background-color: #2a2f45;
 }
 
+/* Style des scrollbars */
+QScrollBar:horizontal {
+    border: none;
+    background: #2a2f45;
+    height: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #4a4f6a;
+    min-width: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+    height: 0px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #5d6385;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: #2a2f45;
+}
+
 QMenu {
     background-color: #1e2130;
     color: #ffffff;
