@@ -79,6 +79,7 @@ def get_app_icon(base_dir):
 
     # Preferred icon files in order of preference
     icon_candidates = [
+        assets_dir / "icone.png",  # Fichier d'icône existant
         assets_dir / "icon.png",
         assets_dir / "icon.ico",
         assets_dir / "app_icon.png",
