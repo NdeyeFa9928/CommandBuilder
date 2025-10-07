@@ -76,8 +76,13 @@ class CommandComponent(QWidget):
                 self.label_command_description.setVisible(False)
             if self.label_command_cli:
                 self.label_command_cli.setText(f"{self.command.name}: {self.command.command}")
-            # Masquer le conteneur d'arguments
-            if self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+            
+            # Afficher les arguments en mode simple
+            if self.arguments_form_layout and self.command.arguments:
+                for argument in self.command.arguments:
+                    self._add_argument(argument)
+            elif self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+                # Pas d'arguments, masquer le conteneur
                 self.arguments_form_layout.parentWidget().setVisible(False)
         else:
             # Mode complet : afficher tout

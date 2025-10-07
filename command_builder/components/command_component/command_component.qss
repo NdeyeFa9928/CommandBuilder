@@ -26,11 +26,18 @@ QLabel#labelCommandCli {
 
 QWidget#argumentsContainer {
     background-color: transparent;
+    padding: 5px 0px;
 }
 
 /* Styles pour les labels d'arguments */
 QLabel[objectName^="label_"] {
     font-size: 12px;
-    color: white;
+    color: #e0e0e0;
     font-weight: normal;
+    padding: 5px 0px;
+}
+
+/* Espacement entre les arguments */
+QFormLayout {
+    spacing: 8px;
 }
