@@ -76,7 +76,7 @@ class CommandComponent(QWidget):
             if self.label_command_description:
                 self.label_command_description.setVisible(False)
             if self.label_command_cli:
-                self.label_command_cli.setText(f"{self.command.name}: {self.command.command}")
+                self.label_command_cli.setText(f"{self.command.name} : {self.command.command}")
             
             # Afficher les arguments en mode simple
             if self.arguments_form_layout and self.command.arguments:
@@ -110,9 +110,9 @@ class CommandComponent(QWidget):
             argument: L'objet Argument à ajouter
         """
         # Créer le label pour l'argument
-        label = QLabel(f"{argument.name}:")
+        label = QLabel(f"{argument.name} :")
         label.setObjectName(f"label_{argument.code}")
-        label.setWordWrap(False)  # Désactiver le word wrap pour éviter les problèmes
+        label.setWordWrap(False) 
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         
         # Forcer une taille fixe pour éviter les chevauchements
