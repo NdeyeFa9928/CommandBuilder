@@ -34,10 +34,23 @@ QLabel[objectName^="label_"] {
     font-size: 12px;
     color: #e0e0e0;
     font-weight: normal;
-    padding: 5px 0px;
+    padding: 5px 8px 5px 0px;
+    min-width: 150px;
+    max-width: 150px;
+    qproperty-alignment: AlignRight;
 }
 
 /* Espacement entre les arguments */
 QFormLayout {
-    spacing: 8px;
+    spacing: 15px;
+}
+
+/* Conteneur d'arguments avec espacement forcé */
+QWidget#argumentsContainer QFormLayout {
+    spacing: 15px;
+}
+
+QWidget#argumentsContainer QFormLayout QLabel {
+    min-width: 150px;
+    max-width: 150px;
 }

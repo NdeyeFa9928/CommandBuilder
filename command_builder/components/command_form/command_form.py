@@ -119,12 +119,7 @@ class CommandForm(QWidget):
         if not commands or len(commands) == 0:
             return
         
-        # Ajouter un label de titre si nécessaire
-        if task_name:
-            title_label = QLabel(task_name)
-            title_label.setObjectName("labelTaskTitle")
-            title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: white; margin-bottom: 10px;")
-            self.commands_layout.addWidget(title_label)
+        # Le titre de la tâche n'est plus affiché ici pour éviter la redondance
         
         # Créer un widget de commande pour chaque commande
         for i, command in enumerate(commands, 1):
@@ -154,17 +149,41 @@ class CommandForm(QWidget):
         """
         Efface tous les CommandComponent du formulaire.
         """
-        # Supprimer tous les widgets du layout
+        # Nettoyer les arguments de chaque CommandComponent avant de les supprimer
+        for command_widget in self.command_components:
+            if hasattr(command_widget, 'remove_all_arguments'):
+                command_widget.remove_all_arguments()
+        
+        # Supprimer tous les widgets et layouts du layout principal
         while self.commands_layout.count() > 0:
             item = self.commands_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
+            elif item.layout():
+                # Nettoyer les layouts imbriqués (comme les QHBoxLayout)
+                self._clear_layout(item.layout())
+                item.layout().deleteLater()
             elif item.spacerItem():
                 # Supprimer le spacer
                 pass
         
         # Vider la liste des composants
         self.command_components.clear()
+    
+    def _clear_layout(self, layout):
+        """
+        Nettoie récursivement un layout et tous ses enfants.
+        
+        Args:
+            layout: Le layout à nettoyer
+        """
+        while layout.count() > 0:
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self._clear_layout(item.layout())
+                item.layout().deleteLater()
     
     def get_form_values(self):
         """
