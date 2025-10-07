@@ -59,8 +59,8 @@ tasks:
     desc: Fix formatting and style issues
     cmds:
       - cmd: pipenv run ruff format .
-      - cmd: pipenv run ruff check --fix .
-      - cmd: pipenv run ruff check --unsafe-fixes --fix .
+      - cmd: pipenv run ruff check --fix . --ignore F401,F841
+      - cmd: pipenv run ruff check --unsafe-fixes --fix . --ignore F401,F841
 
   # Application tasks
   run:

@@ -63,7 +63,9 @@ class ArgumentComponent(QWidget):
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de l'argument."""
         if self.line_edit:
-            self.line_edit.setPlaceholderText(self.argument.description or self.argument.name)
+            self.line_edit.setPlaceholderText(
+                self.argument.description or self.argument.name
+            )
             self.line_edit.textChanged.connect(self._on_value_changed)
 
         # Par défaut, cacher le bouton de parcours (peut être activé selon le type)
