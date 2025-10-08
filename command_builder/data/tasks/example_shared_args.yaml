@@ -1,0 +1,37 @@
+name: "Export complet"
+description: "Exporte les données d'une base SQLite vers plusieurs formats"
+
+# Arguments partagés entre plusieurs commandes
+arguments:
+  # Cet argument sera utilisé par 3 commandes différentes
+  - code: "SHARED_DATABASE"
+    name: "Base de données commune"
+    description: "Fichier SQLite utilisé par toutes les commandes"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+    values:
+      - command: "campaignexport"
+        argument: "DATABASE_FILE"
+      - command: "computeprofile"
+        argument: "DATABASE_FILE"
+      - command: "csvexport"
+        argument: "DATABASE_FILE"
+  
+  # Un autre argument partagé par 2 commandes
+  - code: "OUTPUT_DIR"
+    name: "Répertoire de sortie"
+    description: "Répertoire où seront créés tous les fichiers de sortie"
+    type: "directory"
+    required: 1
+    values:
+      - command: "campaignexport"
+        argument: "TXT_OUTPUT_DIRECTORY"
+      - command: "campaignexport"
+        argument: "IMG_OUTPUT_DIRECTORY"
+
+commands:
+  - !include ../commands/campaignexport_commands.yaml
+  - !include ../commands/computeprofile_commands.yaml
+  - !include ../commands/csvexport_commands.yaml
