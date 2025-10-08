@@ -200,7 +200,8 @@ class MainWindow(QMainWindow):
         """Gère la sélection d'une tâche dans la liste."""
         if task := next((t for t in self.task_list.tasks if t.name == task_name), None):
             if task.commands and self.command_form:
-                self.command_form.set_commands(task.commands, task.name)
+                # Utiliser set_task pour supporter les arguments partagés
+                self.command_form.set_task(task)
 
     def set_tasks(self, tasks):
         """Définit les tâches à afficher dans l'interface."""
