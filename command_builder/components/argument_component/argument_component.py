@@ -3,9 +3,10 @@ Module contenant la classe ArgumentComponent qui représente un composant d'argu
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QPushButton, QFileDialog
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QPushButton, QFileDialog, QLabel
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
+from typing import List, Optional
 
 from command_builder.models.arguments import Argument
 
@@ -19,16 +20,18 @@ class ArgumentComponent(QWidget):
     # Signal émis lorsque la valeur de l'argument change
     value_changed = Signal(str, str)  # (code, value)
 
-    def __init__(self, argument: Argument, parent=None):
+    def __init__(self, argument: Argument, parent=None, affected_commands: Optional[List[str]] = None):
         """
         Initialise le composant ArgumentComponent.
 
         Args:
             argument: L'objet Argument à afficher
             parent: Le widget parent (par défaut: None)
+            affected_commands: Liste des noms de commandes concernées par cet argument (pour les arguments partagés)
         """
         super().__init__(parent)
         self.argument = argument
+        self.affected_commands = affected_commands or []
         self._load_ui()
         self._load_stylesheet()
         self._setup_ui()
@@ -50,6 +53,7 @@ class ArgumentComponent(QWidget):
         # Stocker les références aux widgets importants
         self.line_edit = ui.findChild(QLineEdit, "argumentLineEdit")
         self.browse_button = ui.findChild(QPushButton, "browseButton")
+        self.commands_label = ui.findChild(QLabel, "commandsLabel")
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -63,13 +67,24 @@ class ArgumentComponent(QWidget):
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de l'argument."""
         if self.line_edit:
-            self.line_edit.setPlaceholderText(self.argument.description or self.argument.name)
+            self.line_edit.setPlaceholderText(
+                self.argument.description or self.argument.name
+            )
             self.line_edit.textChanged.connect(self._on_value_changed)
 
         # Par défaut, cacher le bouton de parcours (peut être activé selon le type)
         if self.browse_button:
             self.browse_button.setVisible(False)
             self.browse_button.clicked.connect(self._on_browse_clicked)
+        
+        # Afficher les commandes concernées si disponibles
+        if self.commands_label:
+            if self.affected_commands:
+                commands_text = f"Utilisé par : {', '.join(self.affected_commands)}"
+                self.commands_label.setText(commands_text)
+                self.commands_label.setVisible(True)
+            else:
+                self.commands_label.setVisible(False)
 
     def _on_value_changed(self, text: str):
         """Gère le changement de valeur dans le champ de saisie."""

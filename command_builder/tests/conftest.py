@@ -1,9 +1,9 @@
 """
 Fixtures partagées pour les tests de CommandBuilder.
 """
+
 import json
 import pytest
-from pathlib import Path
 
 
 @pytest.fixture
@@ -19,9 +19,9 @@ def sample_command_json():
                 "name": "Paramètre 1",
                 "description": "Description du paramètre",
                 "type": "string",
-                "required": 1
+                "required": 1,
             }
-        ]
+        ],
     }
 
 
@@ -31,7 +31,7 @@ def sample_task_json(sample_command_json):
     return {
         "name": "Tâche de test",
         "description": "Description de la tâche de test",
-        "commands": [sample_command_json]
+        "commands": [sample_command_json],
     }
 
 
@@ -41,7 +41,7 @@ def sample_pipeline_json(sample_task_json):
     return {
         "name": "Test Pipeline",
         "description": "Pipeline de test",
-        "tasks": [sample_task_json]
+        "tasks": [sample_task_json],
     }
 
 

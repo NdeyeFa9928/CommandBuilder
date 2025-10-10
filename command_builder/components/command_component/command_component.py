@@ -3,7 +3,7 @@ Module contenant la classe CommandComponent qui représente un composant de comm
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
 
@@ -78,12 +78,14 @@ class CommandComponent(QWidget):
             if self.label_command_cli:
                 # Initialiser avec la commande de base
                 self._update_command_display()
-            
+
             # Afficher les arguments en mode simple
             if self.arguments_form_layout and self.command.arguments:
                 for argument in self.command.arguments:
                     self._add_argument(argument)
-            elif self.arguments_form_layout and self.arguments_form_layout.parentWidget():
+            elif (
+                self.arguments_form_layout and self.arguments_form_layout.parentWidget()
+            ):
                 # Pas d'arguments, masquer le conteneur
                 self.arguments_form_layout.parentWidget().setVisible(False)
         else:
@@ -102,7 +104,6 @@ class CommandComponent(QWidget):
                 for argument in self.command.arguments:
                     self._add_argument(argument)
 
-
     def _add_argument(self, argument):
         """
         Ajoute un argument au formulaire.
@@ -113,13 +114,15 @@ class CommandComponent(QWidget):
         # Créer le label pour l'argument
         label = QLabel(f"{argument.name} :")
         label.setObjectName(f"label_{argument.code}")
-        label.setWordWrap(False) 
+        label.setWordWrap(False)
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        
+
         # Forcer une taille fixe pour éviter les chevauchements
         label.setMinimumWidth(150)
         label.setMaximumWidth(150)
-        label.setSizePolicy(label.sizePolicy().horizontalPolicy(), label.sizePolicy().verticalPolicy())
+        label.setSizePolicy(
+            label.sizePolicy().horizontalPolicy(), label.sizePolicy().verticalPolicy()
+        )
 
         # Créer le composant d'argument
         arg_component = ArgumentComponent(argument, self)
@@ -142,7 +145,7 @@ class CommandComponent(QWidget):
         """
         # Mettre à jour l'affichage de la commande
         self._update_command_display()
-        
+
         # Émettre le signal avec tous les arguments
         self.arguments_changed.emit(self.get_argument_values())
 
@@ -182,7 +185,7 @@ class CommandComponent(QWidget):
         """Efface toutes les valeurs des arguments."""
         for component in self.argument_components.values():
             component.set_value("")
-    
+
     def remove_all_arguments(self):
         """Supprime complètement tous les arguments du formulaire."""
         if self.arguments_form_layout:
@@ -191,34 +194,34 @@ class CommandComponent(QWidget):
                 item = self.arguments_form_layout.takeAt(0)
                 if item.widget():
                     item.widget().deleteLater()
-        
+
         # Vider le dictionnaire des composants
         self.argument_components.clear()
-    
+
     def _update_command_display(self):
         """Met à jour l'affichage de la commande avec les valeurs actuelles des arguments."""
         if not self.label_command_cli:
             return
-        
+
         # Construire la commande complète
         full_command = self._build_full_command()
-        
+
         # Mettre à jour le label selon le mode
         if self.simple_mode:
             self.label_command_cli.setText(full_command)
         else:
             self.label_command_cli.setText(f"Commande: {full_command}")
-    
+
     def _build_full_command(self) -> str:
         """
         Construit la commande complète avec les valeurs des arguments.
-        
+
         Returns:
             La commande complète sous forme de chaîne
         """
         # Commencer avec la commande de base
         full_command = self.command.command
-        
+
         # Remplacer chaque placeholder par sa valeur
         if self.command.arguments:
             for argument in self.command.arguments:
@@ -226,16 +229,18 @@ class CommandComponent(QWidget):
                 value = ""
                 if argument.code in self.argument_components:
                     value = self.argument_components[argument.code].get_value()
-                
+
                 # Créer le placeholder
                 placeholder = f"{{{argument.code}}}"
-                
+
                 # Remplacer le placeholder par la valeur ou un texte indicatif
                 if value:
                     full_command = full_command.replace(placeholder, value)
                 else:
                     # Afficher un placeholder stylisé si pas de valeur
                     display_placeholder = argument.name
-                    full_command = full_command.replace(placeholder, f"{{{display_placeholder}}}")
-        
+                    full_command = full_command.replace(
+                        placeholder, f"{{{display_placeholder}}}"
+                    )
+
         return full_command

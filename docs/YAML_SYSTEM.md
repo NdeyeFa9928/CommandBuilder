@@ -73,6 +73,22 @@ Une tâche est un regroupement logique de commandes. Pour créer une nouvelle t�
 ```yaml
 name: "Nom de la tâche"
 description: "Description détaillée de la tâche"
+
+# Arguments partagés (optionnel) - Nouveauté !
+arguments:
+  - code: "SHARED_ARG"
+    name: "Argument partagé"
+    description: "Cet argument sera automatiquement propagé aux commandes"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite"]
+    values:
+      - command: "commande1"
+        argument: "DATABASE_FILE"
+      - command: "commande2"
+        argument: "DB_PATH"
+
 commands:
   # Option 1: Inclure une commande définie dans un fichier séparé
   - !include ../commands/ma_commande.yaml
@@ -86,6 +102,37 @@ commands:
         name: "Premier paramètre"
         description: "Description du paramètre"
 ```
+
+### Arguments partagés
+
+Les arguments partagés permettent de définir une valeur une seule fois au niveau de la tâche et de la propager automatiquement à plusieurs commandes. C'est utile quand plusieurs commandes utilisent le même fichier ou paramètre.
+
+**Structure d'un argument partagé :**
+
+- `code` : Identifiant unique de l'argument au niveau de la tâche
+- `name`, `description`, `type`, `required`, `validation` : Mêmes propriétés qu'un argument de commande
+- `values` : Liste des cibles où propager la valeur
+  - `command` : Nom de la commande cible
+  - `argument` : Code de l'argument dans la commande cible
+
+**Exemple concret :**
+
+```yaml
+arguments:
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    type: "file"
+    required: 1
+    values:
+      - command: "csvexport"
+        argument: "DATABASE_FILE"
+      - command: "computeprofile"
+        argument: "DATABASE_FILE"
+      - command: "campaignexport"
+        argument: "DATABASE_FILE"
+```
+
+L'utilisateur saisit une seule fois le fichier de base de données, et la valeur est automatiquement appliquée aux 3 commandes.
 
 ## Ajouter une nouvelle commande
 

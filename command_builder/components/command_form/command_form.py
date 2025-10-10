@@ -15,13 +15,15 @@ from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.command import Command
+from command_builder.models.task import Task
+from command_builder.models.arguments import TaskArgument
 
 
 class CommandForm(QWidget):
     """
     Classe représentant le composant de formulaire de commande.
     Ce composant permet de configurer les paramètres d'une commande.
-    
+
     Cette classe est découplée de CommandComponent grâce à l'injection de dépendances.
     """
 
@@ -29,9 +31,11 @@ class CommandForm(QWidget):
     form_completed = Signal(dict)  # Dictionnaire des valeurs du formulaire
 
     def __init__(
-        self, 
+        self,
         parent=None,
-        command_widget_factory: Optional[Callable[[Command, QWidget, bool], QWidget]] = None
+        command_widget_factory: Optional[
+            Callable[[Command, QWidget, bool], QWidget]
+        ] = None,
     ):
         """
         Initialise le composant CommandForm.
@@ -45,14 +49,22 @@ class CommandForm(QWidget):
         super().__init__(parent)
         self.current_command = None
         self.current_commands = []  # Liste des commandes multiples
+        self.current_task = None  # Tâche courante
         self.command_components = []  # Liste des CommandComponent
-        self._command_widget_factory = command_widget_factory or self._default_command_widget_factory
+        self.task_argument_components = []  # Liste des ArgumentComponent pour les arguments de tâche
+        self.shared_argument_values = {}  # Valeurs des arguments partagés
+        self._command_widget_factory = (
+            command_widget_factory or self._default_command_widget_factory
+        )
         self._load_ui()
         self._load_stylesheet()
-    
-    def _default_command_widget_factory(self, command: Command, parent: QWidget, simple_mode: bool = False) -> QWidget:
+
+    def _default_command_widget_factory(
+        self, command: Command, parent: QWidget, simple_mode: bool = False
+    ) -> QWidget:
         """Factory par défaut pour créer un CommandComponent."""
         from command_builder.components.command_component import CommandComponent
+
         return CommandComponent(command, parent, simple_mode)
 
     def _load_ui(self):
@@ -73,20 +85,20 @@ class CommandForm(QWidget):
         self.scroll_area = QScrollArea(ui)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setObjectName("scrollArea")
-        
+
         # Créer un conteneur pour le formulaire
         self.form_container = QWidget()
         self.form_container.setObjectName("formContainer")
-        
+
         # Créer un layout vertical pour les CommandComponent
         self.commands_layout = QVBoxLayout(self.form_container)
         self.commands_layout.setContentsMargins(10, 10, 10, 10)
         self.commands_layout.setSpacing(10)
         self.commands_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        
+
         # Ajouter le conteneur au scroll area
         self.scroll_area.setWidget(self.form_container)
-        
+
         # Ajouter le scroll area au layout principal
         main_layout = ui.layout()
         if main_layout:
@@ -101,10 +113,69 @@ class CommandForm(QWidget):
             with open(qss_file, "r") as f:
                 self.setStyleSheet(f.read())
 
+    def set_task(self, task: Task):
+        """
+        Configure le formulaire pour afficher une tâche complète avec ses arguments partagés.
+
+        Args:
+            task: La tâche à afficher
+        """
+        self.current_task = task
+        self.current_commands = task.commands
+        self.current_command = None
+        self.shared_argument_values = {}
+
+        # Effacer le formulaire actuel
+        self._clear_form()
+
+        if not task.commands or len(task.commands) == 0:
+            return
+
+        # Titre de la tâche
+        task_label = QLabel(task.name)
+        task_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        self.commands_layout.addWidget(task_label)
+
+        # Afficher les arguments partagés de la tâche (s'il y en a)
+        if task.arguments and len(task.arguments) > 0:
+            self._add_shared_arguments_section(task.arguments)
+
+        # Afficher les commandes
+        for i, command in enumerate(task.commands, 1):
+            # Créer un layout horizontal pour chaque ligne de commande
+            command_row_layout = QHBoxLayout()
+            command_row_layout.setSpacing(10)
+
+            # Créer un label pour le numéro
+            number_label = QLabel(f"{i}.")
+            number_label.setStyleSheet(
+                "font-size: 12px; color: #a0a0a0; font-weight: bold;"
+            )
+            number_label.setFixedWidth(25)
+            number_label.setAlignment(
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
+            )
+            command_row_layout.addWidget(number_label)
+
+            # Utiliser la factory pour créer le widget de commande en mode simple
+            command_widget = self._command_widget_factory(
+                command, self, simple_mode=True
+            )
+            self.command_components.append(command_widget)
+            command_row_layout.addWidget(
+                command_widget, 1
+            )  # stretch factor de 1 pour prendre tout l'espace
+
+            # Ajouter le layout horizontal au layout vertical principal
+            self.commands_layout.addLayout(command_row_layout)
+
+        # Ajouter un spacer à la fin
+        self.commands_layout.addStretch()
 
     def set_commands(self, commands, task_name=None):
         """
         Configure le formulaire pour afficher plusieurs commandes avec CommandComponent.
+        (Méthode de compatibilité - préférer set_task)
 
         Args:
             commands: Liste des commandes à afficher
@@ -112,14 +183,15 @@ class CommandForm(QWidget):
         """
         self.current_commands = commands
         self.current_command = None
-        
+        self.current_task = None
+
         # Effacer le formulaire actuel
         self._clear_form()
-        
+
         if not commands or len(commands) == 0:
             return
-        
-        # titre de la tâche 
+
+        # titre de la tâche
         if task_name:
             task_label = QLabel(task_name)
             task_label.setStyleSheet("font-size: 14px; font-weight: bold;")
@@ -130,24 +202,125 @@ class CommandForm(QWidget):
             # Créer un layout horizontal pour chaque ligne de commande
             command_row_layout = QHBoxLayout()
             command_row_layout.setSpacing(10)
-            
+
             # Créer un label pour le numéro
             number_label = QLabel(f"{i}.")
-            number_label.setStyleSheet("font-size: 12px; color: #a0a0a0; font-weight: bold;")
+            number_label.setStyleSheet(
+                "font-size: 12px; color: #a0a0a0; font-weight: bold;"
+            )
             number_label.setFixedWidth(25)
-            number_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+            number_label.setAlignment(
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
+            )
             command_row_layout.addWidget(number_label)
-            
+
             # Utiliser la factory pour créer le widget de commande en mode simple
-            command_widget = self._command_widget_factory(command, self, simple_mode=True)
+            command_widget = self._command_widget_factory(
+                command, self, simple_mode=True
+            )
             self.command_components.append(command_widget)
-            command_row_layout.addWidget(command_widget, 1)  # stretch factor de 1 pour prendre tout l'espace
-            
+            command_row_layout.addWidget(
+                command_widget, 1
+            )  # stretch factor de 1 pour prendre tout l'espace
+
             # Ajouter le layout horizontal au layout vertical principal
             self.commands_layout.addLayout(command_row_layout)
-        
+
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
+
+    def _add_shared_arguments_section(self, task_arguments):
+        """
+        Ajoute une section pour les arguments partagés de la tâche.
+
+        Args:
+            task_arguments: Liste des TaskArgument
+        """
+        from command_builder.components.argument_component import ArgumentComponent
+        from command_builder.models.arguments import Argument
+
+        # Titre de la section
+        section_label = QLabel("Arguments partagés")
+        section_label.setStyleSheet(
+            "font-size: 12px; font-weight: bold; color: #4a90e2; margin-top: 10px;"
+        )
+        self.commands_layout.addWidget(section_label)
+
+        # Créer un ArgumentComponent pour chaque argument de tâche
+        for task_arg in task_arguments:
+            # Convertir TaskArgument en Argument pour réutiliser ArgumentComponent
+            arg = Argument(
+                code=task_arg.code,
+                name=task_arg.name,
+                description=task_arg.description,
+                type=task_arg.type,
+                required=task_arg.required,
+                default=task_arg.default,
+                validation=task_arg.validation,
+            )
+
+            # Extraire les noms des commandes concernées
+            affected_commands = [value.command for value in task_arg.values]
+
+            # Créer un layout horizontal pour le label + composant
+            from PySide6.QtWidgets import QHBoxLayout
+            from PySide6.QtCore import Qt
+            
+            arg_layout = QHBoxLayout()
+            arg_layout.setSpacing(10)
+            
+            # Créer le label pour l'argument
+            arg_label = QLabel(f"{task_arg.name} :")
+            arg_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            arg_label.setMinimumWidth(200)
+            arg_label.setMaximumWidth(200)
+            arg_label.setStyleSheet("font-weight: normal;")
+            
+            # Créer le composant avec les commandes concernées
+            arg_component = ArgumentComponent(arg, self, affected_commands=affected_commands)
+            
+            # Activer le bouton de parcours si c'est un fichier ou un répertoire
+            if task_arg.type in ["file", "directory"]:
+                arg_component.enable_browse_button(True)
+            
+            arg_component.value_changed.connect(self._on_shared_argument_changed)
+            self.task_argument_components.append(arg_component)
+            
+            # Ajouter le label et le composant au layout horizontal
+            arg_layout.addWidget(arg_label)
+            arg_layout.addWidget(arg_component, 1)  # stretch factor = 1
+            
+            # Ajouter le layout horizontal au layout principal
+            self.commands_layout.addLayout(arg_layout)
+
+        # Séparateur visuel
+        separator = QLabel("―" * 50)
+        separator.setStyleSheet("color: #e0e0e0; margin: 10px 0;")
+        self.commands_layout.addWidget(separator)
+
+        # Titre pour les commandes
+        commands_label = QLabel("Commandes")
+        commands_label.setStyleSheet(
+            "font-size: 12px; font-weight: bold; color: #4a90e2;"
+        )
+        self.commands_layout.addWidget(commands_label)
+
+    def _on_shared_argument_changed(self, code: str, value: str):
+        """
+        Gère le changement de valeur d'un argument partagé.
+
+        Args:
+            code: Code de l'argument
+            value: Nouvelle valeur
+        """
+        # Stocker la valeur
+        self.shared_argument_values[code] = value
+
+        # Propager la valeur aux commandes concernées
+        if self.current_task:
+            self.current_task.apply_shared_arguments(self.shared_argument_values)
+            # Rafraîchir l'affichage des commandes
+            self._refresh_command_displays()
 
     def _clear_form(self):
         """
@@ -155,9 +328,9 @@ class CommandForm(QWidget):
         """
         # Nettoyer les arguments de chaque CommandComponent avant de les supprimer
         for command_widget in self.command_components:
-            if hasattr(command_widget, 'remove_all_arguments'):
+            if hasattr(command_widget, "remove_all_arguments"):
                 command_widget.remove_all_arguments()
-        
+
         # Supprimer tous les widgets et layouts du layout principal
         while self.commands_layout.count() > 0:
             item = self.commands_layout.takeAt(0)
@@ -170,14 +343,43 @@ class CommandForm(QWidget):
             elif item.spacerItem():
                 # Supprimer le spacer
                 pass
-        
-        # Vider la liste des composants
+
+        # Vider les listes des composants
         self.command_components.clear()
-    
+        self.task_argument_components.clear()
+
+    def _refresh_command_displays(self):
+        """
+        Rafraîchit l'affichage des commandes après modification des arguments partagés.
+        Met à jour en temps réel les valeurs dans les ArgumentComponent des commandes.
+        """
+        if not self.current_task:
+            return
+        
+        # Pour chaque argument partagé modifié
+        for task_arg_code, shared_value in self.shared_argument_values.items():
+            # Trouver l'argument de tâche correspondant
+            task_arg = self.current_task.get_shared_argument_by_code(task_arg_code)
+            if not task_arg:
+                continue
+            
+            # Pour chaque cible (commande + argument)
+            for target in task_arg.values:
+                # Trouver le CommandComponent correspondant
+                for command_widget in self.command_components:
+                    if hasattr(command_widget, 'command') and command_widget.command.name == target.command:
+                        # Trouver l'ArgumentComponent correspondant dans ce CommandComponent
+                        if hasattr(command_widget, 'argument_components'):
+                            arg_component = command_widget.argument_components.get(target.argument)
+                            if arg_component and hasattr(arg_component, 'set_value'):
+                                # Mettre à jour la valeur en temps réel
+                                arg_component.set_value(shared_value)
+                        break
+
     def _clear_layout(self, layout):
         """
         Nettoie récursivement un layout et tous ses enfants.
-        
+
         Args:
             layout: Le layout à nettoyer
         """
@@ -188,7 +390,7 @@ class CommandForm(QWidget):
             elif item.layout():
                 self._clear_layout(item.layout())
                 item.layout().deleteLater()
-    
+
     def get_form_values(self):
         """
         Récupère les valeurs de tous les arguments de toutes les commandes.
@@ -197,12 +399,12 @@ class CommandForm(QWidget):
             Un dictionnaire contenant les valeurs de tous les arguments
         """
         values = {}
-        
+
         # Parcourir tous les widgets de commande
         for command_widget in self.command_components:
             # Récupérer les valeurs des arguments si le widget a cette méthode
-            if hasattr(command_widget, 'get_argument_values'):
+            if hasattr(command_widget, "get_argument_values"):
                 command_values = command_widget.get_argument_values()
                 values.update(command_values)
-        
+
         return values
