@@ -3,7 +3,7 @@ Tests unitaires pour le composant ArgumentComponent.
 """
 
 import pytest
-from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton
+from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton, QLabel
 from unittest.mock import Mock, patch
 
 from command_builder.models.arguments import Argument
@@ -292,3 +292,32 @@ class TestArgumentComponentBrowseDialog:
 
         # Ne devrait pas lever d'exception
         component._on_browse_clicked()
+
+
+class TestArgumentComponentAffectedCommands:
+    """Tests pour l'affichage des commandes concernées."""
+
+    @patch.object(ArgumentComponent, "_load_ui")
+    @patch.object(ArgumentComponent, "_load_stylesheet")
+    @patch.object(ArgumentComponent, "_setup_ui")
+    def test_initialization_with_affected_commands(
+        self, mock_setup, mock_stylesheet, mock_ui, qapp, sample_argument
+    ):
+        """Test que le composant s'initialise correctement avec des commandes concernées."""
+        affected_commands = ["command1", "command2", "command3"]
+        component = ArgumentComponent(sample_argument, affected_commands=affected_commands)
+
+        assert component.affected_commands == affected_commands
+        assert component.argument == sample_argument
+
+    @patch.object(ArgumentComponent, "_load_ui")
+    @patch.object(ArgumentComponent, "_load_stylesheet")
+    @patch.object(ArgumentComponent, "_setup_ui")
+    def test_initialization_without_affected_commands(
+        self, mock_setup, mock_stylesheet, mock_ui, qapp, sample_argument
+    ):
+        """Test que le composant s'initialise correctement sans commandes concernées."""
+        component = ArgumentComponent(sample_argument)
+
+        assert component.affected_commands == []
+        assert component.argument == sample_argument
