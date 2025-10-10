@@ -1,6 +1,5 @@
-name: "Export complet test"
+name: "Export complet test 2"
 description: "Exporte les données d'une base SQLite vers plusieurs formats"
-
 
 arguments:
   # Cet argument sera utilisé par 3 commandes différentes
@@ -18,8 +17,7 @@ arguments:
         argument: "DATABASE_FILE"
       - command: "csvexport"
         argument: "DATABASE_FILE"
-  
-  # Un autre argument partagé par 2 commandes
+
   - code: "OUTPUT_DIR"
     name: "Répertoire de sortie"
     description: "Répertoire où seront créés tous les fichiers de sortie"
@@ -35,3 +33,4 @@ commands:
   - !include ../commands/campaignexport_commands.yaml
   - !include ../commands/computeprofile_commands.yaml
   - !include ../commands/csvexport_commands.yaml
+  - !include ../commands/kmzexport_commands.yaml
