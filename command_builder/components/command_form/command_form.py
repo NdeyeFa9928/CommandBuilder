@@ -259,11 +259,39 @@ class CommandForm(QWidget):
                 validation=task_arg.validation,
             )
 
-            # Créer le composant
-            arg_component = ArgumentComponent(arg, self)
+            # Extraire les noms des commandes concernées
+            affected_commands = [value.command for value in task_arg.values]
+
+            # Créer un layout horizontal pour le label + composant
+            from PySide6.QtWidgets import QHBoxLayout
+            from PySide6.QtCore import Qt
+            
+            arg_layout = QHBoxLayout()
+            arg_layout.setSpacing(10)
+            
+            # Créer le label pour l'argument
+            arg_label = QLabel(f"{task_arg.name} :")
+            arg_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            arg_label.setMinimumWidth(200)
+            arg_label.setMaximumWidth(200)
+            arg_label.setStyleSheet("font-weight: normal;")
+            
+            # Créer le composant avec les commandes concernées
+            arg_component = ArgumentComponent(arg, self, affected_commands=affected_commands)
+            
+            # Activer le bouton de parcours si c'est un fichier ou un répertoire
+            if task_arg.type in ["file", "directory"]:
+                arg_component.enable_browse_button(True)
+            
             arg_component.value_changed.connect(self._on_shared_argument_changed)
             self.task_argument_components.append(arg_component)
-            self.commands_layout.addWidget(arg_component)
+            
+            # Ajouter le label et le composant au layout horizontal
+            arg_layout.addWidget(arg_label)
+            arg_layout.addWidget(arg_component, 1)  # stretch factor = 1
+            
+            # Ajouter le layout horizontal au layout principal
+            self.commands_layout.addLayout(arg_layout)
 
         # Séparateur visuel
         separator = QLabel("―" * 50)
@@ -323,10 +351,30 @@ class CommandForm(QWidget):
     def _refresh_command_displays(self):
         """
         Rafraîchit l'affichage des commandes après modification des arguments partagés.
+        Met à jour en temps réel les valeurs dans les ArgumentComponent des commandes.
         """
-        # Pour l'instant, on ne fait rien car les valeurs sont déjà propagées
-        # Les ArgumentComponent des commandes afficheront automatiquement les nouvelles valeurs par défaut
-        pass
+        if not self.current_task:
+            return
+        
+        # Pour chaque argument partagé modifié
+        for task_arg_code, shared_value in self.shared_argument_values.items():
+            # Trouver l'argument de tâche correspondant
+            task_arg = self.current_task.get_shared_argument_by_code(task_arg_code)
+            if not task_arg:
+                continue
+            
+            # Pour chaque cible (commande + argument)
+            for target in task_arg.values:
+                # Trouver le CommandComponent correspondant
+                for command_widget in self.command_components:
+                    if hasattr(command_widget, 'command') and command_widget.command.name == target.command:
+                        # Trouver l'ArgumentComponent correspondant dans ce CommandComponent
+                        if hasattr(command_widget, 'argument_components'):
+                            arg_component = command_widget.argument_components.get(target.argument)
+                            if arg_component and hasattr(arg_component, 'set_value'):
+                                # Mettre à jour la valeur en temps réel
+                                arg_component.set_value(shared_value)
+                        break
 
     def _clear_layout(self, layout):
         """
