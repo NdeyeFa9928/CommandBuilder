@@ -142,32 +142,33 @@ class CommandForm(QWidget):
 
         # Afficher les commandes
         for i, command in enumerate(task.commands, 1):
-            # Créer un layout horizontal pour chaque ligne de commande
-            command_row_layout = QHBoxLayout()
-            command_row_layout.setSpacing(10)
+            # Créer un layout vertical pour chaque commande (titre + contenu)
+            command_container_layout = QVBoxLayout()
+            command_container_layout.setSpacing(5)
 
-            # Créer un label pour le numéro
-            number_label = QLabel(f"{i}.")
-            number_label.setStyleSheet(
+            # Créer un layout horizontal pour le titre (numéro + nom)
+            title_layout = QHBoxLayout()
+            title_layout.setSpacing(5)
+
+            # Créer un label pour le numéro et le nom
+            title_label = QLabel(f"{i}. {command.name}")
+            title_label.setStyleSheet(
                 "font-size: 12px; color: #a0a0a0; font-weight: bold;"
             )
-            number_label.setFixedWidth(25)
-            number_label.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
-            )
-            command_row_layout.addWidget(number_label)
+            title_layout.addWidget(title_label)
+            title_layout.addStretch()
+
+            command_container_layout.addLayout(title_layout)
 
             # Utiliser la factory pour créer le widget de commande en mode simple
             command_widget = self._command_widget_factory(
                 command, self, simple_mode=True
             )
             self.command_components.append(command_widget)
-            command_row_layout.addWidget(
-                command_widget, 1
-            )  # stretch factor de 1 pour prendre tout l'espace
+            command_container_layout.addWidget(command_widget)
 
-            # Ajouter le layout horizontal au layout vertical principal
-            self.commands_layout.addLayout(command_row_layout)
+            # Ajouter le layout de la commande au layout vertical principal
+            self.commands_layout.addLayout(command_container_layout)
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
@@ -199,32 +200,33 @@ class CommandForm(QWidget):
 
         # Créer un widget de commande pour chaque commande
         for i, command in enumerate(commands, 1):
-            # Créer un layout horizontal pour chaque ligne de commande
-            command_row_layout = QHBoxLayout()
-            command_row_layout.setSpacing(10)
+            # Créer un layout vertical pour chaque commande (titre + contenu)
+            command_container_layout = QVBoxLayout()
+            command_container_layout.setSpacing(5)
 
-            # Créer un label pour le numéro
-            number_label = QLabel(f"{i}.")
-            number_label.setStyleSheet(
+            # Créer un layout horizontal pour le titre (numéro + nom)
+            title_layout = QHBoxLayout()
+            title_layout.setSpacing(5)
+
+            # Créer un label pour le numéro et le nom
+            title_label = QLabel(f"{i}. {command.name}")
+            title_label.setStyleSheet(
                 "font-size: 12px; color: #a0a0a0; font-weight: bold;"
             )
-            number_label.setFixedWidth(25)
-            number_label.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
-            )
-            command_row_layout.addWidget(number_label)
+            title_layout.addWidget(title_label)
+            title_layout.addStretch()
+
+            command_container_layout.addLayout(title_layout)
 
             # Utiliser la factory pour créer le widget de commande en mode simple
             command_widget = self._command_widget_factory(
                 command, self, simple_mode=True
             )
             self.command_components.append(command_widget)
-            command_row_layout.addWidget(
-                command_widget, 1
-            )  # stretch factor de 1 pour prendre tout l'espace
+            command_container_layout.addWidget(command_widget)
 
-            # Ajouter le layout horizontal au layout vertical principal
-            self.commands_layout.addLayout(command_row_layout)
+            # Ajouter le layout de la commande au layout vertical principal
+            self.commands_layout.addLayout(command_container_layout)
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
@@ -280,8 +282,8 @@ class CommandForm(QWidget):
             arg_component = ArgumentComponent(arg, self, affected_commands=affected_commands)
             
             # Activer le bouton de parcours si c'est un fichier ou un répertoire
-            if task_arg.type in ["file", "directory"]:
-                arg_component.enable_browse_button(True)
+            #if task_arg.type in ["file", "directory"]:
+                #arg_component.enable_browse_button(True)
             
             arg_component.value_changed.connect(self._on_shared_argument_changed)
             self.task_argument_components.append(arg_component)
