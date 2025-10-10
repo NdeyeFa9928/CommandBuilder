@@ -70,14 +70,11 @@ class CommandComponent(QWidget):
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de la commande."""
         if self.simple_mode:
-            # Mode simple : afficher uniquement le texte de la commande
+            # Mode simple : masquer le nom et la description (affichés ailleurs)
             if self.label_command_name:
                 self.label_command_name.setVisible(False)
             if self.label_command_description:
                 self.label_command_description.setVisible(False)
-            if self.label_command_cli:
-                # Initialiser avec la commande de base
-                self._update_command_display()
 
             # Afficher les arguments en mode simple
             if self.arguments_form_layout and self.command.arguments:
@@ -88,6 +85,10 @@ class CommandComponent(QWidget):
             ):
                 # Pas d'arguments, masquer le conteneur
                 self.arguments_form_layout.parentWidget().setVisible(False)
+            
+            # Afficher le code de la commande en vert après les arguments
+            if self.label_command_cli:
+                self._update_command_display()
         else:
             # Mode complet : afficher tout
             if self.label_command_name:
@@ -208,7 +209,9 @@ class CommandComponent(QWidget):
 
         # Mettre à jour le label selon le mode
         if self.simple_mode:
-            self.label_command_cli.setText(full_command)
+            # En mode simple, afficher le code en vert avec HTML
+            styled_command = f'<span style="color: #4CAF50;">{full_command}</span>'
+            self.label_command_cli.setText(styled_command)
         else:
             self.label_command_cli.setText(f"Commande: {full_command}")
 
