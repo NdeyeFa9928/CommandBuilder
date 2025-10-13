@@ -90,3 +90,27 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #2a2f45;
 }
+
+/* Style spécifique pour le bouton "Ajouter les commandes" */
+#btnAddCommands {
+    background-color: #3a3f55;
+    color:rgb(255, 255, 255);
+    font-weight: normal;
+    font-size: 12px;
+    border: 1px solid #4a4f65;
+    border-radius: 3px;
+    padding: 6px 12px;
+    margin-top: 15px;
+    margin-right: 5px;
+}
+
+#btnAddCommands:hover {
+    background-color: #4a4f65;
+    color: #ffffff;
+    border: 1px solid #5a5f75;
+}
+
+#btnAddCommands:pressed {
+    background-color: #2a2f45;
+    border: 1px solid #3a3f55;
+}
