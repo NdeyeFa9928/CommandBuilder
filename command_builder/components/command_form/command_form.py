@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QScrollArea,
     QHBoxLayout,
+    QPushButton,
 )
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
@@ -29,6 +30,8 @@ class CommandForm(QWidget):
 
     # Signal émis lorsque le formulaire est complété
     form_completed = Signal(dict)  # Dictionnaire des valeurs du formulaire
+    # Signal émis lorsque les commandes doivent être affichées
+    commands_to_display = Signal(list)  # Liste des commandes construites
 
     def __init__(
         self,
@@ -103,6 +106,12 @@ class CommandForm(QWidget):
         main_layout = ui.layout()
         if main_layout:
             main_layout.addWidget(self.scroll_area)
+        
+        # Créer le bouton dans le conteneur du formulaire
+        self.btn_add_commands = QPushButton("Ajouter les commandes", self.form_container)
+        self.btn_add_commands.setObjectName("btnAddCommands")
+        self.btn_add_commands.clicked.connect(self._on_add_commands_clicked)
+        self.btn_add_commands.hide()  # Masquer par défaut
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -170,6 +179,14 @@ class CommandForm(QWidget):
             # Ajouter le layout de la commande au layout vertical principal
             self.commands_layout.addLayout(command_container_layout)
 
+        # Ajouter un layout horizontal pour le bouton aligné à droite
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        if self.btn_add_commands:
+            self.btn_add_commands.show()  # Afficher le bouton
+            button_layout.addWidget(self.btn_add_commands)
+        self.commands_layout.addLayout(button_layout)
+        
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
 
@@ -228,6 +245,14 @@ class CommandForm(QWidget):
             # Ajouter le layout de la commande au layout vertical principal
             self.commands_layout.addLayout(command_container_layout)
 
+        # Ajouter un layout horizontal pour le bouton aligné à droite
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        if self.btn_add_commands:
+            self.btn_add_commands.show()  # Afficher le bouton
+            button_layout.addWidget(self.btn_add_commands)
+        self.commands_layout.addLayout(button_layout)
+        
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
 
@@ -337,7 +362,10 @@ class CommandForm(QWidget):
         while self.commands_layout.count() > 0:
             item = self.commands_layout.takeAt(0)
             if item.widget():
-                item.widget().deleteLater()
+                # Ne pas supprimer le bouton "Ajouter les commandes"
+                widget = item.widget()
+                if widget != self.btn_add_commands:
+                    widget.deleteLater()
             elif item.layout():
                 # Nettoyer les layouts imbriqués (comme les QHBoxLayout)
                 self._clear_layout(item.layout())
@@ -345,6 +373,10 @@ class CommandForm(QWidget):
             elif item.spacerItem():
                 # Supprimer le spacer
                 pass
+
+        # Masquer le bouton après le nettoyage
+        if self.btn_add_commands:
+            self.btn_add_commands.hide()
 
         # Vider les listes des composants
         self.command_components.clear()
@@ -388,7 +420,10 @@ class CommandForm(QWidget):
         while layout.count() > 0:
             item = layout.takeAt(0)
             if item.widget():
-                item.widget().deleteLater()
+                # Ne pas supprimer le bouton "Ajouter les commandes"
+                widget = item.widget()
+                if widget != self.btn_add_commands:
+                    widget.deleteLater()
             elif item.layout():
                 self._clear_layout(item.layout())
                 item.layout().deleteLater()
@@ -410,3 +445,22 @@ class CommandForm(QWidget):
                 values.update(command_values)
 
         return values
+    
+    def _on_add_commands_clicked(self):
+        """
+        Gère le clic sur le bouton "Ajouter les commandes".
+        Émet un signal avec les commandes construites pour affichage dans la console.
+        """
+        if not self.command_components:
+            return
+        
+        # Construire la liste des commandes avec leurs noms
+        commands_list = []
+        for command_widget in self.command_components:
+            if hasattr(command_widget, "_build_full_command"):
+                full_command = command_widget._build_full_command()
+                command_name = command_widget.command.name if hasattr(command_widget, "command") else "Commande"
+                commands_list.append({"name": command_name, "command": full_command})
+        
+        # Émettre le signal avec les commandes
+        self.commands_to_display.emit(commands_list)
