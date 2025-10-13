@@ -162,7 +162,7 @@ class CommandForm(QWidget):
             # Créer un label pour le numéro et le nom
             title_label = QLabel(f"{i}. {command.name}")
             title_label.setStyleSheet(
-                "font-size: 12px; color: #a0a0a0; font-weight: bold;"
+                "font-size: 12px; color: #ffffff ; font-weight: bold;"
             )
             title_layout.addWidget(title_label)
             title_layout.addStretch()
