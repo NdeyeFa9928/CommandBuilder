@@ -44,13 +44,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="labelCommandCli">
-     <property name="text">
-      <string>Commande: </string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QWidget" name="argumentsContainer" native="true">
      <layout class="QFormLayout" name="argumentsFormLayout">
       <property name="horizontalSpacing">
@@ -81,6 +74,13 @@
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelCommandCli">
+     <property name="text">
+      <string>Commande: </string>
+     </property>
     </widget>
    </item>
    <item>
