@@ -13,7 +13,7 @@
 }
 
 #labelCommand {
-    color: #a0a0a0;
+    color:rgb(255, 255, 255);
     font-style: italic;
     padding-bottom: 10px;
 }
