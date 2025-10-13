@@ -133,7 +133,7 @@ class CommandForm(QWidget):
 
         # Titre de la tâche
         task_label = QLabel(task.name)
-        task_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        task_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         self.commands_layout.addWidget(task_label)
 
         # Afficher les arguments partagés de la tâche (s'il y en a)

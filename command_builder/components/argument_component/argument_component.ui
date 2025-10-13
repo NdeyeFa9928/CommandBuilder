@@ -59,7 +59,7 @@
       <string/>
      </property>
      <property name="styleSheet">
-      <string>font-size: 10px; color: #888; font-style: italic;</string>
+      <string>font-size: 12px; color: #888; font-style: italic;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
