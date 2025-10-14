@@ -30,10 +30,50 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="taskButton">
-     <property name="text">
-      <string>Task Name</string>
-     </property>
+    <widget class="QWidget" name="containerWidget">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="taskButton">
+        <property name="text">
+         <string>Task Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="infoButton">
+        <property name="text">
+         <string>ℹ</string>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
