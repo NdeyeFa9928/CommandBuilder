@@ -1,0 +1,27 @@
+name: "csvexport"
+description: "Exporte une table SQLite en CSV"
+command: "csvexport {DATABASE_FILE} {OUTPUT_FILE} {TABLE_NAME}"
+arguments:
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite source"
+    type: "file"
+    required: 1
+    default: "C:\\data\\default_command.db"
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+  
+  - code: "OUTPUT_FILE"
+    name: "Fichier CSV"
+    description: "Fichier CSV de destination"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".csv"]
+  
+  - code: "TABLE_NAME"
+    name: "Nom de la table"
+    description: "Nom de la table à exporter"
+    type: "string"
+    required: 1
+    default: "measurements"

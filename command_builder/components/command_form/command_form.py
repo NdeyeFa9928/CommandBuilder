@@ -140,6 +140,16 @@ class CommandForm(QWidget):
         if not task.commands or len(task.commands) == 0:
             return
 
+        # Initialiser les valeurs partagées avec les valeurs par défaut des arguments de tâche
+        if task.arguments:
+            for task_arg in task.arguments:
+                if task_arg.default:
+                    self.shared_argument_values[task_arg.code] = task_arg.default
+        
+        # Appliquer les valeurs par défaut aux commandes (priorité tâche > commande)
+        if self.shared_argument_values:
+            task.apply_shared_arguments(self.shared_argument_values)
+
         # Titre de la tâche
         task_label = QLabel(task.name)
         task_label.setStyleSheet("font-size: 16px; font-weight: bold;")
@@ -298,6 +308,7 @@ class CommandForm(QWidget):
             
             # Créer le label pour l'argument
             arg_label = QLabel(f"{task_arg.name} :")
+            arg_label.setObjectName(f"shared_label_{task_arg.code}")
             arg_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             arg_label.setMinimumWidth(200)
             arg_label.setMaximumWidth(200)
@@ -310,8 +321,16 @@ class CommandForm(QWidget):
             #if task_arg.type in ["file", "directory"]:
                 #arg_component.enable_browse_button(True)
             
-            arg_component.value_changed.connect(self._on_shared_argument_changed)
-            self.task_argument_components.append(arg_component)
+            # Connecter le signal avec une closure correcte
+            def make_handler(lbl):
+                return lambda code, value: self._on_shared_argument_changed(code, value, lbl)
+            
+            arg_component.value_changed.connect(make_handler(arg_label))
+            
+            # Appliquer le style initial si valeur par défaut (après connexion du signal)
+            if arg_component.has_default_value():
+                self._apply_default_style(arg_label)
+            self.task_argument_components.append({"component": arg_component, "label": arg_label})
             
             # Ajouter le label et le composant au layout horizontal
             arg_layout.addWidget(arg_label)
@@ -332,14 +351,24 @@ class CommandForm(QWidget):
         )
         self.commands_layout.addWidget(commands_label)
 
-    def _on_shared_argument_changed(self, code: str, value: str):
+    def _on_shared_argument_changed(self, code: str, value: str, label: QLabel):
         """
         Gère le changement de valeur d'un argument partagé.
 
         Args:
             code: Code de l'argument
             value: Nouvelle valeur
+            label: Le label associé à l'argument
         """
+        # Mettre à jour le style du label selon si la valeur est vide ou non
+        for arg_data in self.task_argument_components:
+            if arg_data["component"].get_argument().code == code:
+                if arg_data["component"].has_default_value() and value:
+                    self._apply_default_style(label)
+                else:
+                    self._remove_default_style(label)
+                break
+        
         # Stocker la valeur
         self.shared_argument_values[code] = value
 
@@ -404,10 +433,10 @@ class CommandForm(QWidget):
                     if hasattr(command_widget, 'command') and command_widget.command.name == target.command:
                         # Trouver l'ArgumentComponent correspondant dans ce CommandComponent
                         if hasattr(command_widget, 'argument_components'):
-                            arg_component = command_widget.argument_components.get(target.argument)
-                            if arg_component and hasattr(arg_component, 'set_value'):
-                                # Mettre à jour la valeur en temps réel
-                                arg_component.set_value(shared_value)
+                            arg_data = command_widget.argument_components.get(target.argument)
+                            if arg_data and hasattr(arg_data["component"], 'set_value'):
+                                # Mettre à jour la valeur en temps réel avec le flag is_default
+                                arg_data["component"].set_value(shared_value, is_default=True)
                         break
 
     def _clear_layout(self, layout):
@@ -464,3 +493,25 @@ class CommandForm(QWidget):
         
         # Émettre le signal avec les commandes
         self.commands_to_display.emit(commands_list)
+
+    def _apply_default_style(self, label: QLabel):
+        """
+        Applique le style pour indiquer une valeur par défaut.
+
+        Args:
+            label: Le label à styliser
+        """
+        label.setProperty("hasDefault", True)
+        label.style().unpolish(label)
+        label.style().polish(label)
+
+    def _remove_default_style(self, label: QLabel):
+        """
+        Retire le style de valeur par défaut.
+
+        Args:
+            label: Le label à déstyliser
+        """
+        label.setProperty("hasDefault", False)
+        label.style().unpolish(label)
+        label.style().polish(label)

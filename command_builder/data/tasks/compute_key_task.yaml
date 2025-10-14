@@ -1,4 +1,16 @@
 name: "Calculer clés"
 description: "Recalcule les tables de clés dans la base de données"
+arguments:
+  - code: "DATABASE_FILE"
+    name: "Base de données"
+    description: "Fichier SQLite à traiter"
+    default: "C:\\data\\default_computekey_task.db"
+    type: "file"
+    required: 1
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+    values:
+      - command: "computekey"
+        argument: "DATABASE_FILE"
 commands:
   - !include ../commands/computekey_commands.yaml

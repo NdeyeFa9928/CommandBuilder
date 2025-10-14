@@ -127,23 +127,36 @@ class CommandComponent(QWidget):
 
         # Créer le composant d'argument
         arg_component = ArgumentComponent(argument, self)
-        arg_component.value_changed.connect(self._on_argument_changed)
+        arg_component.value_changed.connect(lambda code, value: self._on_argument_changed(code, value, label))
 
-        # Stocker la référence
-        self.argument_components[argument.code] = arg_component
+        # Stocker la référence avec le label
+        self.argument_components[argument.code] = {"component": arg_component, "label": label}
+
+        # Appliquer le style initial si valeur par défaut
+        if arg_component.has_default_value():
+            self._apply_default_style(label)
 
         # Ajouter au formulaire
         if self.arguments_form_layout:
             self.arguments_form_layout.addRow(label, arg_component)
 
-    def _on_argument_changed(self, code: str, value: str):
+    def _on_argument_changed(self, code: str, value: str, label: QLabel):
         """
         Gère le changement de valeur d'un argument.
 
         Args:
             code: Le code de l'argument
             value: La nouvelle valeur
+            label: Le label associé à l'argument
         """
+        # Mettre à jour le style du label selon si la valeur est vide ou non
+        if code in self.argument_components:
+            arg_data = self.argument_components[code]
+            if arg_data["component"].has_default_value() and value:
+                self._apply_default_style(label)
+            else:
+                self._remove_default_style(label)
+
         # Mettre à jour l'affichage de la commande
         self._update_command_display()
 
@@ -158,20 +171,27 @@ class CommandComponent(QWidget):
             Dictionnaire {code: value}
         """
         return {
-            code: component.get_value()
-            for code, component in self.argument_components.items()
+            code: arg_data["component"].get_value()
+            for code, arg_data in self.argument_components.items()
         }
 
-    def set_argument_value(self, code: str, value: str):
+    def set_argument_value(self, code: str, value: str, is_default: bool = False):
         """
         Définit la valeur d'un argument spécifique.
 
         Args:
             code: Le code de l'argument
             value: La valeur à définir
+            is_default: Indique si la valeur est une valeur par défaut
         """
         if code in self.argument_components:
-            self.argument_components[code].set_value(value)
+            arg_data = self.argument_components[code]
+            arg_data["component"].set_value(value, is_default)
+            # Appliquer le style si c'est une valeur par défaut
+            if is_default and value:
+                self._apply_default_style(arg_data["label"])
+            else:
+                self._remove_default_style(arg_data["label"])
 
     def get_command(self) -> Command:
         """
@@ -184,8 +204,9 @@ class CommandComponent(QWidget):
 
     def clear_arguments(self):
         """Efface toutes les valeurs des arguments."""
-        for component in self.argument_components.values():
-            component.set_value("")
+        for arg_data in self.argument_components.values():
+            arg_data["component"].set_value("")
+            self._remove_default_style(arg_data["label"])
 
     def remove_all_arguments(self):
         """Supprime complètement tous les arguments du formulaire."""
@@ -231,7 +252,7 @@ class CommandComponent(QWidget):
                 # Récupérer la valeur actuelle de l'argument
                 value = ""
                 if argument.code in self.argument_components:
-                    value = self.argument_components[argument.code].get_value()
+                    value = self.argument_components[argument.code]["component"].get_value()
 
                 # Créer le placeholder
                 placeholder = f"{{{argument.code}}}"
@@ -247,3 +268,25 @@ class CommandComponent(QWidget):
                     )
 
         return full_command
+
+    def _apply_default_style(self, label: QLabel):
+        """
+        Applique le style pour indiquer une valeur par défaut.
+
+        Args:
+            label: Le label à styliser
+        """
+        label.setProperty("hasDefault", True)
+        label.style().unpolish(label)
+        label.style().polish(label)
+
+    def _remove_default_style(self, label: QLabel):
+        """
+        Retire le style de valeur par défaut.
+
+        Args:
+            label: Le label à déstyliser
+        """
+        label.setProperty("hasDefault", False)
+        label.style().unpolish(label)
+        label.style().polish(label)

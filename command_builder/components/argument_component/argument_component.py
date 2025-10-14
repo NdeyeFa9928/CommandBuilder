@@ -32,6 +32,7 @@ class ArgumentComponent(QWidget):
         super().__init__(parent)
         self.argument = argument
         self.affected_commands = affected_commands or []
+        self._has_default_value = False
         self._load_ui()
         self._load_stylesheet()
         self._setup_ui()
@@ -70,6 +71,10 @@ class ArgumentComponent(QWidget):
             self.line_edit.setPlaceholderText(
                 self.argument.description or self.argument.name
             )
+            # Initialiser avec la valeur par défaut si elle existe
+            if self.argument.default:
+                self.line_edit.setText(self.argument.default)
+                self._has_default_value = True
             self.line_edit.textChanged.connect(self._on_value_changed)
 
         # Par défaut, cacher le bouton de parcours (peut être activé selon le type)
@@ -105,15 +110,17 @@ class ArgumentComponent(QWidget):
         """
         return self.line_edit.text() if self.line_edit else ""
 
-    def set_value(self, value: str):
+    def set_value(self, value: str, is_default: bool = False):
         """
         Définit la valeur de l'argument.
 
         Args:
             value: La valeur à définir
+            is_default: Indique si la valeur est une valeur par défaut
         """
         if self.line_edit:
             self.line_edit.setText(value)
+            self._has_default_value = is_default
 
     def get_argument(self) -> Argument:
         """
@@ -133,3 +140,12 @@ class ArgumentComponent(QWidget):
         """
         if self.browse_button:
             self.browse_button.setVisible(enabled)
+
+    def has_default_value(self) -> bool:
+        """
+        Indique si l'argument a une valeur par défaut.
+
+        Returns:
+            True si l'argument a une valeur par défaut
+        """
+        return self._has_default_value
