@@ -32,12 +32,18 @@ QWidget#argumentsContainer {
 /* Styles pour les labels d'arguments */
 QLabel[objectName^="label_"] {
     font-size: 12px;
-    color:rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
     font-weight: normal;
     padding: 5px 8px 5px 0px;
     min-width: 150px;
     max-width: 150px;
     qproperty-alignment: AlignRight;
+}
+
+/* Style pour les labels avec valeur par défaut */
+QLabel[objectName^="label_"][hasDefault="true"] {
+    color: rgb(76, 175, 80);
+    font-weight: bold;
 }
 
 /* Espacement entre les arguments */
