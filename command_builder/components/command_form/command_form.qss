@@ -114,3 +114,16 @@ QPushButton:pressed {
     background-color: #2a2f45;
     border: 1px solid #3a3f55;
 }
+
+/* Styles pour les labels d'arguments partagés */
+QLabel[objectName^="shared_label_"] {
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    font-weight: normal;
+}
+
+/* Style pour les labels avec valeur par défaut */
+QLabel[objectName^="shared_label_"][hasDefault="true"] {
+    color: rgb(76, 175, 80);
+    font-weight: bold;
+}
