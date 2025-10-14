@@ -1,0 +1,20 @@
+name: "Test priorité valeurs par défaut"
+description: "Vérifie que la valeur par défaut de tâche écrase celle de commande"
+
+arguments:
+  # Argument partagé avec valeur par défaut au niveau tâche
+  # Cette valeur devrait ÉCRASER la valeur par défaut de la commande
+  - code: "SHARED_DATABASE"
+    name: "Base de données (tâche)"
+    description: "Valeur par défaut au niveau TÂCHE - prioritaire"
+    type: "file"
+    required: 1
+    default: "C:\\data\\TASK_DEFAULT.db"
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+    values:
+      - command: "csvexport"
+        argument: "DATABASE_FILE"
+
+commands:
+  - !include ../commands/csvexport_with_default.yaml

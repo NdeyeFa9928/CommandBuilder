@@ -5,6 +5,7 @@ arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"
     description: "Fichier SQLite à traiter"
+    default: "C:\\data\\default_computekey.db"
     type: "file"
     required: 1
     validation:

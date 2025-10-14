@@ -1,0 +1,33 @@
+name: "Test valeurs par défaut"
+description: "Test de la priorité des valeurs par défaut : tâche > commande"
+
+arguments:
+  # Argument partagé avec valeur par défaut au niveau tâche
+  - code: "SHARED_DATABASE"
+    name: "Base de données"
+    description: "Fichier SQLite utilisé par toutes les commandes"
+    type: "file"
+    required: 1
+    default: "C:\\data\\default_task.db"
+    validation:
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+    values:
+      - command: "csvexport"
+        argument: "DATABASE_FILE"
+      - command: "computeprofile"
+        argument: "DATABASE_FILE"
+  
+  # Argument partagé SANS valeur par défaut
+  - code: "OUTPUT_DIR"
+    name: "Répertoire de sortie"
+    description: "Répertoire où seront créés tous les fichiers"
+    default: "C:\\data\\default_task.db"
+    type: "directory"
+    required: 1
+    values:
+      - command: "csvexport"
+        argument: "OUTPUT_FILE"
+
+commands:
+  - !include ../commands/csvexport_commands.yaml
+  - !include ../commands/computeprofile_commands.yaml
