@@ -13,6 +13,7 @@ class Task(BaseModel):
     def apply_shared_arguments(self, shared_values: Dict[str, str]) -> None:
         """
         Applique les valeurs des arguments partagés aux commandes concernées.
+        Priorité : valeur de tâche > valeur par défaut de commande.
 
         Args:
             shared_values: Dictionnaire {code_argument_tache: valeur}
@@ -22,8 +23,8 @@ class Task(BaseModel):
 
         # Pour chaque argument de tâche
         for task_arg in self.arguments:
-            # Récupère la valeur saisie
-            value = shared_values.get(task_arg.code, "")
+            # Récupère la valeur saisie ou la valeur par défaut de la tâche
+            value = shared_values.get(task_arg.code, task_arg.default or "")
             if not value:
                 continue
 
@@ -35,7 +36,7 @@ class Task(BaseModel):
                         # Trouve l'argument dans la commande
                         for arg in command.arguments:
                             if arg.code == target.argument:
-                                # Applique la valeur par défaut
+                                # Applique la valeur par défaut (priorité tâche > commande)
                                 arg.default = value
                                 break
 
