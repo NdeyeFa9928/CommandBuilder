@@ -2,9 +2,10 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict
 from command_builder.models.command import Command
 from command_builder.models.arguments import TaskArgument
+from command_builder.models.with_interface import WithArguments
 
 
-class Task(BaseModel):
+class Task(BaseModel, WithArguments):
     name: str
     description: str
     arguments: Optional[List[TaskArgument]] = []  # Arguments partagés
@@ -33,18 +34,8 @@ class Task(BaseModel):
                 # Trouve la commande concernée
                 for command in self.commands:
                     if command.name == target.command:
-                        # Trouve l'argument dans la commande
-                        for arg in command.arguments:
-                            if arg.code == target.argument:
-                                # Applique la valeur par défaut (priorité tâche > commande)
-                                arg.default = value
-                                break
-
-    def get_shared_argument_by_code(self, code: str) -> Optional[TaskArgument]:
-        """Récupère un argument partagé par son code."""
-        if not self.arguments:
-            return None
-        for arg in self.arguments:
-            if arg.code == code:
-                return arg
-        return None
+                        # Utilise la méthode héritée de WithArguments
+                        arg = command.get_argument_by_code(target.argument)
+                        if arg:
+                            # Applique la valeur par défaut (priorité tâche > commande)
+                            arg.default = value
