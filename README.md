@@ -5,6 +5,7 @@
 ## Table des matières
 
 - [Description](#description)
+- [Démarrage rapide](#démarrage-rapide)
 - [Prérequis](#prérequis)
 - [Installation](#installation)
 - [Fonctionnalités clés](#fonctionnalités-clés)
@@ -29,6 +30,22 @@
 **CommandBuilder** est une application de bureau développée en Python qui permet de construire et d'exécuter des commandes CLI Windows de manière visuelle et sécurisée. L'application offre une interface graphique moderne pour définir des tâches composées de commandes avec leurs arguments, en éliminant les risques d'erreurs de syntaxe.
 
 Le projet est conçu avec une architecture modulaire et découplée, facilitant la maintenance, l'évolution et les tests. Les commandes sont définies via des fichiers YAML, permettant une extensibilité sans modification du code.
+
+---
+
+## Démarrage rapide
+
+Pour les utilisateurs pressés :
+
+```bash
+# Installation complète
+task setup
+
+# Lancer l'application
+task run
+```
+
+Pour plus de détails, consultez la section [Installation](#installation).
 
 ---
 
