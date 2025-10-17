@@ -421,8 +421,8 @@ class CommandForm(QWidget):
         
         # Pour chaque argument partagé modifié
         for task_arg_code, shared_value in self.shared_argument_values.items():
-            # Trouver l'argument de tâche correspondant
-            task_arg = self.current_task.get_shared_argument_by_code(task_arg_code)
+            # Trouver l'argument de tâche correspondant (méthode héritée de WithArguments)
+            task_arg = self.current_task.get_argument_by_code(task_arg_code)
             if not task_arg:
                 continue
             

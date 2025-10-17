@@ -118,9 +118,9 @@ class TestCommandComponentBuildFullCommand:
         mock_mode_component.get_value.return_value = "fast"
 
         component.argument_components = {
-            "INPUT_FILE": mock_input_component,
-            "OUTPUT_FILE": mock_output_component,
-            "MODE": mock_mode_component,
+            "INPUT_FILE": {"component": mock_input_component, "label": Mock()},
+            "OUTPUT_FILE": {"component": mock_output_component, "label": Mock()},
+            "MODE": {"component": mock_mode_component, "label": Mock()},
         }
 
         result = component._build_full_command()
@@ -147,9 +147,9 @@ class TestCommandComponentBuildFullCommand:
         mock_mode_component.get_value.return_value = "fast"
 
         component.argument_components = {
-            "INPUT_FILE": mock_input_component,
-            "OUTPUT_FILE": mock_output_component,
-            "MODE": mock_mode_component,
+            "INPUT_FILE": {"component": mock_input_component, "label": Mock()},
+            "OUTPUT_FILE": {"component": mock_output_component, "label": Mock()},
+            "MODE": {"component": mock_mode_component, "label": Mock()},
         }
 
         result = component._build_full_command()
@@ -228,11 +228,12 @@ class TestCommandComponentIntegration:
         # Simuler des composants d'arguments
         mock_input_component = Mock()
         mock_input_component.get_value.return_value = "test.txt"
+        mock_label = Mock()
 
-        component.argument_components = {"INPUT_FILE": mock_input_component}
+        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": mock_label}}
 
         # Appeler _on_argument_changed pour simuler un changement
-        component._on_argument_changed("INPUT_FILE", "test.txt")
+        component._on_argument_changed("INPUT_FILE", "test.txt", mock_label)
 
         # Vérifier que setText a été appelé
         assert component.label_command_cli.setText.called
@@ -252,7 +253,7 @@ class TestCommandComponentIntegration:
         mock_input_component.get_value.return_value = "test.txt"
         mock_input_component.set_value = Mock()
 
-        component.argument_components = {"INPUT_FILE": mock_input_component}
+        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": Mock()}}
 
         # Effacer les arguments
         component.clear_arguments()
@@ -277,8 +278,8 @@ class TestCommandComponentIntegration:
         mock_output_component.get_value.return_value = "output.txt"
 
         component.argument_components = {
-            "INPUT_FILE": mock_input_component,
-            "OUTPUT_FILE": mock_output_component,
+            "INPUT_FILE": {"component": mock_input_component, "label": Mock()},
+            "OUTPUT_FILE": {"component": mock_output_component, "label": Mock()},
         }
 
         result = component.get_argument_values()
@@ -298,10 +299,10 @@ class TestCommandComponentIntegration:
         mock_input_component = Mock()
         mock_input_component.set_value = Mock()
 
-        component.argument_components = {"INPUT_FILE": mock_input_component}
+        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": Mock()}}
 
         # Définir une valeur
         component.set_argument_value("INPUT_FILE", "new_value.txt")
 
         # Vérifier que set_value a été appelé
-        mock_input_component.set_value.assert_called_once_with("new_value.txt")
+        mock_input_component.set_value.assert_called_once_with("new_value.txt", False)
