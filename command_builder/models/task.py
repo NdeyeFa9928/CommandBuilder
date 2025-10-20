@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict
 from command_builder.models.command import Command
 from command_builder.models.arguments import TaskArgument
-from command_builder.models.with_interface import WithArguments
+from command_builder.models.with_argument import WithArguments
 
 
 class Task(BaseModel, WithArguments):

@@ -124,7 +124,7 @@ CommandBuilder/
 │   │   ├── arguments.py          # Modèles d'arguments
 │   │   ├── command.py            # Modèle de commande
 │   │   ├── task.py               # Modèle de tâche
-│   │   └── with_interface.py     # Mixin WithArguments
+│   │   └── with_argument.py     # Mixin WithArguments
 │   ├── services/                 # Logique métier
 │   │   └── yaml_task_loader.py   # Chargement des tâches YAML
 │   └── tests/                    # Tests unitaires et d'intégration

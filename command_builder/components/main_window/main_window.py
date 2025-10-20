@@ -196,9 +196,9 @@ class MainWindow(QMainWindow):
             # Connecter le signal de sélection de commande à l'affichage du formulaire
             self.task_list.command_selected.connect(self._on_command_selected)
         
-        if self.command_form:
-            # Connecter le signal d'affichage des commandes à la console
-            self.command_form.commands_to_display.connect(self._on_display_commands)
+        if self.command_form and self.console_output:
+            # Connecter directement le formulaire à la console pour l'exécution
+            self.command_form.commands_to_execute.connect(self.console_output.execute_commands)
 
     def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
@@ -206,31 +206,6 @@ class MainWindow(QMainWindow):
             if task.commands and self.command_form:
                 # Utiliser set_task pour supporter les arguments partagés
                 self.command_form.set_task(task)
-    
-    def _on_display_commands(self, commands_list):
-        """
-        Affiche les commandes dans la console.
-        
-        Args:
-            commands_list: Liste de dictionnaires avec 'name' et 'command'
-        """
-        if not self.console_output:
-            return
-        
-        # Ajouter un séparateur
-        self.console_output.append_text("=" * 80)
-        self.console_output.append_text("COMMANDES CONSTRUITES")
-        self.console_output.append_text("=" * 80)
-        
-        if not commands_list:
-            self.console_output.append_text("Aucune commande à afficher.")
-        else:
-            # Afficher chaque commande
-            for i, cmd_info in enumerate(commands_list, 1):
-                self.console_output.append_text(f"\n{i}. {cmd_info['name']}")
-                self.console_output.append_command(cmd_info['command'])
-        
-        self.console_output.append_text("=" * 80 + "\n")
 
     def set_tasks(self, tasks):
         """Définit les tâches à afficher dans l'interface."""

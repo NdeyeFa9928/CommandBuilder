@@ -11,14 +11,20 @@ from PySide6.QtWidgets import (
     QPushButton,
     QFileDialog,
 )
+from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
+from command_builder.services.command_executor import CommandExecutorService
 
 
 class ConsoleOutput(QWidget):
     """
     Classe représentant le composant de sortie console.
-    Ce composant affiche les résultats des commandes exécutées.
+    Ce composant affiche les résultats des commandes exécutées
+    et gère leur exécution de manière autonome.
     """
+    
+    # Signal émis lorsque toutes les commandes sont terminées
+    all_commands_finished = Signal()
 
     def __init__(self, parent=None):
         """
@@ -28,6 +34,10 @@ class ConsoleOutput(QWidget):
             parent: Le widget parent (par défaut: None)
         """
         super().__init__(parent)
+        self.executor_service = CommandExecutorService()
+        self.commands_queue = []  # File d'attente des commandes à exécuter
+        self.current_command_index = 0  # Index de la commande en cours
+        self.command_start_time = None  # Timestamp de début de commande
         self._load_ui()
         self._load_stylesheet()
         self._connect_signals()
@@ -130,3 +140,101 @@ class ConsoleOutput(QWidget):
                 self.append_text(f"[INFO] Console exportée vers {file_path}")
             except Exception as e:
                 self.append_error(f"Erreur lors de l'exportation: {str(e)}")
+    
+    def execute_commands(self, commands_list):
+        """
+        Exécute toutes les commandes de la liste séquentiellement.
+        
+        Args:
+            commands_list: Liste de dictionnaires avec 'name' et 'command'
+        """
+        if not commands_list:
+            return
+        
+        # Initialiser la file d'attente
+        self.commands_queue = commands_list
+        self.current_command_index = 0
+        
+        # Afficher l'en-tête global avec timestamp de début
+        start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        self.append_text("=" * 80)
+        self.append_text(f"EXÉCUTION DES COMMANDES - Début: {start_time}")
+        self.append_text("=" * 80)
+        self.append_text(f"Nombre de commandes: {len(commands_list)}\n")
+        
+        # Exécuter la première commande
+        self._execute_next_command()
+    
+    def _execute_next_command(self):
+        """
+        Exécute la prochaine commande dans la file d'attente.
+        """
+        if self.current_command_index >= len(self.commands_queue):
+            # Toutes les commandes ont été exécutées
+            self._on_all_commands_finished()
+            return
+        
+        # Récupérer la commande courante
+        cmd_info = self.commands_queue[self.current_command_index]
+        command = cmd_info['command']
+        name = cmd_info['name']
+        
+        # Afficher l'en-tête de la commande avec timestamp
+        start_time = datetime.datetime.now().strftime("%H:%M:%S")
+        
+        self.append_text("-" * 80)
+        self.append_text(f"[{self.current_command_index + 1}/{len(self.commands_queue)}] {name}")
+        self.append_text(f"Heure de début: {start_time}")
+        self.append_command(command)
+        self.append_text("\nSortie:")
+        
+        # Stocker le timestamp de début
+        self.command_start_time = datetime.datetime.now()
+        
+        # Exécuter la commande
+        self.executor_service.execute_command(
+            command,
+            on_output=lambda line: self.append_text(line),
+            on_error=lambda line: self.append_error(line),
+            on_finished=lambda code: self._on_single_command_finished(code)
+        )
+    
+    def _on_single_command_finished(self, return_code: int):
+        """
+        Appelé lorsqu'une commande individuelle est terminée.
+        
+        Args:
+            return_code: Le code de retour de la commande
+        """
+        # Calculer la durée d'exécution
+        end_time = datetime.datetime.now()
+        duration = (end_time - self.command_start_time).total_seconds()
+        end_time_str = end_time.strftime("%H:%M:%S")
+        
+        # Afficher le résultat
+        self.append_text("")
+        self.append_text(f"Heure de fin: {end_time_str}")
+        self.append_text(f"Durée: {duration:.2f}s")
+        
+        if return_code == 0:
+            self.append_text("✓ Succès")
+        else:
+            self.append_error(f"✗ Erreur (code {return_code})")
+        
+        # Passer à la commande suivante
+        self.current_command_index += 1
+        self._execute_next_command()
+    
+    def _on_all_commands_finished(self):
+        """
+        Appelé lorsque toutes les commandes ont été exécutées.
+        """
+        end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        self.append_text("=" * 80)
+        self.append_text(f"TOUTES LES COMMANDES TERMINÉES - Fin: {end_time}")
+        self.append_text("=" * 80 + "\n")
+        
+        # Émettre le signal
+        self.all_commands_finished.emit()
