@@ -1,0 +1,14 @@
+- name: "Afficher configuration réseau"
+  description: "Affiche la configuration IP de toutes les interfaces réseau"
+  command: "ipconfig"
+  arguments: []
+
+- name: "Afficher configuration réseau détaillée"
+  description: "Affiche la configuration IP détaillée de toutes les interfaces réseau"
+  command: "ipconfig /all"
+  arguments: []
+
+- name: "Lister les fichiers du répertoire courant"
+  description: "Liste les fichiers et dossiers du répertoire courant"
+  command: "dir"
+  arguments: []

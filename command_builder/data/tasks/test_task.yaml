@@ -1,8 +1,4 @@
-name: "Test"
-description: "Test"
+name: "Tests simples Windows"
+description: "Commandes de test Windows simples (ipconfig, dir)"
 commands:
-  - !include ../commands/computeprofile_commands.yaml
-  - !include ../commands/pcapimport_commands.yaml
-  - !include ../commands/kmzexport_commands.yaml
-  - !include ../commands/computecurve_commands.yaml
-  - !include ../commands/computekey_commands.yaml
+  - !include ../commands/test_commands.yaml
