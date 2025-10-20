@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from command_builder.models.arguments import Argument
-from command_builder.models.with_interface import WithArguments
+from command_builder.models.with_argument import WithArguments
 
 
 class Command(BaseModel, WithArguments):
