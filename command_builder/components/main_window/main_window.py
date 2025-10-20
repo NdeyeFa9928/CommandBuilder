@@ -16,6 +16,7 @@ from PySide6.QtUiTools import QUiLoader
 from command_builder.components.task_list import TaskList
 from command_builder.components.command_form import CommandForm
 from command_builder.components.console_output import ConsoleOutput
+from command_builder.services.command_executor import CommandExecutorService
 
 
 class MainWindow(QMainWindow):
@@ -32,6 +33,9 @@ class MainWindow(QMainWindow):
             parent: Le widget parent (par défaut: None)
         """
         super().__init__(parent)
+        self.executor_service = CommandExecutorService()
+        self.commands_queue = []  # File d'attente des commandes à exécuter
+        self.current_command_index = 0  # Index de la commande en cours
         self._load_ui()
         self._setup_components()
         self._load_stylesheet()
@@ -197,8 +201,8 @@ class MainWindow(QMainWindow):
             self.task_list.command_selected.connect(self._on_command_selected)
         
         if self.command_form:
-            # Connecter le signal d'affichage des commandes à la console
-            self.command_form.commands_to_display.connect(self._on_display_commands)
+            # Connecter le signal d'exécution des commandes
+            self.command_form.commands_to_execute.connect(self._on_execute_commands)
 
     def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
@@ -207,29 +211,106 @@ class MainWindow(QMainWindow):
                 # Utiliser set_task pour supporter les arguments partagés
                 self.command_form.set_task(task)
     
-    def _on_display_commands(self, commands_list):
+    def _on_execute_commands(self, commands_list):
         """
-        Affiche les commandes dans la console.
+        Exécute toutes les commandes de la liste séquentiellement.
         
         Args:
             commands_list: Liste de dictionnaires avec 'name' et 'command'
         """
+        if not self.console_output or not commands_list:
+            return
+        
+        # Initialiser la file d'attente
+        self.commands_queue = commands_list
+        self.current_command_index = 0
+        
+        # Afficher l'en-tête global avec timestamp de début
+        from datetime import datetime
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        self.console_output.append_text("=" * 80)
+        self.console_output.append_text(f"EXÉCUTION DES COMMANDES - Début: {start_time}")
+        self.console_output.append_text("=" * 80)
+        self.console_output.append_text(f"Nombre de commandes: {len(commands_list)}\n")
+        
+        # Exécuter la première commande
+        self._execute_next_command()
+    
+    def _execute_next_command(self):
+        """
+        Exécute la prochaine commande dans la file d'attente.
+        """
+        if self.current_command_index >= len(self.commands_queue):
+            # Toutes les commandes ont été exécutées
+            self._on_all_commands_finished()
+            return
+        
+        # Récupérer la commande courante
+        cmd_info = self.commands_queue[self.current_command_index]
+        command = cmd_info['command']
+        name = cmd_info['name']
+        
+        # Afficher l'en-tête de la commande avec timestamp
+        from datetime import datetime
+        start_time = datetime.now().strftime("%H:%M:%S")
+        
+        self.console_output.append_text("-" * 80)
+        self.console_output.append_text(f"[{self.current_command_index + 1}/{len(self.commands_queue)}] {name}")
+        self.console_output.append_text(f"Heure de début: {start_time}")
+        self.console_output.append_command(command)
+        self.console_output.append_text("\nSortie:")
+        
+        # Stocker le timestamp de début
+        self.command_start_time = datetime.now()
+        
+        # Exécuter la commande
+        self.executor_service.execute_command(
+            command,
+            on_output=lambda line: self.console_output.append_text(line),
+            on_error=lambda line: self.console_output.append_error(line),
+            on_finished=lambda code: self._on_single_command_finished(code)
+        )
+    
+    def _on_single_command_finished(self, return_code: int):
+        """
+        Appelé lorsqu'une commande individuelle est terminée.
+        
+        Args:
+            return_code: Le code de retour de la commande
+        """
         if not self.console_output:
             return
         
-        # Ajouter un séparateur
-        self.console_output.append_text("=" * 80)
-        self.console_output.append_text("COMMANDES CONSTRUITES")
-        self.console_output.append_text("=" * 80)
+        # Calculer la durée d'exécution
+        from datetime import datetime
+        end_time = datetime.now()
+        duration = (end_time - self.command_start_time).total_seconds()
+        end_time_str = end_time.strftime("%H:%M:%S")
         
-        if not commands_list:
-            self.console_output.append_text("Aucune commande à afficher.")
+        # Afficher le résultat
+        self.console_output.append_text("")
+        self.console_output.append_text(f"Heure de fin: {end_time_str}")
+        self.console_output.append_text(f"Durée: {duration:.2f}s")
+        
+        if return_code == 0:
+            self.console_output.append_text("\u2713 Succès")
         else:
-            # Afficher chaque commande
-            for i, cmd_info in enumerate(commands_list, 1):
-                self.console_output.append_text(f"\n{i}. {cmd_info['name']}")
-                self.console_output.append_command(cmd_info['command'])
+            self.console_output.append_error(f"\u2717 Erreur (code {return_code})")
         
+        # Passer à la commande suivante
+        self.current_command_index += 1
+        self._execute_next_command()
+    
+    def _on_all_commands_finished(self):
+        """
+        Appelé lorsque toutes les commandes ont été exécutées.
+        """
+        from datetime import datetime
+        end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        self.console_output.append_text("=" * 80)
+        self.console_output.append_text(f"TOUTES LES COMMANDES TERMINÉES - Fin: {end_time}")
         self.console_output.append_text("=" * 80 + "\n")
 
     def set_tasks(self, tasks):
