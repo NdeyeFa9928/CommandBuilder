@@ -219,12 +219,28 @@ class ConsoleOutput(QWidget):
         
         if return_code == 0:
             self.append_text("✓ Succès")
+            # Passer à la commande suivante
+            self.current_command_index += 1
+            self._execute_next_command()
         else:
             self.append_error(f"✗ Erreur (code {return_code})")
+            # Arrêter l'exécution en cas d'erreur
+            self._on_execution_stopped_with_error()
+    
+    def _on_execution_stopped_with_error(self):
+        """
+        Appelé lorsque l'exécution s'arrête en raison d'une erreur.
+        """
+        end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Passer à la commande suivante
-        self.current_command_index += 1
-        self._execute_next_command()
+        self.append_text("")
+        self.append_text("=" * 80)
+        self.append_text(f"EXÉCUTION ARRÊTEE - Erreur détectée - Fin: {end_time}")
+        self.append_text(f"Commandes non exécutées: {len(self.commands_queue) - self.current_command_index - 1}")
+        self.append_text("=" * 80 + "\n")
+        
+        # Émettre le signal
+        self.all_commands_finished.emit()
     
     def _on_all_commands_finished(self):
         """
