@@ -22,13 +22,14 @@ def get_yaml_tasks_directory() -> Path:
         base_path = Path(sys._MEIPASS)
     else:
         base_path = Path(__file__).parent.parent  # dossier command_builder au runtime normal
-    # 1. Dossier externe à côté de l'exécutable
-    exe_external = Path(sys.executable).parent / "data" / "tasks"
-    if exe_external.exists():
-        return exe_external.absolute()
+    # 1. Dossier externe (uniquement pour exécutable PyInstaller one-dir)
+    if getattr(sys, "frozen", False):
+        exe_external = Path(sys.executable).parent / "data" / "tasks"
+        if exe_external.exists():
+            return exe_external.absolute()
 
-    # 2. Dossier interne (bundle PyInstaller one-file ou exécution dev)
-    tasks_dir = base_path / "command_builder" / "data" / "tasks"
+    # 2. Dossier interne (repo développement ou _MEIPASS)
+    tasks_dir = (base_path / "data" / "tasks") if not getattr(sys, "frozen", False) else base_path / "command_builder" / "data" / "tasks"
     return tasks_dir.absolute()
 
 
