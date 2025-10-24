@@ -164,7 +164,7 @@ def build_executable(dev_mode=False):
     # Build PyInstaller command
     command = ["pipenv", "run", "pyinstaller"]
 
-    # Basic options
+    # Basic options and PySide6 specifics
     command.extend(
         [
             "--onefile",
