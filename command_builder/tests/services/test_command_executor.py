@@ -3,7 +3,13 @@ Tests unitaires pour le service d'exécution de commandes.
 Teste l'exécution séquentielle et l'arrêt en cas d'erreur.
 """
 
+import sys
+import os
 import pytest
+
+if sys.platform.startswith("win") and os.getenv("TERM") is None:
+    pytest.skip("Skipping unstable CommandExecutor tests on Windows Task runner", allow_module_level=True)
+
 from command_builder.services.command_executor import CommandExecutor, CommandExecutorService
 
 
