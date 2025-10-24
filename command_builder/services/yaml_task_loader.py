@@ -7,9 +7,29 @@ from command_builder.services.yaml_loader import load_yaml_with_includes
 
 
 def get_yaml_tasks_directory() -> Path:
+    """Retourne le chemin absolu vers le dossier contenant les fichiers YAML de tâches.
+
+    Fonctionne aussi bien en mode développement qu'une fois bundlé par PyInstaller
+    (un seul exécutable). Dans ce dernier cas, les fichiers de données sont
+    extraits dans le répertoire temporaire `sys._MEIPASS`.
+    """
     """Retourne le chemin vers le répertoire des tâches YAML."""
-    current_dir = Path(__file__).parent.parent  # Remonte au dossier command_builder
-    tasks_dir = current_dir / "data" / "tasks"
+    # Détecte si l'application est lancée depuis un exécutable PyInstaller
+    import sys
+
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        # Dans ce cas, les fichiers ont été copiés dans _MEIPASS lors du --add-data
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).parent.parent  # dossier command_builder au runtime normal
+    # 1. Dossier externe (uniquement pour exécutable PyInstaller one-dir)
+    if getattr(sys, "frozen", False):
+        exe_external = Path(sys.executable).parent / "data" / "tasks"
+        if exe_external.exists():
+            return exe_external.absolute()
+
+    # 2. Dossier interne (repo développement ou _MEIPASS)
+    tasks_dir = (base_path / "data" / "tasks") if not getattr(sys, "frozen", False) else base_path / "command_builder" / "data" / "tasks"
     return tasks_dir.absolute()
 
 

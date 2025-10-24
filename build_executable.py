@@ -47,6 +47,13 @@ def collect_data_files(base_dir):
         dest_dir = rel_path.parent
         data_files.append((str(rel_path), str(dest_dir)))
 
+    # Add whole tasks directory (allows user to drop new YAML files next to the exe)
+    tasks_dir = base_dir / "command_builder" / "data" / "tasks"
+    if tasks_dir.exists():
+        rel_path = tasks_dir.relative_to(base_dir)
+        # Destination inside the bundle: command_builder/data
+        data_files.append((str(rel_path), "command_builder/data"))
+
     # Add JSON command files
     commands_dir = base_dir / "command_builder" / "data" / "commands"
     if commands_dir.exists():
@@ -164,7 +171,7 @@ def build_executable(dev_mode=False):
     # Build PyInstaller command
     command = ["pipenv", "run", "pyinstaller"]
 
-    # Basic options
+    # Basic options and PySide6 specifics
     command.extend(
         [
             "--onefile",
