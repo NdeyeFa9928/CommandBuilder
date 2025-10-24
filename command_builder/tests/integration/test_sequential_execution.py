@@ -3,6 +3,8 @@ Tests simples et robustes pour les éléments critiques.
 """
 
 import pytest
+import os
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")  # run Qt without GUI
 from unittest.mock import patch
 from PySide6.QtWidgets import QApplication
 from command_builder.components.console_output.console_output import ConsoleOutput
