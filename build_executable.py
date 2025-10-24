@@ -12,6 +12,17 @@ import argparse
 from pathlib import Path
 
 
+from importlib import import_module
+
+
+def get_version() -> str:
+    """Return CommandBuilder package version."""
+    try:
+        return import_module("command_builder").__version__
+    except Exception:
+        return "0.0.0"
+
+
 def get_project_root():
     """Get the project root directory."""
     return Path(__file__).parent.absolute()
@@ -168,14 +179,16 @@ def build_executable(dev_mode=False):
     # Get application icon
     app_icon = get_app_icon(base_dir)
 
-    # Build PyInstaller command
+        # Build PyInstaller command
     command = ["pipenv", "run", "pyinstaller"]
+
+    exe_name = f"CommandBuilder_{get_version()}"
 
     # Basic options and PySide6 specifics
     command.extend(
         [
             "--onefile",
-            "--name=CommandBuilder",
+            f"--name={exe_name}",
             f"--distpath={dist_dir}",
             "--clean",
         ]
