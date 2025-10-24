@@ -478,6 +478,16 @@ task build-dev
 # L'exécutable est créé dans dist/CommandBuilder.exe
 ```
 
+### Gestion du dossier **data/tasks** à l'exécution
+
+| Contexte | Chemin chargé par l'application | Comment ajouter des tâches ? |
+|----------|---------------------------------|------------------------------|
+| **Développement** (`python main.py`, `task run`) | `command_builder/data/tasks/` dans le dépôt | Créez/éditez directement vos fichiers YAML dans ce dossier. |
+| **Exécutable _one-dir_** (`dist/CommandBuilder.exe` + dossier) | `dist/data/tasks/` (s’il existe) sinon ressources embarquées | Déposez des YAML dans `dist/data/tasks/`; ils seront détectés au prochain lancement. |
+| **Exécutable _one-file_** (`dist/CommandBuilder.exe` seul) | Ressources embarquées dans l’EXE | Créez manuellement `dist/data/tasks/` pour surcharger, ou rebuild. |
+
+Cette logique est implémentée dans `command_builder/services/yaml_task_loader.py`.
+
 ### Script de build
 
 Le script `build_executable.py` utilise PyInstaller pour créer un exécutable autonome :
