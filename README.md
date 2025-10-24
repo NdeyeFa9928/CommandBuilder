@@ -475,7 +475,7 @@ task build
 # Build développement (avec console pour debug)
 task build-dev
 
-# L'exécutable est créé dans dist/CommandBuilder.exe
+# L'exécutable est créé dans dist/CommandBuilder_<version>.exe (ex: CommandBuilder_0.1.0.exe)
 ```
 
 ### Gestion du dossier **data/tasks** à l'exécution
