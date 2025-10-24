@@ -47,15 +47,12 @@ def collect_data_files(base_dir):
         dest_dir = rel_path.parent
         data_files.append((str(rel_path), str(dest_dir)))
 
-    # Add YAML task files
+    # Add whole tasks directory (allows user to drop new YAML files next to the exe)
     tasks_dir = base_dir / "command_builder" / "data" / "tasks"
     if tasks_dir.exists():
-        for yaml_file in tasks_dir.rglob("*.yml"):
-            rel_path = yaml_file.relative_to(base_dir)
-            data_files.append((str(rel_path), str(rel_path.parent)))
-        for yaml_file in tasks_dir.rglob("*.yaml"):
-            rel_path = yaml_file.relative_to(base_dir)
-            data_files.append((str(rel_path), str(rel_path.parent)))
+        rel_path = tasks_dir.relative_to(base_dir)
+        # Destination inside the bundle: command_builder/data
+        data_files.append((str(rel_path), "command_builder/data"))
 
     # Add JSON command files
     commands_dir = base_dir / "command_builder" / "data" / "commands"
