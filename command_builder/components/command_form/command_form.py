@@ -86,6 +86,9 @@ class CommandForm(QWidget):
 
         # Créer un scroll area pour le formulaire
         self.scroll_area = QScrollArea(ui)
+        from PySide6.QtWidgets import QSizePolicy
+        self.scroll_area.setMinimumHeight(0)
+        self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setObjectName("scrollArea")
 
