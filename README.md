@@ -99,7 +99,9 @@ python main.py
 - **Architecture modulaire et découplée** avec injection de dépendances
 - **Composants UI réutilisables** (TaskComponent, CommandComponent, ArgumentComponent)
 - **Système de tâches** regroupant plusieurs commandes liées
-- **Gestion des arguments partagés** entre commandes d'une même tâche
+- **Gestion des arguments partagés** entre commandes d'une même tâche  
+- **Infobulles enrichies** sur chaque tâche : description + commandes, affichage instantané au survol ou clic  
+- **Panneaux redimensionnables librement** (formulaire & console) : adapter l’espace de travail à vos besoins
 
 ---
 
