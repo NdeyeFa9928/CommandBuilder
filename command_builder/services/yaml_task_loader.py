@@ -1,9 +1,11 @@
 """Service de chargement des tâches au format YAML avec support d'inclusion."""
 
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from command_builder.models.task import Task
+from command_builder.models.yaml_error import YamlError
 from command_builder.services.yaml_loader import load_yaml_with_includes
+from command_builder.services.yaml_error_handler import YamlErrorHandler
 
 
 def get_yaml_tasks_directory() -> Path:
@@ -121,27 +123,32 @@ def load_yaml_task(file_path: str) -> Task:
         raise
 
 
-def load_yaml_tasks() -> List[Task]:
+def load_yaml_tasks() -> Tuple[List[Task], List[YamlError]]:
     """
-    Charge toutes les tâches YAML disponibles.
+    Charge toutes les tâches YAML disponibles et collecte les erreurs.
+    
+    Les tâches avec erreurs ne sont pas chargées, mais les erreurs sont
+    collectées et retournées pour affichage à l'utilisateur.
 
     Returns:
-        Liste des objets Task
+        Tuple (liste des tâches chargées, liste des erreurs)
     """
     task_files = list_yaml_task_files()
     task_files.sort(key=lambda x: x.name)
 
     if not task_files:
         print("Aucun fichier tâche YAML trouvé")
-        return []
+        return [], []
 
-    tasks = []
-    for file in task_files:
-        try:
-            task = load_yaml_task(str(file))
-            tasks.append(task)
-            print(f"Tâche YAML chargée: {task.name}")
-        except Exception as e:
-            print(f"Erreur lors du chargement de la tâche YAML {file.name}: {str(e)}")
-
-    return tasks
+    # Utiliser le gestionnaire d'erreurs pour charger les tâches
+    error_handler = YamlErrorHandler()
+    tasks, errors = error_handler.load_all_tasks(task_files)
+    
+    # Afficher les résultats
+    print(f"Tâches chargées: {len(tasks)}/{len(task_files)}")
+    if errors:
+        print(f"Erreurs détectées: {len(errors)}")
+        for error in errors:
+            print(f"  - {error.file_name}: {error.error_type}")
+    
+    return tasks, errors
