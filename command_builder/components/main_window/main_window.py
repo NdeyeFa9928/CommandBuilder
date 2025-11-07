@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
 
             # Définir les tailles du splitter droit (70% formulaire, 30% console)
             right_height = self.right_splitter.height()
-            form_height = int(right_height * 0.4)
+            form_height = int(right_height * 0.7)
             console_height = right_height - form_height
             self.right_splitter.setSizes([form_height, console_height])
 
