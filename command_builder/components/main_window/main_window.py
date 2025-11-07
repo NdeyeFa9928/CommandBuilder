@@ -3,6 +3,7 @@ Module contenant la classe MainWindow qui représente la fenêtre principale de 
 """
 
 from pathlib import Path
+from typing import List
 from PySide6.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
@@ -10,12 +11,16 @@ from PySide6.QtWidgets import (
     QWidget,
     QSplitter,
     QSizePolicy,
+    QDialog,
+    QLabel,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtUiTools import QUiLoader
 from command_builder.components.task_list import TaskList
 from command_builder.components.command_form import CommandForm
 from command_builder.components.console_output import ConsoleOutput
+from command_builder.models.yaml_error import YamlError
+from command_builder.components.error_display.error_display import ErrorsPanel
 
 
 class MainWindow(QMainWindow):
@@ -213,3 +218,28 @@ class MainWindow(QMainWindow):
         """Définit les tâches à afficher dans l'interface."""
         if self.task_list:
             self.task_list.set_tasks(tasks)
+    
+    def show_yaml_errors(self, errors: List[YamlError]):
+        """
+        Affiche les erreurs YAML dans une dialog.
+        
+        Args:
+            errors: Liste des erreurs YamlError à afficher
+        """
+        if not errors:
+            return
+        
+        # Créer une dialog pour afficher les erreurs
+        error_dialog = QDialog(self)
+        error_dialog.setWindowTitle(f"⚠️ Erreurs YAML détectées ({len(errors)})")
+        error_dialog.setGeometry(100, 100, 700, 500)
+        
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Ajouter le panel d'erreurs
+        errors_panel = ErrorsPanel(errors)
+        layout.addWidget(errors_panel)
+        
+        error_dialog.setLayout(layout)
+        error_dialog.exec()
