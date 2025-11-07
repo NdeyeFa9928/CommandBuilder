@@ -3,8 +3,8 @@ Module contenant la classe TaskComponent qui représente un composant de tâche 
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QToolTip, QApplication
+from PySide6.QtCore import Signal, Qt, QEvent, QPoint
 from PySide6.QtUiTools import QUiLoader
 
 from command_builder.models.task import Task
@@ -32,6 +32,9 @@ class TaskComponent(QWidget):
         self._load_ui()
         self._load_stylesheet()
         self._setup_ui()
+        # Install event filter for reactive tooltip display
+        if self.info_button:
+            self.info_button.installEventFilter(self)
 
     def _load_ui(self):
         """Charge le fichier UI du composant."""
@@ -76,6 +79,10 @@ class TaskComponent(QWidget):
         
         if self.info_button:
             self.info_button.setCursor(Qt.PointingHandCursor)
+            # Appliquer un style global personnalisé pour les tooltips
+            app = QApplication.instance()
+            if app is not None:
+                app.setStyleSheet("QToolTip { background-color: #2e2e2e; color: #ffffff; border: 1px solid #7aa2f7; padding: 5px; border-radius: 5px; }")
             # Créer un tooltip riche avec la description de la tâche et des commandes
             tooltip = self._build_tooltip()
             self.info_button.setToolTip(tooltip)
@@ -89,6 +96,24 @@ class TaskComponent(QWidget):
                 if button_layout:
                     button_layout.addWidget(self.info_button)
 
+    # --------------------------
+    # Tooltip helpers
+    # --------------------------
+    def _show_tooltip(self):
+        """Show tooltip immediately next to the info button."""
+        if not self.info_button:
+            return
+        # Offset to avoid cursor hiding the first characters
+        global_pos = self.info_button.mapToGlobal(QPoint(self.info_button.width() // 2, self.info_button.height()))
+        QToolTip.showText(global_pos, self.info_button.toolTip(), self.info_button)
+
+    def eventFilter(self, source, event):
+        """React instantly on hover or click events to display tooltip."""
+        if source == self.info_button:
+            if event.type() in (QEvent.Enter, QEvent.MouseButtonPress):
+                self._show_tooltip()
+        return super().eventFilter(source, event)
+
     def _build_tooltip(self) -> str:
         """
         Construit un tooltip HTML formaté avec la description de la tâche et des commandes.
@@ -97,8 +122,9 @@ class TaskComponent(QWidget):
             Le texte HTML du tooltip
         """
         # Commencer avec la description de la tâche
+        # Style tooltip via inline CSS to ensure theme consistency
         tooltip_parts = [
-            "<div style='padding: 5px;'>",
+            "<div style='background-color: #333; color: #dcdcdc; padding: 5px; border-radius: 5px;'>",
             f"<p style='margin: 0 0 10px 0; font-weight: bold; font-size: 13px;'>{self.task.name}</p>",
             f"<p style='margin: 0 0 10px 0; color: #cccccc;'>{self.task.description}</p>",
         ]

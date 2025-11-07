@@ -138,6 +138,12 @@ class MainWindow(QMainWindow):
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(0)
             layout.addWidget(self.command_form)
+            # Réduire la hauteur minimale pour permettre à la console de monter davantage
+            from PySide6.QtWidgets import QSizePolicy
+            self.command_form_container.setMinimumSize(0, 0)
+            self.command_form.setMinimumSize(0, 0)
+            self.command_form_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+            self.command_form.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Créer et configurer le composant ConsoleOutput
         self.console_output = ConsoleOutput()
@@ -164,7 +170,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, "main_splitter") and hasattr(self, "right_splitter"):
             # Calculer les tailles proportionnelles
             total_width = self.width()
-            left_width = int(total_width * 0.25)  # 25% pour la liste des tâches
+            left_width = int(total_width * 0.3)  # 30% pour la liste des tâches
             right_width = total_width - left_width
 
             # Définir les tailles du splitter principal
@@ -176,10 +182,6 @@ class MainWindow(QMainWindow):
             console_height = right_height - form_height
             self.right_splitter.setSizes([form_height, console_height])
 
-    def resizeEvent(self, event):
-        """Surcharge de la méthode de redimensionnement pour ajuster les splitters."""
-        super().resizeEvent(event)
-        self._adjust_splitter_sizes()
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""

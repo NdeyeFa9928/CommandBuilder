@@ -99,7 +99,9 @@ python main.py
 - **Architecture modulaire et découplée** avec injection de dépendances
 - **Composants UI réutilisables** (TaskComponent, CommandComponent, ArgumentComponent)
 - **Système de tâches** regroupant plusieurs commandes liées
-- **Gestion des arguments partagés** entre commandes d'une même tâche
+- **Gestion des arguments partagés** entre commandes d'une même tâche  
+- **Infobulles enrichies** sur chaque tâche : description + commandes, affichage instantané au survol ou clic  
+- **Panneaux redimensionnables librement** (formulaire & console) : adapter l’espace de travail à vos besoins
 
 ---
 
@@ -516,12 +518,37 @@ task clean
 
 ---
 
+## Guide rapide utilisateur
+
+### Utiliser l'application
+
+1. **Lancer** : `python main.py` ou `task run`
+2. **Sélectionner une tâche** : Cliquez sur une tâche dans le panneau gauche
+3. **Configurer les arguments** : Remplissez les champs du formulaire
+4. **Exécuter** : Cliquez sur "Exécuter" pour lancer les commandes
+5. **Exporter** : Cliquez sur "Exporter" pour sauvegarder en `.bat` ou `.txt`
+
+### Types d'arguments
+
+- **Texte** : Saisie libre
+- **Nombre** : Valeur numérique
+- **Fichier/Dossier** : Sélecteur avec bouton "Parcourir"
+- **Booléen** : Case à cocher
+- **Sélection** : Liste déroulante
+
+### Arguments partagés
+
+Les arguments en haut du formulaire s'appliquent à **toutes les commandes** de la tâche. Modifiez-les une fois et ils se propagent automatiquement.
+
+---
+
 ## Documentation complémentaire
 
-- [WITH_ARGUMENTS_INTERFACE.md](docs/WITH_ARGUMENTS_INTERFACE.md) - Documentation détaillée du mixin WithArguments
-- [YAML_SYSTEM.md](docs/YAML_SYSTEM.md) - Système de définition des commandes en YAML
-- [SHARED_ARGUMENTS_IMPROVEMENTS.md](docs/SHARED_ARGUMENTS_IMPROVEMENTS.md) - Gestion des arguments partagés
-- [adr/](docs/adr/) - Architecture Decision Records
+- [WITH_ARGUMENTS_INTERFACE.md](docs/WITH_ARGUMENTS_INTERFACE.md) - Mixin WithArguments
+- [YAML_SYSTEM.md](docs/YAML_SYSTEM.md) - Système YAML et ajouter des commandes
+- [SHARED_ARGUMENTS_IMPROVEMENTS.md](docs/SHARED_ARGUMENTS_IMPROVEMENTS.md) - Arguments partagés
+- [BUILD_AND_DISTRIBUTION.md](docs/BUILD_AND_DISTRIBUTION.md) - Compiler l'application
+- [TESTS.md](TESTS.md) - Suite de tests
 
 ---
 
