@@ -1,0 +1,51 @@
+/* Styles pour le composant ErrorDisplay */
+
+ErrorDisplay {
+    background-color: #fff3e0;
+    border: 1px solid #ffb74d;
+    border-radius: 4px;
+}
+
+ErrorDisplay QLabel#titleLabel {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+ErrorDisplay QLabel#fileLabel {
+    color: #555;
+    margin-top: 4px;
+}
+
+ErrorDisplay QLabel#messageLabel {
+    color: #333;
+    margin-top: 8px;
+}
+
+ErrorDisplay QLabel#suggestionLabel {
+    color: #1976d2;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Styles pour le panel d'erreurs */
+
+ErrorsPanel {
+    background-color: #fafafa;
+}
+
+ErrorsPanel QLabel#titleLabel {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 12pt;
+    padding: 12px;
+}
+
+ErrorsPanel QScrollArea {
+    border: none;
+    background-color: #fafafa;
+}
+
+ErrorsPanel QScrollArea QWidget {
+    background-color: #fafafa;
+}
