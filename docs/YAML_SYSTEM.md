@@ -604,33 +604,123 @@ commands:
 
 ---
 
+## Gestion des erreurs YAML
+
+CommandBuilder inclut un système robuste de gestion des erreurs YAML. Lorsqu'une tâche YAML contient une erreur, elle n'est pas chargée, mais l'erreur est affichée à l'utilisateur.
+
+### Types d'erreurs détectées
+
+| Erreur | Cause | Solution |
+|--------|-------|----------|
+| **SyntaxError** | YAML invalide (indentation, syntaxe) | Vérifiez l'indentation et la syntaxe YAML |
+| **ValidationError** | Champ manquant ou invalide | Vérifiez que tous les champs requis sont présents |
+| **FileNotFoundError** | Fichier inclus introuvable | Vérifiez le chemin de l'inclusion `!include` |
+| **TypeError** | Type de données incorrect | Vérifiez que les types correspondent (string, list, etc.) |
+
+### Affichage des erreurs
+
+Quand l'application démarre, une dialog s'affiche si des erreurs sont détectées :
+
+```bash
+┌─────────────────────────────────────────┐
+│ ⚠️ Erreurs YAML détectées (2)           │
+├─────────────────────────────────────────┤
+│ ❌ SyntaxError - error_example.yaml     │
+│    Erreur de syntaxe YAML: ...          │
+│    💡 Vérifiez l'indentation...         │
+│                                         │
+│ ❌ ValidationError - invalid_task.yaml  │
+│    Erreur de validation: ...            │
+│    💡 Vérifiez que tous les champs...   │
+└─────────────────────────────────────────┘
+```
+
+### Exemple : Fichier avec erreurs
+
+**Fichier** : `data/tasks/error_example.yaml`
+
+```yaml
+# ❌ ERREUR 1 : Argument partagé avec commande inexistante
+name: "❌ Exemple d'erreur"
+description: "Cette tâche contient des erreurs intentionnelles"
+
+arguments:
+  - code: "DATABASE"
+    name: "Base de données"
+    type: "file"
+    required: true
+    values:
+      - command: "commande_inexistante"  # ❌ Cette commande n'existe pas
+        argument: "DB_FILE"
+
+# ❌ ERREUR 2 : Argument avec champ manquant
+commands:
+  - name: "commande_incomplete"
+    description: "Commande avec argument manquant"
+    command: "echo {MESSAGE}"
+    arguments:
+      - code: "MESSAGE"
+        name: "Message"
+        # ❌ Le champ 'type' est manquant (requis)
+        required: true
+```
+
+**Résultat** : Cette tâche ne sera pas chargée, et les erreurs s'afficheront dans la dialog au démarrage.
+
+### Bonnes pratiques pour éviter les erreurs
+
+1. **Validez votre YAML** avant de le charger
+   - Utilisez un validateur YAML en ligne
+   - Vérifiez l'indentation (2 espaces)
+
+2. **Vérifiez les chemins d'inclusion**
+   ```yaml
+   commands:
+     - !include ../commands/ma_commande.yaml  # ✅ Chemin relatif correct
+   ```
+
+3. **Assurez-vous que tous les champs requis sont présents**
+   - `name` : Obligatoire
+   - `description` : Obligatoire
+   - `command` : Obligatoire pour les commandes
+   - `type` : Obligatoire pour les arguments
+
+4. **Testez les inclusions**
+   - Vérifiez que le fichier inclus existe
+   - Vérifiez que le chemin est relatif au fichier courant
+
+---
+
 ## Dépannage
 
 ### La commande n'apparaît pas
 
-- Vérifiez que le fichier est dans `data/commands/`
-- Vérifiez que le YAML est valide (pas d'erreur de syntaxe)
-- Vérifiez que la tâche inclut bien la commande
-- Redémarrez l'application
+- ✅ Vérifiez que le fichier est dans `data/commands/`
+- ✅ Vérifiez que le YAML est valide (pas d'erreur de syntaxe)
+- ✅ Vérifiez que la tâche inclut bien la commande
+- ✅ Redémarrez l'application
+- ✅ Vérifiez la dialog d'erreurs au démarrage
 
 ### L'argument partagé ne se propage pas
 
-- Vérifiez que le nom de la commande est correct
-- Vérifiez que le code de l'argument est correct
-- Vérifiez que l'argument existe dans la commande
-- Vérifiez la structure de `values`
+- ✅ Vérifiez que le nom de la commande est correct
+- ✅ Vérifiez que le code de l'argument est correct
+- ✅ Vérifiez que l'argument existe dans la commande
+- ✅ Vérifiez la structure de `values`
 
 ### Erreur de chemin d'inclusion
 
-- Vérifiez que le chemin est relatif au fichier courant
-- Vérifiez que le fichier inclus existe
-- Vérifiez la syntaxe `!include ../chemin/fichier.yaml`
+- ✅ Vérifiez que le chemin est relatif au fichier courant
+- ✅ Vérifiez que le fichier inclus existe
+- ✅ Vérifiez la syntaxe `!include ../chemin/fichier.yaml`
+- ✅ Vérifiez la dialog d'erreurs pour le message exact
 
 ### Validation échoue
 
-- Vérifiez les extensions de fichier autorisées
-- Vérifiez les valeurs min/max pour les nombres
-- Vérifiez que la valeur correspond au type attendu
+- ✅ Vérifiez les extensions de fichier autorisées
+- ✅ Vérifiez les valeurs min/max pour les nombres
+- ✅ Vérifiez que la valeur correspond au type attendu
+- ✅ Consultez la dialog d'erreurs pour les détails
 
 ---
 

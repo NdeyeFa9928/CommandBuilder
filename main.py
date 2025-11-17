@@ -30,8 +30,13 @@ def setup_application():
 
 if __name__ == "__main__":
     app = setup_application()
-    tasks = load_yaml_tasks()
+    tasks, errors = load_yaml_tasks()
     main_window = MainWindow()
     main_window.set_tasks(tasks)
+    
+    # Afficher les erreurs s'il y en a
+    if errors:
+        main_window.show_yaml_errors(errors)
+    
     main_window.show()
     sys.exit(app.exec())
