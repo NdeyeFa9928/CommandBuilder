@@ -179,7 +179,7 @@ def build_executable(dev_mode=False):
     # Get application icon
     app_icon = get_app_icon(base_dir)
 
-        # Build PyInstaller command
+    # Build PyInstaller command
     command = ["pipenv", "run", "pyinstaller"]
 
     exe_name = f"CommandBuilder_{get_version()}"

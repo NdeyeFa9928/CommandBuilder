@@ -18,13 +18,13 @@ def setup_application():
     """Configure l'application Qt."""
     app = QApplication(sys.argv)
     app.setApplicationName("CommandBuilder")
-    
+
     # Définir l'icône de l'application
     icon_path = get_icon_path()
     if os.path.exists(icon_path):
         app_icon = QIcon(icon_path)
         app.setWindowIcon(app_icon)
-    
+
     return app
 
 
@@ -33,10 +33,10 @@ if __name__ == "__main__":
     tasks, errors = load_yaml_tasks()
     main_window = MainWindow()
     main_window.set_tasks(tasks)
-    
+
     # Afficher les erreurs s'il y en a
     if errors:
         main_window.show_yaml_errors(errors)
-    
+
     main_window.show()
     sys.exit(app.exec())

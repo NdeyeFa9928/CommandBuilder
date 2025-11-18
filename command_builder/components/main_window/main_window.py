@@ -145,9 +145,12 @@ class MainWindow(QMainWindow):
             layout.addWidget(self.command_form)
             # Réduire la hauteur minimale pour permettre à la console de monter davantage
             from PySide6.QtWidgets import QSizePolicy
+
             self.command_form_container.setMinimumSize(0, 0)
             self.command_form.setMinimumSize(0, 0)
-            self.command_form_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+            self.command_form_container.setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Minimum
+            )
             self.command_form.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Créer et configurer le composant ConsoleOutput
@@ -187,7 +190,6 @@ class MainWindow(QMainWindow):
             console_height = right_height - form_height
             self.right_splitter.setSizes([form_height, console_height])
 
-
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
         current_dir = Path(__file__).parent
@@ -202,10 +204,12 @@ class MainWindow(QMainWindow):
         if self.task_list:
             # Connecter le signal de sélection de commande à l'affichage du formulaire
             self.task_list.command_selected.connect(self._on_command_selected)
-        
+
         if self.command_form and self.console_output:
             # Connecter directement le formulaire à la console pour l'exécution
-            self.command_form.commands_to_execute.connect(self.console_output.execute_commands)
+            self.command_form.commands_to_execute.connect(
+                self.console_output.execute_commands
+            )
 
     def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
@@ -218,28 +222,28 @@ class MainWindow(QMainWindow):
         """Définit les tâches à afficher dans l'interface."""
         if self.task_list:
             self.task_list.set_tasks(tasks)
-    
+
     def show_yaml_errors(self, errors: List[YamlError]):
         """
         Affiche les erreurs YAML dans une dialog.
-        
+
         Args:
             errors: Liste des erreurs YamlError à afficher
         """
         if not errors:
             return
-        
+
         # Créer une dialog pour afficher les erreurs
         error_dialog = QDialog(self)
         error_dialog.setWindowTitle(f"⚠️ Erreurs YAML détectées ({len(errors)})")
         error_dialog.setGeometry(100, 100, 700, 500)
-        
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        
+
         # Ajouter le panel d'erreurs
         errors_panel = ErrorsPanel(errors)
         layout.addWidget(errors_panel)
-        
+
         error_dialog.setLayout(layout)
         error_dialog.exec()

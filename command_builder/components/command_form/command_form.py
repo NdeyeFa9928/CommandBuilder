@@ -88,6 +88,7 @@ class CommandForm(QWidget):
         # Créer un scroll area pour le formulaire
         self.scroll_area = QScrollArea(ui)
         from PySide6.QtWidgets import QSizePolicy
+
         self.scroll_area.setMinimumHeight(0)
         self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.scroll_area.setWidgetResizable(True)
@@ -110,7 +111,7 @@ class CommandForm(QWidget):
         main_layout = ui.layout()
         if main_layout:
             main_layout.addWidget(self.scroll_area)
-        
+
         # Créer le bouton Exécuter dans le conteneur du formulaire
         self.btn_execute = QPushButton("Exécuter", self.form_container)
         self.btn_execute.setObjectName("btnExecute")
@@ -149,7 +150,7 @@ class CommandForm(QWidget):
             for task_arg in task.arguments:
                 if task_arg.default:
                     self.shared_argument_values[task_arg.code] = task_arg.default
-        
+
         # Appliquer les valeurs par défaut aux commandes (priorité tâche > commande)
         if self.shared_argument_values:
             task.apply_shared_arguments(self.shared_argument_values)
@@ -200,7 +201,7 @@ class CommandForm(QWidget):
             self.btn_execute.show()  # Afficher le bouton
             button_layout.addWidget(self.btn_execute)
         self.commands_layout.addLayout(button_layout)
-        
+
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
 
@@ -266,7 +267,7 @@ class CommandForm(QWidget):
             self.btn_execute.show()  # Afficher le bouton
             button_layout.addWidget(self.btn_execute)
         self.commands_layout.addLayout(button_layout)
-        
+
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
 
@@ -306,40 +307,48 @@ class CommandForm(QWidget):
             # Créer un layout horizontal pour le label + composant
             from PySide6.QtWidgets import QHBoxLayout
             from PySide6.QtCore import Qt
-            
+
             arg_layout = QHBoxLayout()
             arg_layout.setSpacing(10)
-            
+
             # Créer le label pour l'argument
             arg_label = QLabel(f"{task_arg.name} :")
             arg_label.setObjectName(f"shared_label_{task_arg.code}")
-            arg_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            arg_label.setAlignment(
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            )
             arg_label.setMinimumWidth(200)
             arg_label.setMaximumWidth(200)
             arg_label.setStyleSheet("font-weight: normal;")
-            
+
             # Créer le composant avec les commandes concernées
-            arg_component = ArgumentComponent(arg, self, affected_commands=affected_commands)
-            
+            arg_component = ArgumentComponent(
+                arg, self, affected_commands=affected_commands
+            )
+
             # Activer le bouton de parcours si c'est un fichier ou un répertoire
-            #if task_arg.type in ["file", "directory"]:
-                #arg_component.enable_browse_button(True)
-            
+            # if task_arg.type in ["file", "directory"]:
+            # arg_component.enable_browse_button(True)
+
             # Connecter le signal avec une closure correcte
             def make_handler(lbl):
-                return lambda code, value: self._on_shared_argument_changed(code, value, lbl)
-            
+                return lambda code, value: self._on_shared_argument_changed(
+                    code, value, lbl
+                )
+
             arg_component.value_changed.connect(make_handler(arg_label))
-            
+
             # Appliquer le style initial si valeur par défaut (après connexion du signal)
             if arg_component.has_default_value():
                 self._apply_default_style(arg_label)
-            self.task_argument_components.append({"component": arg_component, "label": arg_label})
-            
+            self.task_argument_components.append(
+                {"component": arg_component, "label": arg_label}
+            )
+
             # Ajouter le label et le composant au layout horizontal
             arg_layout.addWidget(arg_label)
             arg_layout.addWidget(arg_component, 1)  # stretch factor = 1
-            
+
             # Ajouter le layout horizontal au layout principal
             self.commands_layout.addLayout(arg_layout)
 
@@ -372,7 +381,7 @@ class CommandForm(QWidget):
                 else:
                     self._remove_default_style(label)
                 break
-        
+
         # Stocker la valeur
         self.shared_argument_values[code] = value
 
@@ -422,25 +431,32 @@ class CommandForm(QWidget):
         """
         if not self.current_task:
             return
-        
+
         # Pour chaque argument partagé modifié
         for task_arg_code, shared_value in self.shared_argument_values.items():
             # Trouver l'argument de tâche correspondant (méthode héritée de WithArguments)
             task_arg = self.current_task.get_argument_by_code(task_arg_code)
             if not task_arg:
                 continue
-            
+
             # Pour chaque cible (commande + argument)
             for target in task_arg.values:
                 # Trouver le CommandComponent correspondant
                 for command_widget in self.command_components:
-                    if hasattr(command_widget, 'command') and command_widget.command.name == target.command:
+                    if (
+                        hasattr(command_widget, "command")
+                        and command_widget.command.name == target.command
+                    ):
                         # Trouver l'ArgumentComponent correspondant dans ce CommandComponent
-                        if hasattr(command_widget, 'argument_components'):
-                            arg_data = command_widget.argument_components.get(target.argument)
-                            if arg_data and hasattr(arg_data["component"], 'set_value'):
+                        if hasattr(command_widget, "argument_components"):
+                            arg_data = command_widget.argument_components.get(
+                                target.argument
+                            )
+                            if arg_data and hasattr(arg_data["component"], "set_value"):
                                 # Mettre à jour la valeur en temps réel avec le flag is_default
-                                arg_data["component"].set_value(shared_value, is_default=True)
+                                arg_data["component"].set_value(
+                                    shared_value, is_default=True
+                                )
                         break
 
     def _clear_layout(self, layout):
@@ -478,7 +494,7 @@ class CommandForm(QWidget):
                 values.update(command_values)
 
         return values
-    
+
     def _on_execute_clicked(self):
         """
         Gère le clic sur le bouton "Exécuter".
@@ -486,21 +502,23 @@ class CommandForm(QWidget):
         """
         if not self.command_components:
             return
-        
+
         # Valider tous les arguments obligatoires avant l'exécution
         all_errors = []
         for command_widget in self.command_components:
-            if hasattr(command_widget, "command") and hasattr(command_widget, "get_argument_values"):
+            if hasattr(command_widget, "command") and hasattr(
+                command_widget, "get_argument_values"
+            ):
                 command = command_widget.command
                 argument_values = command_widget.get_argument_values()
-                
+
                 # Valider les arguments de cette commande
                 is_valid, errors = command.validate_arguments(argument_values)
                 if not is_valid:
                     # Ajouter le nom de la commande aux erreurs
                     for error in errors:
                         all_errors.append(f"[{command.name}] {error}")
-        
+
         # Si des erreurs ont été trouvées, afficher un message et ne pas exécuter
         if all_errors:
             error_text = "\n".join(f"• {err}" for err in all_errors)
@@ -509,7 +527,7 @@ class CommandForm(QWidget):
             msg_box.setWindowTitle("Arguments manquants")
             msg_box.setText("Veuillez remplir tous les champs obligatoires :")
             msg_box.setInformativeText(error_text)
-            
+
             # Forcer un style lisible (fond blanc, texte noir)
             msg_box.setStyleSheet("""
                 QMessageBox {
@@ -534,15 +552,19 @@ class CommandForm(QWidget):
             """)
             msg_box.exec()
             return
-        
+
         # Construire la liste de toutes les commandes avec leurs noms
         commands_list = []
         for command_widget in self.command_components:
             if hasattr(command_widget, "_build_full_command"):
                 full_command = command_widget._build_full_command()
-                command_name = command_widget.command.name if hasattr(command_widget, "command") else "Commande"
+                command_name = (
+                    command_widget.command.name
+                    if hasattr(command_widget, "command")
+                    else "Commande"
+                )
                 commands_list.append({"name": command_name, "command": full_command})
-        
+
         # Émettre le signal pour exécuter toutes les commandes
         self.commands_to_execute.emit(commands_list)
 

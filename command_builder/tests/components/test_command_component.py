@@ -230,7 +230,9 @@ class TestCommandComponentIntegration:
         mock_input_component.get_value.return_value = "test.txt"
         mock_label = Mock()
 
-        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": mock_label}}
+        component.argument_components = {
+            "INPUT_FILE": {"component": mock_input_component, "label": mock_label}
+        }
 
         # Appeler _on_argument_changed pour simuler un changement
         component._on_argument_changed("INPUT_FILE", "test.txt", mock_label)
@@ -253,7 +255,9 @@ class TestCommandComponentIntegration:
         mock_input_component.get_value.return_value = "test.txt"
         mock_input_component.set_value = Mock()
 
-        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": Mock()}}
+        component.argument_components = {
+            "INPUT_FILE": {"component": mock_input_component, "label": Mock()}
+        }
 
         # Effacer les arguments
         component.clear_arguments()
@@ -299,7 +303,9 @@ class TestCommandComponentIntegration:
         mock_input_component = Mock()
         mock_input_component.set_value = Mock()
 
-        component.argument_components = {"INPUT_FILE": {"component": mock_input_component, "label": Mock()}}
+        component.argument_components = {
+            "INPUT_FILE": {"component": mock_input_component, "label": Mock()}
+        }
 
         # Définir une valeur
         component.set_argument_value("INPUT_FILE", "new_value.txt")

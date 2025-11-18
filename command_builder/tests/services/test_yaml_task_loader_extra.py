@@ -1,6 +1,9 @@
 """Tests supplémentaires pour les fonctions internes de `yaml_task_loader` afin d'améliorer la couverture."""
 
-from command_builder.services.yaml_task_loader import resolve_command_includes, merge_task_metadata
+from command_builder.services.yaml_task_loader import (
+    resolve_command_includes,
+    merge_task_metadata,
+)
 
 
 def test_resolve_command_includes_with_full_definition():

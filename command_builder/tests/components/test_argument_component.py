@@ -305,7 +305,9 @@ class TestArgumentComponentAffectedCommands:
     ):
         """Test que le composant s'initialise correctement avec des commandes concernées."""
         affected_commands = ["command1", "command2", "command3"]
-        component = ArgumentComponent(sample_argument, affected_commands=affected_commands)
+        component = ArgumentComponent(
+            sample_argument, affected_commands=affected_commands
+        )
 
         assert component.affected_commands == affected_commands
         assert component.argument == sample_argument

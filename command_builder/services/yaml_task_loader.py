@@ -23,7 +23,9 @@ def get_yaml_tasks_directory() -> Path:
         # Dans ce cas, les fichiers ont été copiés dans _MEIPASS lors du --add-data
         base_path = Path(sys._MEIPASS)
     else:
-        base_path = Path(__file__).parent.parent  # dossier command_builder au runtime normal
+        base_path = Path(
+            __file__
+        ).parent.parent  # dossier command_builder au runtime normal
     # 1. Dossier externe (uniquement pour exécutable PyInstaller one-dir)
     if getattr(sys, "frozen", False):
         exe_external = Path(sys.executable).parent / "data" / "tasks"
@@ -31,7 +33,11 @@ def get_yaml_tasks_directory() -> Path:
             return exe_external.absolute()
 
     # 2. Dossier interne (repo développement ou _MEIPASS)
-    tasks_dir = (base_path / "data" / "tasks") if not getattr(sys, "frozen", False) else base_path / "command_builder" / "data" / "tasks"
+    tasks_dir = (
+        (base_path / "data" / "tasks")
+        if not getattr(sys, "frozen", False)
+        else base_path / "command_builder" / "data" / "tasks"
+    )
     return tasks_dir.absolute()
 
 
@@ -126,7 +132,7 @@ def load_yaml_task(file_path: str) -> Task:
 def load_yaml_tasks() -> Tuple[List[Task], List[YamlError]]:
     """
     Charge toutes les tâches YAML disponibles et collecte les erreurs.
-    
+
     Les tâches avec erreurs ne sont pas chargées, mais les erreurs sont
     collectées et retournées pour affichage à l'utilisateur.
 
@@ -143,12 +149,12 @@ def load_yaml_tasks() -> Tuple[List[Task], List[YamlError]]:
     # Utiliser le gestionnaire d'erreurs pour charger les tâches
     error_handler = YamlErrorHandler()
     tasks, errors = error_handler.load_all_tasks(task_files)
-    
+
     # Afficher les résultats
     print(f"Tâches chargées: {len(tasks)}/{len(task_files)}")
     if errors:
         print(f"Erreurs détectées: {len(errors)}")
         for error in errors:
             print(f"  - {error.file_name}: {error.error_type}")
-    
+
     return tasks, errors

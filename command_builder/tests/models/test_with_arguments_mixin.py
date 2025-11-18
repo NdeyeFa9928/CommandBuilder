@@ -15,8 +15,18 @@ def _make_command(values: dict[str, str] | None = None):
         description="cmd",
         command="echo {input} {opt}",
         arguments=[
-            Argument(code="input", name="Input", required=True, default=values.get("input", "")),
-            Argument(code="opt", name="Optional", required=False, default=values.get("opt", "def")),
+            Argument(
+                code="input",
+                name="Input",
+                required=True,
+                default=values.get("input", ""),
+            ),
+            Argument(
+                code="opt",
+                name="Optional",
+                required=False,
+                default=values.get("opt", "def"),
+            ),
         ],
     )
 

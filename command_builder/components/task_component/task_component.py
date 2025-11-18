@@ -3,7 +3,14 @@ Module contenant la classe TaskComponent qui représente un composant de tâche 
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QToolTip, QApplication
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QHBoxLayout,
+    QToolTip,
+    QApplication,
+)
 from PySide6.QtCore import Signal, Qt, QEvent, QPoint
 from PySide6.QtUiTools import QUiLoader
 
@@ -70,25 +77,27 @@ class TaskComponent(QWidget):
             self.task_button.setObjectName(f"task_{self.task.name}")
             self.task_button.setCursor(Qt.PointingHandCursor)
             self.task_button.clicked.connect(self._on_clicked)
-            
+
             # Créer un layout horizontal à l'intérieur du bouton
             button_layout = QHBoxLayout(self.task_button)
             button_layout.setContentsMargins(0, 0, 0, 0)
             button_layout.setSpacing(0)
             button_layout.addStretch()  # Pousse l'icône vers la droite
-        
+
         if self.info_button:
             self.info_button.setCursor(Qt.PointingHandCursor)
             # Appliquer un style global personnalisé pour les tooltips
             app = QApplication.instance()
             if app is not None:
-                app.setStyleSheet("QToolTip { background-color: #2e2e2e; color: #ffffff; border: 1px solid #7aa2f7; padding: 5px; border-radius: 5px; }")
+                app.setStyleSheet(
+                    "QToolTip { background-color: #2e2e2e; color: #ffffff; border: 1px solid #7aa2f7; padding: 5px; border-radius: 5px; }"
+                )
             # Créer un tooltip riche avec la description de la tâche et des commandes
             tooltip = self._build_tooltip()
             self.info_button.setToolTip(tooltip)
             # Empêcher le bouton info de déclencher la sélection de la tâche
             self.info_button.clicked.connect(lambda: None)
-            
+
             # Reparenter l'icône pour qu'elle soit à l'intérieur du bouton
             if self.task_button:
                 self.info_button.setParent(self.task_button)
@@ -104,7 +113,9 @@ class TaskComponent(QWidget):
         if not self.info_button:
             return
         # Offset to avoid cursor hiding the first characters
-        global_pos = self.info_button.mapToGlobal(QPoint(self.info_button.width() // 2, self.info_button.height()))
+        global_pos = self.info_button.mapToGlobal(
+            QPoint(self.info_button.width() // 2, self.info_button.height())
+        )
         QToolTip.showText(global_pos, self.info_button.toolTip(), self.info_button)
 
     def eventFilter(self, source, event):
@@ -117,7 +128,7 @@ class TaskComponent(QWidget):
     def _build_tooltip(self) -> str:
         """
         Construit un tooltip HTML formaté avec la description de la tâche et des commandes.
-        
+
         Returns:
             Le texte HTML du tooltip
         """
@@ -128,12 +139,14 @@ class TaskComponent(QWidget):
             f"<p style='margin: 0 0 10px 0; font-weight: bold; font-size: 13px;'>{self.task.name}</p>",
             f"<p style='margin: 0 0 10px 0; color: #cccccc;'>{self.task.description}</p>",
         ]
-        
+
         # Ajouter les commandes
         if self.task.commands:
-            tooltip_parts.append("<p style='margin: 10px 0 5px 0; font-weight: bold;'>Commandes :</p>")
+            tooltip_parts.append(
+                "<p style='margin: 10px 0 5px 0; font-weight: bold;'>Commandes :</p>"
+            )
             tooltip_parts.append("<ul style='margin: 0; padding-left: 20px;'>")
-            
+
             for cmd in self.task.commands:
                 tooltip_parts.append(
                     f"<li style='margin: 3px 0;'>"
@@ -141,13 +154,13 @@ class TaskComponent(QWidget):
                     f"<span style='color: #aaaaaa;'>{cmd.description}</span>"
                     f"</li>"
                 )
-            
+
             tooltip_parts.append("</ul>")
-        
+
         tooltip_parts.append("</div>")
-        
+
         return "".join(tooltip_parts)
-    
+
     def _on_clicked(self):
         """Gère le clic sur le bouton de tâche."""
         self.task_clicked.emit(self.task)
