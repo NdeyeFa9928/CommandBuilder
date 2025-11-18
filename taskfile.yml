@@ -53,12 +53,14 @@ tasks:
     desc: Check formatting and style without fixing
     cmds:
       - cmd: pipenv run ruff format --check .
-      - cmd: pipenv run ruff check .
+      - cmd: pipenv run ruff check .*
+
 
   fix:
     desc: Fix formatting and style issues
     cmds:
       - cmd: pipenv run ruff format .
+      - cmd: pipenv run ruff check --fix . --select I
       - cmd: pipenv run ruff check --fix . --ignore F401,F841
       - cmd: pipenv run ruff check --unsafe-fixes --fix . --ignore F401,F841
 
