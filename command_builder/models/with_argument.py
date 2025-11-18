@@ -13,7 +13,30 @@ class WithArguments:
     
     Les classes qui héritent de ce mixin doivent avoir un attribut 'arguments'.
     Avec Pydantic, cet attribut est automatiquement créé via la définition du champ.
+    
+    Fournit également la validation des arguments obligatoires.
     """
+    
+    @staticmethod
+    def validate_single_argument(arg: Any, value: str) -> tuple[bool, Optional[str]]:
+        """
+        Valide un argument individuel.
+        Méthode statique pour éviter la duplication dans Argument et TaskArgument.
+        
+        Args:
+            arg: L'argument à valider (doit avoir 'required' et 'name')
+            value: La valeur à valider
+            
+        Returns:
+            Tuple (is_valid, error_message)
+        """
+        if not hasattr(arg, 'required') or not hasattr(arg, 'name'):
+            return True, None
+        
+        if (arg.required == 1 or arg.required is True) and not value.strip():
+            return False, f"Le champ '{arg.name}' est obligatoire"
+        
+        return True, None
     
     def get_argument_by_code(self, code: str) -> Optional[Any]:
         """
@@ -32,6 +55,66 @@ class WithArguments:
             if hasattr(arg, 'code') and arg.code == code:
                 return arg
         return None
+    
+    def validate_arguments(self, argument_values: Dict[str, str]) -> tuple[bool, List[str]]:
+        """
+        Valide que tous les arguments requis sont fournis et valides.
+        
+        Cette méthode centralise la logique de validation pour tous les objets
+        qui contiennent des arguments (Command, Task, etc.).
+        
+        Args:
+            argument_values: Dictionnaire {code_argument: valeur}
+            
+        Returns:
+            Tuple (is_valid, error_messages)
+            - is_valid: True si tous les arguments sont valides
+            - error_messages: Liste des messages d'erreur
+        """
+        if not hasattr(self, 'arguments') or not self.arguments:
+            return True, []
+        
+        errors = []
+        
+        for arg in self.arguments:
+            value = argument_values.get(arg.code, "")
+            # Utiliser directement la méthode statique
+            is_valid, error_msg = self.validate_single_argument(arg, value)
+            
+            if not is_valid and error_msg:
+                errors.append(error_msg)
+        
+        return len(errors) == 0, errors
+    
+    def get_required_arguments(self) -> List[Any]:
+        """
+        Retourne la liste des arguments obligatoires.
+        
+        Returns:
+            Liste des arguments avec required=1 (ou True)
+        """
+        if not hasattr(self, 'arguments') or not self.arguments:
+            return []
+        
+        return [
+            arg for arg in self.arguments 
+            if hasattr(arg, 'required') and (arg.required == 1 or arg.required is True)
+        ]
+    
+    def get_optional_arguments(self) -> List[Any]:
+        """
+        Retourne la liste des arguments optionnels.
+        
+        Returns:
+            Liste des arguments avec required=0 (ou False)
+        """
+        if not hasattr(self, 'arguments') or not self.arguments:
+            return []
+        
+        return [
+            arg for arg in self.arguments 
+            if hasattr(arg, 'required') and (arg.required == 0 or arg.required is False)
+        ]
     
     def get_argument_values(self) -> Dict[str, str]:
         """

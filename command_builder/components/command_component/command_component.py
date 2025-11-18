@@ -112,11 +112,16 @@ class CommandComponent(QWidget):
         Args:
             argument: L'objet Argument à ajouter
         """
-        # Créer le label pour l'argument
-        label = QLabel(f"{argument.name} :")
+        # Créer le label pour l'argument avec astérisque si obligatoire
+        label_text = f"{argument.name} :"
+        if argument.required == 1:
+            label_text = f'{argument.name} :  <span style="color: #e74c3c; font-weight: bold;"> *</span>'
+        
+        label = QLabel(label_text)
         label.setObjectName(f"label_{argument.code}")
         label.setWordWrap(False)
         label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        label.setTextFormat(Qt.TextFormat.RichText)  # Permettre le HTML
 
         # Forcer une taille fixe pour éviter les chevauchements
         label.setMinimumWidth(150)
