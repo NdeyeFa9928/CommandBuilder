@@ -3,14 +3,15 @@ Module contenant la classe CommandForm qui représente le formulaire de commande
 """
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLabel,
+    QPushButton,
     QScrollArea,
     QHBoxLayout,
-    QPushButton,
+    QMessageBox,
 )
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtUiTools import QUiLoader
@@ -481,9 +482,33 @@ class CommandForm(QWidget):
     def _on_execute_clicked(self):
         """
         Gère le clic sur le bouton "Exécuter".
-        Exécute toutes les commandes de la liste.
+        Valide les arguments obligatoires puis exécute toutes les commandes de la liste.
         """
         if not self.command_components:
+            return
+        
+        # Valider tous les arguments obligatoires avant l'exécution
+        all_errors = []
+        for command_widget in self.command_components:
+            if hasattr(command_widget, "command") and hasattr(command_widget, "get_argument_values"):
+                command = command_widget.command
+                argument_values = command_widget.get_argument_values()
+                
+                # Valider les arguments de cette commande
+                is_valid, errors = command.validate_arguments(argument_values)
+                if not is_valid:
+                    # Ajouter le nom de la commande aux erreurs
+                    for error in errors:
+                        all_errors.append(f"[{command.name}] {error}")
+        
+        # Si des erreurs ont été trouvées, afficher un message et ne pas exécuter
+        if all_errors:
+            error_text = "\n".join(f"• {err}" for err in all_errors)
+            QMessageBox.warning(
+                self,
+                "Arguments manquants",
+                f"Veuillez remplir tous les champs obligatoires :\n\n{error_text}"
+            )
             return
         
         # Construire la liste de toutes les commandes avec leurs noms
