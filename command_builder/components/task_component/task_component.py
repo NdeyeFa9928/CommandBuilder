@@ -3,16 +3,17 @@ Module contenant la classe TaskComponent qui représente un composant de tâche 
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QHBoxLayout,
-    QToolTip,
-    QApplication,
-)
-from PySide6.QtCore import Signal, Qt, QEvent, QPoint
+
+from PySide6.QtCore import QEvent, QPoint, Qt, Signal
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QPushButton,
+    QToolTip,
+    QVBoxLayout,
+    QWidget,
+)
 
 from command_builder.models.task import Task
 

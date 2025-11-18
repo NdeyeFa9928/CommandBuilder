@@ -4,23 +4,25 @@ Module contenant la classe MainWindow qui représente la fenêtre principale de 
 
 from pathlib import Path
 from typing import List
-from PySide6.QtWidgets import (
-    QMainWindow,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QSplitter,
-    QSizePolicy,
-    QDialog,
-    QLabel,
-)
-from PySide6.QtCore import Qt
+
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtUiTools import QUiLoader
-from command_builder.components.task_list import TaskList
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QSizePolicy,
+    QSplitter,
+    QVBoxLayout,
+    QWidget,
+)
+
 from command_builder.components.command_form import CommandForm
 from command_builder.components.console_output import ConsoleOutput
-from command_builder.models.yaml_error import YamlError
 from command_builder.components.error_display.error_display import ErrorsPanel
+from command_builder.components.task_list import TaskList
+from command_builder.models.yaml_error import YamlError
 
 
 class MainWindow(QMainWindow):
@@ -144,8 +146,6 @@ class MainWindow(QMainWindow):
             layout.setSpacing(0)
             layout.addWidget(self.command_form)
             # Réduire la hauteur minimale pour permettre à la console de monter davantage
-            from PySide6.QtWidgets import QSizePolicy
-
             self.command_form_container.setMinimumSize(0, 0)
             self.command_form.setMinimumSize(0, 0)
             self.command_form_container.setSizePolicy(
@@ -169,8 +169,6 @@ class MainWindow(QMainWindow):
         # Définir des tailles par défaut si nécessaire
         if hasattr(self, "main_splitter") and hasattr(self, "right_splitter"):
             # Ajuster les tailles après que la fenêtre soit affichée
-            from PySide6.QtCore import QTimer
-
             QTimer.singleShot(0, self._adjust_splitter_sizes)
 
     def _adjust_splitter_sizes(self):

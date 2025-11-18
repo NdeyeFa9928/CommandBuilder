@@ -5,14 +5,12 @@ Build script for CommandBuilder executable using PyInstaller.
 Adapted for CommandBuilder project structure.
 """
 
+import argparse
 import os
 import subprocess
 import sys
-import argparse
-from pathlib import Path
-
-
 from importlib import import_module
+from pathlib import Path
 
 
 def get_version() -> str:

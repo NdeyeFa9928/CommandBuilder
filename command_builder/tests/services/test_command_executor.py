@@ -3,8 +3,9 @@ Tests unitaires pour le service d'exécution de commandes.
 Teste l'exécution séquentielle et l'arrêt en cas d'erreur.
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 if sys.platform.startswith("win") and os.getenv("TERM") is None:

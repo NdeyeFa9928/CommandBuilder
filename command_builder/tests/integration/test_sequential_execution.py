@@ -2,8 +2,9 @@
 Tests simples et robustes pour les éléments critiques.
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 # Skip entirely on Windows PowerShell/Go-Task environment to éviter exit 255
@@ -17,7 +18,9 @@ import os
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")  # run Qt without GUI
 from unittest.mock import patch
+
 from PySide6.QtWidgets import QApplication
+
 from command_builder.components.console_output.console_output import ConsoleOutput
 from command_builder.services.command_executor import CommandExecutorService
 

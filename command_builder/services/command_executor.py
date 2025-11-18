@@ -3,8 +3,9 @@ Service d'exécution de commandes Windows.
 """
 
 import subprocess
-from typing import Optional, Callable
-from PySide6.QtCore import QObject, Signal, QThread
+from typing import Callable, Optional
+
+from PySide6.QtCore import QObject, QThread, Signal
 
 
 class CommandExecutor(QThread):

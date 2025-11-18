@@ -2,12 +2,13 @@
 Tests unitaires pour le composant ArgumentComponent.
 """
 
-import pytest
-from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton, QLabel
 from unittest.mock import Mock, patch
 
-from command_builder.models.arguments import Argument
+import pytest
+from PySide6.QtWidgets import QApplication, QLabel, QLineEdit, QPushButton
+
 from command_builder.components.argument_component import ArgumentComponent
+from command_builder.models.arguments import Argument
 
 
 @pytest.fixture(scope="module")

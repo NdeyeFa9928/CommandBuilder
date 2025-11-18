@@ -2,18 +2,18 @@
 Tests simples pour le chargeur de tâches YAML.
 """
 
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from command_builder.models.task import Task
 from command_builder.services.yaml_task_loader import (
     get_yaml_tasks_directory,
     list_yaml_task_files,
     load_yaml_task,
     load_yaml_tasks,
 )
-from command_builder.models.task import Task
 
 
 def test_get_yaml_tasks_directory():

@@ -3,7 +3,7 @@ Module contenant les mixins et interfaces pour les modèles.
 """
 
 from abc import ABC
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 
 class WithArguments:

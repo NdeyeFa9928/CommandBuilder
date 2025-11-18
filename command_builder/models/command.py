@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
+
 from command_builder.models.arguments import Argument
 from command_builder.models.with_argument import WithArguments
 

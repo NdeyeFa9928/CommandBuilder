@@ -4,10 +4,12 @@ Module contenant la classe TaskList qui affiche les tâches disponibles.
 
 from pathlib import Path
 from typing import Callable, Optional
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
+from command_builder.components.task_component import TaskComponent
 from command_builder.models.task import Task
 
 
@@ -49,8 +51,6 @@ class TaskList(QWidget):
 
     def _default_task_widget_factory(self, task: Task, parent: QWidget) -> QWidget:
         """Factory par défaut pour créer un TaskComponent."""
-        from command_builder.components.task_component import TaskComponent
-
         return TaskComponent(task, parent)
 
     def _load_ui(self):

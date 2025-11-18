@@ -2,13 +2,14 @@
 Tests unitaires pour le composant CommandComponent.
 """
 
-import pytest
-from PySide6.QtWidgets import QApplication, QLabel
 from unittest.mock import Mock, patch
 
-from command_builder.models.command import Command
-from command_builder.models.arguments import Argument
+import pytest
+from PySide6.QtWidgets import QApplication, QLabel
+
 from command_builder.components.command_component import CommandComponent
+from command_builder.models.arguments import Argument
+from command_builder.models.command import Command
 
 
 @pytest.fixture(scope="module")

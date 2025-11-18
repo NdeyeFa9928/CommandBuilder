@@ -1,12 +1,13 @@
 """Service de gestion des erreurs YAML."""
 
-from typing import List, Dict, Any, Tuple, Optional
 from pathlib import Path
-from pydantic import ValidationError
-import yaml
+from typing import Any, Dict, List, Optional, Tuple
 
-from command_builder.models.yaml_error import YamlError
+import yaml
+from pydantic import ValidationError
+
 from command_builder.models.task import Task
+from command_builder.models.yaml_error import YamlError
 from command_builder.services.yaml_loader import load_yaml_with_includes
 
 

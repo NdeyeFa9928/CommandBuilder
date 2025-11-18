@@ -4,9 +4,10 @@ Teste la validation, le chargement et la gestion des commandes.
 """
 
 import pytest
-from command_builder.models.task import Task
-from command_builder.models.command import Command
+
 from command_builder.models.arguments import Argument
+from command_builder.models.command import Command
+from command_builder.models.task import Task
 
 
 @pytest.fixture

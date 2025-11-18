@@ -3,22 +3,26 @@ Module contenant la classe CommandForm qui représente le formulaire de commande
 """
 
 from pathlib import Path
-from typing import Callable, Optional, List
+from typing import Callable, List, Optional
+
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QScrollArea,
-    QHBoxLayout,
-    QMessageBox,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtUiTools import QUiLoader
 
+from command_builder.components.argument_component import ArgumentComponent
+from command_builder.components.command_component import CommandComponent
+from command_builder.models.arguments import Argument, TaskArgument
 from command_builder.models.command import Command
 from command_builder.models.task import Task
-from command_builder.models.arguments import TaskArgument
 
 
 class CommandForm(QWidget):
@@ -67,8 +71,6 @@ class CommandForm(QWidget):
         self, command: Command, parent: QWidget, simple_mode: bool = False
     ) -> QWidget:
         """Factory par défaut pour créer un CommandComponent."""
-        from command_builder.components.command_component import CommandComponent
-
         return CommandComponent(command, parent, simple_mode)
 
     def _load_ui(self):
@@ -87,8 +89,6 @@ class CommandForm(QWidget):
 
         # Créer un scroll area pour le formulaire
         self.scroll_area = QScrollArea(ui)
-        from PySide6.QtWidgets import QSizePolicy
-
         self.scroll_area.setMinimumHeight(0)
         self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.scroll_area.setWidgetResizable(True)
@@ -312,11 +312,6 @@ class CommandForm(QWidget):
         Args:
             task_arg: L'argument de tâche (TaskArgument)
         """
-        from command_builder.components.argument_component import ArgumentComponent
-        from command_builder.models.arguments import Argument
-        from PySide6.QtWidgets import QHBoxLayout
-        from PySide6.QtCore import Qt
-
         # Convertir TaskArgument en Argument
         arg = Argument(
             code=task_arg.code,

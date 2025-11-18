@@ -2,13 +2,14 @@
 Tests d'intégration simples pour le système YAML.
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
 
-from command_builder.services.yaml_task_loader import load_yaml_task
+import pytest
+
 from command_builder.models.task import Task
+from command_builder.services.yaml_task_loader import load_yaml_task
 
 
 def test_task_with_command_inclusion():

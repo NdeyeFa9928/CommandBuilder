@@ -3,17 +3,18 @@ Module contenant la classe ArgumentComponent qui représente un composant d'argu
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QLineEdit,
-    QPushButton,
-    QFileDialog,
-    QLabel,
-)
+from typing import List, Optional
+
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
-from typing import List, Optional
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QWidget,
+)
 
 from command_builder.models.arguments import Argument
 

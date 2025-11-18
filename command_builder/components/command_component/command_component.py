@@ -3,12 +3,13 @@ Module contenant la classe CommandComponent qui représente un composant de comm
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtUiTools import QUiLoader
 
-from command_builder.models.command import Command
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QFormLayout, QLabel, QVBoxLayout, QWidget
+
 from command_builder.components.argument_component import ArgumentComponent
+from command_builder.models.command import Command
 
 
 class CommandComponent(QWidget):

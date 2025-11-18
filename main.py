@@ -1,8 +1,10 @@
-import sys
 import os
+import sys
 from pathlib import Path
-from PySide6.QtWidgets import QApplication
+
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
+
 from command_builder.components.main_window import MainWindow
 from command_builder.services.yaml_task_loader import load_yaml_tasks
 

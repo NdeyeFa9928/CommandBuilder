@@ -1,8 +1,9 @@
 """Composant pour afficher les erreurs YAML."""
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea
+
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QLabel, QScrollArea, QVBoxLayout, QWidget
 
 from command_builder.models.yaml_error import YamlError
 

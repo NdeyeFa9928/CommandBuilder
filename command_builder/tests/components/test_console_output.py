@@ -3,9 +3,11 @@ Tests unitaires pour le composant ConsoleOutput.
 Teste l'exécution séquentielle des commandes et l'arrêt en cas d'erreur.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from PySide6.QtWidgets import QApplication
+
 from command_builder.components.console_output.console_output import ConsoleOutput
 
 

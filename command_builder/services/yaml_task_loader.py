@@ -2,11 +2,12 @@
 
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
+
 from command_builder.models.task import Task
 from command_builder.models.yaml_error import YamlError
-from command_builder.services.yaml_loader import load_yaml_with_includes
 from command_builder.services.yaml_error_handler import YamlErrorHandler
+from command_builder.services.yaml_loader import load_yaml_with_includes
 
 
 def get_yaml_tasks_directory() -> Path:

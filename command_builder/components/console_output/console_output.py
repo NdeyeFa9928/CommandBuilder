@@ -2,17 +2,19 @@
 Module contenant la classe ConsoleOutput qui représente la sortie console.
 """
 
-from pathlib import Path
 import datetime
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPlainTextEdit,
-    QPushButton,
-    QFileDialog,
-)
+from pathlib import Path
+
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QPlainTextEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
 from command_builder.services.command_executor import CommandExecutorService
 
 
