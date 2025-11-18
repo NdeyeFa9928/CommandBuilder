@@ -504,11 +504,35 @@ class CommandForm(QWidget):
         # Si des erreurs ont été trouvées, afficher un message et ne pas exécuter
         if all_errors:
             error_text = "\n".join(f"• {err}" for err in all_errors)
-            QMessageBox.warning(
-                self,
-                "Arguments manquants",
-                f"Veuillez remplir tous les champs obligatoires :\n\n{error_text}"
-            )
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Warning)
+            msg_box.setWindowTitle("Arguments manquants")
+            msg_box.setText("Veuillez remplir tous les champs obligatoires :")
+            msg_box.setInformativeText(error_text)
+            
+            # Forcer un style lisible (fond blanc, texte noir)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: white;
+                }
+                QMessageBox QLabel {
+                    color: #2c3e50;
+                    font-size: 11pt;
+                }
+                QMessageBox QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    min-width: 80px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #2980b9;
+                }
+            """)
+            msg_box.exec()
             return
         
         # Construire la liste de toutes les commandes avec leurs noms
