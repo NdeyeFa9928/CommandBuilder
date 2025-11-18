@@ -148,36 +148,6 @@ class WithArguments:
                     return False
         return True
     
-    def get_required_arguments(self) -> List[Any]:
-        """
-        Retourne uniquement les arguments requis.
-        
-        Returns:
-            Liste des arguments requis
-        """
-        if not self.arguments:
-            return []
-            
-        return [
-            arg for arg in self.arguments 
-            if hasattr(arg, 'required') and arg.required
-        ]
-    
-    def get_optional_arguments(self) -> List[Any]:
-        """
-        Retourne uniquement les arguments optionnels.
-        
-        Returns:
-            Liste des arguments optionnels
-        """
-        if not self.arguments:
-            return []
-            
-        return [
-            arg for arg in self.arguments 
-            if not hasattr(arg, 'required') or not arg.required
-        ]
-    
     def has_argument(self, code: str) -> bool:
         """
         Vérifie si un argument avec ce code existe.
