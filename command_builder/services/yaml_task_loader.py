@@ -1,5 +1,6 @@
 """Service de chargement des tâches au format YAML avec support d'inclusion."""
 
+import sys
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 from command_builder.models.task import Task
@@ -15,30 +16,28 @@ def get_yaml_tasks_directory() -> Path:
     (un seul exécutable). Dans ce dernier cas, les fichiers de données sont
     extraits dans le répertoire temporaire `sys._MEIPASS`.
     """
-    """Retourne le chemin vers le répertoire des tâches YAML."""
-    # Détecte si l'application est lancée depuis un exécutable PyInstaller
-    import sys
 
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        # Dans ce cas, les fichiers ont été copiés dans _MEIPASS lors du --add-data
-        base_path = Path(sys._MEIPASS)
+    is_frozen = getattr(sys, "frozen", False)
+
+    if is_frozen:
+        # Mode exécutable PyInstaller
+        # 1. Vérifier d'abord le dossier externe (one-dir mode)
+        exe_dir = Path(sys.executable).parent
+        external_tasks_dir = exe_dir / "data" / "tasks"
+        if external_tasks_dir.exists():
+            return external_tasks_dir.absolute()
+
+        # 2. Sinon, utiliser le dossier interne (_MEIPASS pour one-file mode)
+        if hasattr(sys, "_MEIPASS"):
+            internal_base = Path(sys._MEIPASS)
+            return (internal_base / "command_builder" / "data" / "tasks").absolute()
+        else:
+            # Fallback si _MEIPASS n'existe pas
+            return (exe_dir / "command_builder" / "data" / "tasks").absolute()
     else:
-        base_path = Path(
-            __file__
-        ).parent.parent  # dossier command_builder au runtime normal
-    # 1. Dossier externe (uniquement pour exécutable PyInstaller one-dir)
-    if getattr(sys, "frozen", False):
-        exe_external = Path(sys.executable).parent / "data" / "tasks"
-        if exe_external.exists():
-            return exe_external.absolute()
-
-    # 2. Dossier interne (repo développement ou _MEIPASS)
-    tasks_dir = (
-        (base_path / "data" / "tasks")
-        if not getattr(sys, "frozen", False)
-        else base_path / "command_builder" / "data" / "tasks"
-    )
-    return tasks_dir.absolute()
+        # Mode développement
+        dev_base = Path(__file__).parent.parent
+        return (dev_base / "data" / "tasks").absolute()
 
 
 def list_yaml_task_files() -> List[Path]:
