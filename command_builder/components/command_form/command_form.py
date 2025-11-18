@@ -125,7 +125,12 @@ class CommandForm(QWidget):
 
         if qss_file.exists():
             with open(qss_file, "r") as f:
-                self.setStyleSheet(f.read())
+                stylesheet = f.read()
+                self.setStyleSheet(stylesheet)
+                # Stocker le stylesheet pour l'appliquer aux dialogs
+                self._stylesheet = stylesheet
+        else:
+            self._stylesheet = ""
 
     def set_task(self, task: Task):
         """
@@ -278,91 +283,100 @@ class CommandForm(QWidget):
         Args:
             task_arguments: Liste des TaskArgument
         """
-        from command_builder.components.argument_component import ArgumentComponent
-        from command_builder.models.arguments import Argument
+        self._add_section_title("Arguments partagés")
 
-        # Titre de la section
-        section_label = QLabel("Arguments partagés")
-        section_label.setStyleSheet(
+        # Créer un widget pour chaque argument de tâche
+        for task_arg in task_arguments:
+            self._create_shared_argument_widget(task_arg)
+
+        self._add_section_separator()
+        self._add_section_title("Commandes")
+
+    def _add_section_title(self, title: str):
+        """
+        Ajoute un titre de section.
+
+        Args:
+            title: Le texte du titre
+        """
+        label = QLabel(title)
+        label.setStyleSheet(
             "font-size: 12px; font-weight: bold; color: #4a90e2; margin-top: 10px;"
         )
-        self.commands_layout.addWidget(section_label)
+        self.commands_layout.addWidget(label)
 
-        # Créer un ArgumentComponent pour chaque argument de tâche
-        for task_arg in task_arguments:
-            # Convertir TaskArgument en Argument pour réutiliser ArgumentComponent
-            arg = Argument(
-                code=task_arg.code,
-                name=task_arg.name,
-                description=task_arg.description,
-                type=task_arg.type,
-                required=task_arg.required,
-                default=task_arg.default,
-                validation=task_arg.validation,
+    def _create_shared_argument_widget(self, task_arg):
+        """
+        Crée et ajoute un widget pour un argument partagé.
+
+        Args:
+            task_arg: L'argument de tâche (TaskArgument)
+        """
+        from command_builder.components.argument_component import ArgumentComponent
+        from command_builder.models.arguments import Argument
+        from PySide6.QtWidgets import QHBoxLayout
+        from PySide6.QtCore import Qt
+
+        # Convertir TaskArgument en Argument
+        arg = Argument(
+            code=task_arg.code,
+            name=task_arg.name,
+            description=task_arg.description,
+            type=task_arg.type,
+            required=task_arg.required,
+            default=task_arg.default,
+            validation=task_arg.validation,
+        )
+
+        # Extraire les noms des commandes concernées
+        affected_commands = [value.command for value in task_arg.values]
+
+        # Créer le layout horizontal
+        arg_layout = QHBoxLayout()
+        arg_layout.setSpacing(10)
+
+        # Créer le label
+        arg_label = QLabel(f"{task_arg.name} :")
+        arg_label.setObjectName(f"shared_label_{task_arg.code}")
+        arg_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        arg_label.setMinimumWidth(200)
+        arg_label.setMaximumWidth(200)
+        arg_label.setStyleSheet("font-weight: normal;")
+
+        # Créer le composant
+        arg_component = ArgumentComponent(
+            arg, self, affected_commands=affected_commands
+        )
+
+        # Connecter le signal
+        def make_handler(lbl):
+            return lambda code, value: self._on_shared_argument_changed(
+                code, value, lbl
             )
 
-            # Extraire les noms des commandes concernées
-            affected_commands = [value.command for value in task_arg.values]
+        arg_component.value_changed.connect(make_handler(arg_label))
 
-            # Créer un layout horizontal pour le label + composant
-            from PySide6.QtWidgets import QHBoxLayout
-            from PySide6.QtCore import Qt
+        # Appliquer le style initial si valeur par défaut
+        if arg_component.has_default_value():
+            self._apply_default_style(arg_label)
 
-            arg_layout = QHBoxLayout()
-            arg_layout.setSpacing(10)
+        # Stocker la référence
+        self.task_argument_components.append(
+            {"component": arg_component, "label": arg_label}
+        )
 
-            # Créer le label pour l'argument
-            arg_label = QLabel(f"{task_arg.name} :")
-            arg_label.setObjectName(f"shared_label_{task_arg.code}")
-            arg_label.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
-            )
-            arg_label.setMinimumWidth(200)
-            arg_label.setMaximumWidth(200)
-            arg_label.setStyleSheet("font-weight: normal;")
+        # Ajouter au layout
+        arg_layout.addWidget(arg_label)
+        arg_layout.addWidget(arg_component, 1)
+        self.commands_layout.addLayout(arg_layout)
 
-            # Créer le composant avec les commandes concernées
-            arg_component = ArgumentComponent(
-                arg, self, affected_commands=affected_commands
-            )
-
-            # Activer le bouton de parcours si c'est un fichier ou un répertoire
-            # if task_arg.type in ["file", "directory"]:
-            # arg_component.enable_browse_button(True)
-
-            # Connecter le signal avec une closure correcte
-            def make_handler(lbl):
-                return lambda code, value: self._on_shared_argument_changed(
-                    code, value, lbl
-                )
-
-            arg_component.value_changed.connect(make_handler(arg_label))
-
-            # Appliquer le style initial si valeur par défaut (après connexion du signal)
-            if arg_component.has_default_value():
-                self._apply_default_style(arg_label)
-            self.task_argument_components.append(
-                {"component": arg_component, "label": arg_label}
-            )
-
-            # Ajouter le label et le composant au layout horizontal
-            arg_layout.addWidget(arg_label)
-            arg_layout.addWidget(arg_component, 1)  # stretch factor = 1
-
-            # Ajouter le layout horizontal au layout principal
-            self.commands_layout.addLayout(arg_layout)
-
-        # Séparateur visuel
+    def _add_section_separator(self):
+        """Ajoute un séparateur visuel entre les sections."""
         separator = QLabel("―" * 50)
         separator.setStyleSheet("color: #e0e0e0; margin: 10px 0;")
         self.commands_layout.addWidget(separator)
-
-        # Titre pour les commandes
-        commands_label = QLabel("Commandes")
-        commands_label.setStyleSheet(
-            "font-size: 12px; font-weight: bold; color: #4a90e2;"
-        )
-        self.commands_layout.addWidget(commands_label)
 
     def _on_shared_argument_changed(self, code: str, value: str, label: QLabel):
         """
@@ -527,29 +541,7 @@ class CommandForm(QWidget):
             msg_box.setWindowTitle("Arguments manquants")
             msg_box.setText("Veuillez remplir tous les champs obligatoires :")
             msg_box.setInformativeText(error_text)
-
-            # Forcer un style lisible (fond blanc, texte noir)
-            msg_box.setStyleSheet("""
-                QMessageBox {
-                    background-color: white;
-                }
-                QMessageBox QLabel {
-                    color: #2c3e50;
-                    font-size: 11pt;
-                }
-                QMessageBox QPushButton {
-                    background-color: #3498db;
-                    color: white;
-                    border: none;
-                    padding: 8px 20px;
-                    border-radius: 4px;
-                    font-weight: bold;
-                    min-width: 80px;
-                }
-                QMessageBox QPushButton:hover {
-                    background-color: #2980b9;
-                }
-            """)
+            msg_box.setStyleSheet(self._stylesheet)
             msg_box.exec()
             return
 
