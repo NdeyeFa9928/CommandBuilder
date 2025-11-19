@@ -121,9 +121,9 @@ tasks:
 
   # Test tasks
   test:
-    desc: Run all tests
+    desc: Run all tests with coverage summary
     cmds:
-      - cmd: pipenv run pytest command_builder/tests
+      - cmd: pipenv run pytest command_builder/tests --cov=command_builder --cov-report=term --tb=short -q
 
   test:services:
     desc: Run service tests only
@@ -141,14 +141,24 @@ tasks:
       - cmd: pipenv run pytest command_builder/tests/components
 
   test:fast:
-    desc: Run tests with minimal output
+    desc: Run tests with minimal output (no coverage)
     cmds:
       - cmd: pipenv run pytest -q command_builder/tests
+  
+  test:nocov:
+    desc: Run tests without coverage (faster)
+    cmds:
+      - cmd: pipenv run pytest command_builder/tests -v
 
   test:cov:
-    desc: Run tests with coverage
+    desc: Run tests with detailed coverage report (HTML + terminal with missing lines)
     cmds:
-      - cmd: pipenv run pytest --cov=command_builder --cov-report=html --cov-report=term
+      - cmd: pipenv run pytest --cov=command_builder --cov-report=html --cov-report=term-missing command_builder/tests -v
+  
+  test:verbose:
+    desc: Run tests with verbose output and coverage
+    cmds:
+      - cmd: pipenv run pytest command_builder/tests --cov=command_builder --cov-report=term-missing -v
 
   # Command management tasks
   add-command:
