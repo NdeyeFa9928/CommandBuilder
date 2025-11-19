@@ -35,7 +35,18 @@ Le projet est conçu avec une architecture modulaire et découplée, facilitant 
 
 ## Démarrage rapide
 
-Pour les utilisateurs pressés :
+### Nouveau sur le projet ?
+
+**Consultez le guide complet : [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md)**
+
+Ce guide contient :
+- Installation pas à pas des prérequis
+- Explication de toutes les commandes
+- Structure détaillée du projet
+- Workflow de développement
+- Solutions aux problèmes courants
+
+### Installation rapide (si vous avez déjà tout)
 
 ```bash
 # Installation complète
@@ -43,6 +54,9 @@ task setup
 
 # Lancer l'application
 task run
+
+# Exécuter les tests
+task test
 ```
 
 Pour plus de détails, consultez la section [Installation](#installation).
