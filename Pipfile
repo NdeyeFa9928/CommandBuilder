@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pytest = "*"
+pytest-cov = "*"
 ruff = "*"
 black = "*"
 mermaid-py = "*"
@@ -14,7 +15,6 @@ pyside6 = "*"
 
 [dev-packages]
 pyinstaller = "*"
-pytest-cov = "*"
 
 [requires]
 python_version = "3.12"
