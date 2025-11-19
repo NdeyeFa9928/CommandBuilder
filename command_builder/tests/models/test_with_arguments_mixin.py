@@ -2,9 +2,10 @@
 Ces tests n'impliquent aucun composant Qt et sont donc sûrs sur toutes les plateformes.
 """
 
+import pytest
+
 from command_builder.models.arguments import Argument
 from command_builder.models.command import Command
-import pytest
 
 
 def _make_command(values: dict[str, str] | None = None):
@@ -15,8 +16,18 @@ def _make_command(values: dict[str, str] | None = None):
         description="cmd",
         command="echo {input} {opt}",
         arguments=[
-            Argument(code="input", name="Input", required=True, default=values.get("input", "")),
-            Argument(code="opt", name="Optional", required=False, default=values.get("opt", "def")),
+            Argument(
+                code="input",
+                name="Input",
+                required=True,
+                default=values.get("input", ""),
+            ),
+            Argument(
+                code="opt",
+                name="Optional",
+                required=False,
+                default=values.get("opt", "def"),
+            ),
         ],
     )
 

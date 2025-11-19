@@ -2,12 +2,13 @@
 Tests unitaires pour le composant ArgumentComponent.
 """
 
-import pytest
-from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton, QLabel
 from unittest.mock import Mock, patch
 
-from command_builder.models.arguments import Argument
+import pytest
+from PySide6.QtWidgets import QApplication, QLabel, QLineEdit, QPushButton
+
 from command_builder.components.argument_component import ArgumentComponent
+from command_builder.models.arguments import Argument
 
 
 @pytest.fixture(scope="module")
@@ -305,7 +306,9 @@ class TestArgumentComponentAffectedCommands:
     ):
         """Test que le composant s'initialise correctement avec des commandes concernées."""
         affected_commands = ["command1", "command2", "command3"]
-        component = ArgumentComponent(sample_argument, affected_commands=affected_commands)
+        component = ArgumentComponent(
+            sample_argument, affected_commands=affected_commands
+        )
 
         assert component.affected_commands == affected_commands
         assert component.argument == sample_argument

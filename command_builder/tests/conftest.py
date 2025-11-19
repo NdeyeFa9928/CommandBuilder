@@ -3,6 +3,7 @@ Fixtures partagées pour les tests de CommandBuilder.
 """
 
 import json
+
 import pytest
 
 

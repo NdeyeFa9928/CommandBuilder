@@ -2,10 +2,11 @@
 Tests simples pour le chargeur YAML.
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
+
+import pytest
 
 from command_builder.services.yaml_loader import load_yaml_with_includes
 

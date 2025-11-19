@@ -5,14 +5,12 @@ Build script for CommandBuilder executable using PyInstaller.
 Adapted for CommandBuilder project structure.
 """
 
+import argparse
 import os
 import subprocess
 import sys
-import argparse
-from pathlib import Path
-
-
 from importlib import import_module
+from pathlib import Path
 
 
 def get_version() -> str:
@@ -179,7 +177,7 @@ def build_executable(dev_mode=False):
     # Get application icon
     app_icon = get_app_icon(base_dir)
 
-        # Build PyInstaller command
+    # Build PyInstaller command
     command = ["pipenv", "run", "pyinstaller"]
 
     exe_name = f"CommandBuilder_{get_version()}"

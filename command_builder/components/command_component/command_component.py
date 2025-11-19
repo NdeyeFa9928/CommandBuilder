@@ -3,12 +3,13 @@ Module contenant la classe CommandComponent qui représente un composant de comm
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFormLayout
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtUiTools import QUiLoader
 
-from command_builder.models.command import Command
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QFormLayout, QLabel, QVBoxLayout, QWidget
+
 from command_builder.components.argument_component import ArgumentComponent
+from command_builder.models.command import Command
 
 
 class CommandComponent(QWidget):
@@ -85,7 +86,7 @@ class CommandComponent(QWidget):
             ):
                 # Pas d'arguments, masquer le conteneur
                 self.arguments_form_layout.parentWidget().setVisible(False)
-            
+
             # Afficher le code de la commande en vert après les arguments
             if self.label_command_cli:
                 self._update_command_display()
@@ -116,7 +117,7 @@ class CommandComponent(QWidget):
         label_text = f"{argument.name} :"
         if argument.required == 1:
             label_text = f'{argument.name} :  <span style="color: #e74c3c; font-weight: bold;"> *</span>'
-        
+
         label = QLabel(label_text)
         label.setObjectName(f"label_{argument.code}")
         label.setWordWrap(False)
@@ -132,10 +133,15 @@ class CommandComponent(QWidget):
 
         # Créer le composant d'argument
         arg_component = ArgumentComponent(argument, self)
-        arg_component.value_changed.connect(lambda code, value: self._on_argument_changed(code, value, label))
+        arg_component.value_changed.connect(
+            lambda code, value: self._on_argument_changed(code, value, label)
+        )
 
         # Stocker la référence avec le label
-        self.argument_components[argument.code] = {"component": arg_component, "label": label}
+        self.argument_components[argument.code] = {
+            "component": arg_component,
+            "label": label,
+        }
 
         # Appliquer le style initial si valeur par défaut
         if arg_component.has_default_value():
@@ -257,7 +263,9 @@ class CommandComponent(QWidget):
                 # Récupérer la valeur actuelle de l'argument
                 value = ""
                 if argument.code in self.argument_components:
-                    value = self.argument_components[argument.code]["component"].get_value()
+                    value = self.argument_components[argument.code][
+                        "component"
+                    ].get_value()
 
                 # Créer le placeholder
                 placeholder = f"{{{argument.code}}}"

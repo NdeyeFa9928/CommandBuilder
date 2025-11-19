@@ -127,3 +127,27 @@ QLabel[objectName^="shared_label_"][hasDefault="true"] {
     color: rgb(76, 175, 80);
     font-weight: bold;
 }
+
+/* Style pour la boîte de dialogue d'erreurs de validation */
+QMessageBox {
+    background-color: white;
+}
+
+QMessageBox QLabel {
+    color: #2c3e50;
+    font-size: 11pt;
+}
+
+QMessageBox QPushButton {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    min-width: 80px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #2980b9;
+}

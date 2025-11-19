@@ -2,18 +2,18 @@
 Tests simples pour le chargeur de tâches YAML.
 """
 
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from command_builder.models.task import Task
 from command_builder.services.yaml_task_loader import (
     get_yaml_tasks_directory,
     list_yaml_task_files,
     load_yaml_task,
     load_yaml_tasks,
 )
-from command_builder.models.task import Task
 
 
 def test_get_yaml_tasks_directory():
@@ -97,19 +97,20 @@ def test_load_yaml_tasks_with_mock():
         patch(
             "command_builder.services.yaml_task_loader.list_yaml_task_files"
         ) as mock_list,
-        patch("command_builder.services.yaml_task_loader.load_yaml_task") as mock_load,
+        patch("command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task") as mock_load,
     ):
         # Configurer les mocks
         mock_list.return_value = [Path("task1.yaml"), Path("task2.yaml")]
         mock_load.side_effect = [task1, task2]
 
-        # Appeler la fonction
-        tasks = load_yaml_tasks()
+        # Appeler la fonction - retourne maintenant (tasks, errors)
+        tasks, errors = load_yaml_tasks()
 
         # Vérifications
         assert len(tasks) == 2
         assert tasks[0].name == "Tâche 1"
         assert tasks[1].name == "Tâche 2"
+        assert len(errors) == 0
 
         # Vérifier que les mocks ont été appelés
         mock_list.assert_called_once()
@@ -124,21 +125,16 @@ def test_load_yaml_tasks_with_error():
         patch(
             "command_builder.services.yaml_task_loader.list_yaml_task_files"
         ) as mock_list,
-        patch("command_builder.services.yaml_task_loader.load_yaml_task") as mock_load,
-        patch("builtins.print") as mock_print,
+        patch("command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task") as mock_load,
     ):
-        # Configurer les mocks
+        # Configurer les mocks - première tâche OK, deuxième retourne None (erreur)
         mock_list.return_value = [Path("task1.yaml"), Path("task2.yaml")]
-        mock_load.side_effect = [task1, ValueError("Erreur de format")]
+        mock_load.side_effect = [task1, None]
 
-        # Appeler la fonction
-        tasks = load_yaml_tasks()
+        # Appeler la fonction - retourne maintenant (tasks, errors)
+        tasks, errors = load_yaml_tasks()
 
         # Vérifications
         assert len(tasks) == 1  # Seule la première tâche a été chargée
         assert tasks[0].name == "Tâche 1"
-
-        # Vérifier que l'erreur a été affichée
-        mock_print.assert_called()
-        print_args = mock_print.call_args[0][0]
-        assert "Erreur lors du chargement" in print_args
+        # Les erreurs sont gérées par YamlErrorHandler, pas par des exceptions

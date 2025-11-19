@@ -2,9 +2,10 @@
 Loader YAML avec support de l'inclusion de fichiers (!include)
 """
 
-import yaml
 from pathlib import Path
 from typing import Any, Dict
+
+import yaml
 
 
 class IncludeLoader(yaml.SafeLoader):

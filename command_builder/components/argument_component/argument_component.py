@@ -3,10 +3,18 @@ Module contenant la classe ArgumentComponent qui représente un composant d'argu
 """
 
 from pathlib import Path
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QPushButton, QFileDialog, QLabel
+from typing import List, Optional
+
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
-from typing import List, Optional
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QWidget,
+)
 
 from command_builder.models.arguments import Argument
 
@@ -20,7 +28,12 @@ class ArgumentComponent(QWidget):
     # Signal émis lorsque la valeur de l'argument change
     value_changed = Signal(str, str)  # (code, value)
 
-    def __init__(self, argument: Argument, parent=None, affected_commands: Optional[List[str]] = None):
+    def __init__(
+        self,
+        argument: Argument,
+        parent=None,
+        affected_commands: Optional[List[str]] = None,
+    ):
         """
         Initialise le composant ArgumentComponent.
 
@@ -81,7 +94,7 @@ class ArgumentComponent(QWidget):
         if self.browse_button:
             self.browse_button.setVisible(False)
             self.browse_button.clicked.connect(self._on_browse_clicked)
-        
+
         # Afficher les commandes concernées si disponibles
         if self.commands_label:
             if self.affected_commands:
