@@ -1,4 +1,4 @@
-# 🚀 Guide de démarrage - CommandBuilder
+# Guide de démarrage - CommandBuilder
 
 > Guide complet pour un nouveau développeur qui prend en main le projet
 
@@ -10,10 +10,6 @@
 2. [Installation pas à pas](#installation-pas-à-pas)
 3. [Premier lancement](#premier-lancement)
 4. [Commandes essentielles](#commandes-essentielles)
-5. [Structure du projet](#structure-du-projet)
-6. [Workflow de développement](#workflow-de-développement)
-7. [Tests](#tests)
-8. [Dépannage](#dépannage)
 
 ---
 
@@ -244,7 +240,7 @@ class Task(BaseModel):
     name: str
     description: str
     commands: List[Command]
-    arguments: List[TaskArgument] = []
+    arguments: List[TaskArgument] = []  # Arguments partagés
 
 # models/command.py
 class Command(BaseModel):
@@ -257,9 +253,10 @@ class Command(BaseModel):
 class Argument(BaseModel):
     code: str
     name: str
-    type: str
-    required: int
+    type: str  # "text", "file", "folder"
+    required: int  # 0 = optionnel, 1 = obligatoire
     default: str = ""
+    validation: Optional[dict] = None
 ```
 
 #### 3. **Services** (Logique)
@@ -320,276 +317,3 @@ git add .
 git commit -m "feat: ajout de la nouvelle fonctionnalité"
 ```
 
-### 5. Push et PR
-
-```bash
-git push origin feature/ma-nouvelle-fonctionnalite
-# Créer une Pull Request sur GitHub/GitLab
-```
-
----
-
-## Tests
-
-### Organisation des tests
-
-```
-tests/
-├── components/        # Tests UI
-├── models/           # Tests des modèles
-├── services/         # Tests des services
-├── integration/      # Tests d'intégration
-└── performance/      # Tests de performance
-```
-
-### Écrire un test
-
-```python
-# tests/models/test_mon_modele.py
-import pytest
-from command_builder.models.mon_modele import MonModele
-
-def test_creation():
-    """Test de création d'un modèle."""
-    modele = MonModele(name="Test")
-    assert modele.name == "Test"
-
-def test_validation():
-    """Test de validation."""
-    with pytest.raises(ValidationError):
-        MonModele(name="")  # Nom vide = erreur
-```
-
-### Exécuter les tests
-
-```bash
-# Tous les tests
-task test
-
-# Un fichier spécifique
-pytest command_builder/tests/models/test_mon_modele.py -v
-
-# Un test spécifique
-pytest command_builder/tests/models/test_mon_modele.py::test_creation -v
-
-# Avec couverture détaillée
-task test:cov
-```
-
-### Couverture actuelle
-
-- **Total : 79%**
-- Models : ~90%
-- Services : ~80%
-- Components : ~70% (normal pour UI)
-- Integration : ~95%
-
-**Objectif : 85%+ global**
-
----
-
-## Dépannage
-
-### Problème : "task: command not found"
-
-**Solution :**
-```bash
-# Windows (avec Chocolatey)
-choco install go-task
-
-# Ou télécharger depuis
-# https://taskfile.dev/installation/
-```
-
-### Problème : "pipenv: command not found"
-
-**Solution :**
-```bash
-python -m pip install --user pipenv
-
-# Ajouter au PATH si nécessaire
-# Windows : %USERPROFILE%\AppData\Roaming\Python\Python312\Scripts
-```
-
-### Problème : "Python version mismatch"
-
-**Solution :**
-```bash
-# Vérifier la version
-python --version
-
-# Doit être 3.12+
-# Sinon, installer Python 3.12 depuis python.org
-```
-
-### Problème : "Module not found"
-
-**Solution :**
-```bash
-# Réinstaller les dépendances
-pipenv install --dev
-
-# Ou forcer la réinstallation
-pipenv --rm
-pipenv install --dev
-```
-
-### Problème : Tests échouent
-
-**Solution :**
-```bash
-# Vérifier l'environnement
-pipenv --venv
-
-# Réinstaller pytest-cov
-pipenv install pytest-cov
-
-# Exécuter avec détails
-task test:verbose
-```
-
-### Problème : L'application ne se lance pas
-
-**Solution :**
-```bash
-# Vérifier les dépendances
-pipenv check
-
-# Réinstaller PySide6
-pipenv install pyside6 --force
-
-# Lancer avec détails d'erreur
-pipenv run python main.py
-```
-
-### Problème : Erreurs de style (ruff)
-
-**Solution :**
-```bash
-# Corriger automatiquement
-task fix
-
-# Vérifier ce qui reste
-task lint
-```
-
----
-
-## Ressources utiles
-
-### Documentation du projet
-
-- `README.md` - Vue d'ensemble
-- `docs/TESTS_SUMMARY.md` - Résumé des tests
-- `docs/BUILD_AND_DISTRIBUTION.md` - Guide de build
-- `docs/SHARED_ARGUMENTS_IMPROVEMENTS.md` - Arguments partagés
-- `docs/WITH_ARGUMENTS_INTERFACE.md` - Interface WithArguments
-
-### Technologies utilisées
-
-- **Python 3.12** - https://docs.python.org/3.12/
-- **PySide6** - https://doc.qt.io/qtforpython-6/
-- **Pydantic** - https://docs.pydantic.dev/
-- **pytest** - https://docs.pytest.org/
-- **Ruff** - https://docs.astral.sh/ruff/
-
-### Commandes Git utiles
-
-```bash
-# Voir l'état
-git status
-
-# Voir les différences
-git diff
-
-# Annuler les modifications
-git checkout -- fichier.py
-
-# Créer une branche
-git checkout -b feature/nom
-
-# Mettre à jour depuis main
-git pull origin main
-
-# Voir l'historique
-git log --oneline
-```
-
----
-
-## Checklist du nouveau développeur
-
-- [ ] Python 3.12+ installé
-- [ ] Git installé
-- [ ] Task installé
-- [ ] Projet cloné
-- [ ] `task setup` exécuté avec succès
-- [ ] `task test` passe (156 tests)
-- [ ] `task run` lance l'application
-- [ ] Documentation lue (README.md)
-- [ ] Premier test écrit et passant
-- [ ] Première modification commitée
-
----
-
-## Prochaines étapes
-
-1. **Explorer le code**
-   - Lire `main.py` (point d'entrée)
-   - Explorer `components/main_window/`
-   - Comprendre les modèles dans `models/`
-
-2. **Modifier une tâche YAML**
-   - Ouvrir `data/tasks/import_task.yaml`
-   - Ajouter un argument
-   - Relancer l'app pour voir le changement
-
-3. **Écrire un test**
-   - Créer `tests/models/test_exemple.py`
-   - Écrire un test simple
-   - Exécuter avec `pytest`
-
-4. **Contribuer**
-   - Choisir une issue sur GitHub
-   - Créer une branche
-   - Implémenter et tester
-   - Créer une Pull Request
-
----
-
-## Conseils
-
-### Pour bien démarrer
-
-1. **Lisez le README.md en entier** - Vue d'ensemble complète
-2. **Lancez l'application** - Comprenez ce qu'elle fait
-3. **Explorez les tests** - Exemples de code
-4. **Modifiez un YAML** - Voyez l'impact immédiat
-5. **Posez des questions** - L'équipe est là pour aider
-
-### Bonnes pratiques
-
-- Toujours exécuter `task test` avant de commit
-- Utiliser `task fix` pour formater le code
-- Écrire des tests pour le nouveau code
-- Commenter le code complexe
-- Suivre la structure existante
-- Faire des commits atomiques et clairs
-
-### Erreurs à éviter
-
-- Ne pas tester avant de commit
-- Modifier le code sans comprendre l'architecture
-- Ignorer les erreurs de lint
-- Supprimer des tests existants
-- Hardcoder des valeurs (utiliser YAML)
-- Oublier de documenter les nouvelles fonctionnalités
-
----
-
-Bienvenue dans l'équipe CommandBuilder !
-
-Si vous avez des questions, n'hésitez pas à :
-- Consulter la documentation dans `docs/`
-- Demander de l'aide à Ndeye Fatou Mbow
-- Ouvrir une issue sur GitHub

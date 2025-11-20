@@ -78,12 +78,9 @@ CommandBuilder supporte plusieurs types d'arguments avec validation :
 
 | Type | Description | Exemple | Validation |
 |------|-------------|---------|-----------|
-| `text` | Texte libre | `"mon_fichier"` | Longueur min/max |
-| `number` | Nombre entier ou décimal | `42`, `3.14` | Min/max |
-| `boolean` | Vrai/Faux | `true`, `false` | - |
-| `file` | Chemin vers un fichier | `"C:\data\input.csv"` | Extensions autorisées |
-| `directory` | Chemin vers un dossier | `"C:\output"` | - |
-| `select` | Liste de valeurs | `["option1", "option2"]` | Options prédéfinies |
+| `text` | Texte libre (par défaut) | `"mon_fichier"` | Longueur min/max, pattern regex |
+| `file` | Chemin vers un fichier | `"C:\data\input.csv"` | Fichier doit exister |
+| `folder` | Chemin vers un dossier | `"C:\output"` | Dossier doit exister |
 
 ### Propriétés communes d'un argument
 
@@ -91,13 +88,14 @@ CommandBuilder supporte plusieurs types d'arguments avec validation :
 arguments:
   - code: "ARG_CODE"              # Identifiant unique (utilisé dans la commande)
     name: "Nom affiché"           # Nom visible dans l'interface
-    description: "Explication"    # Aide pour l'utilisateur
-    type: "text"                  # Type d'argument
-    required: true                # Obligatoire ? (true/false)
+    type: "text"                  # Type : "text", "file", "folder"
+    required: 1                   # 1 = obligatoire, 0 = optionnel
     default: "valeur_defaut"      # Valeur par défaut (optionnel)
-    validation:                   # Validation (optionnel, selon le type)
+    validation:                   # Validation (optionnel)
       min_length: 1
       max_length: 100
+      pattern: "^[a-zA-Z0-9_]+$"  # Regex
+      message: "Erreur personnalisée"
 ```
 
 ---
