@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HelpWindow</class>
+ <widget class="QDialog" name="HelpWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Documentation YAML - CommandBuilder</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="titleLabel">
+     <property name="text">
+      <string>&lt;h1&gt;📚 Documentation YAML&lt;/h1&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="introTab">
+      <attribute name="title">
+       <string>Introduction</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="introLayout">
+       <item>
+        <widget class="QTextBrowser" name="introText"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="structureTab">
+      <attribute name="title">
+       <string>Structure</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="structureLayout">
+       <item>
+        <widget class="QTextBrowser" name="structureText"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="argumentsTab">
+      <attribute name="title">
+       <string>Arguments</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="argumentsLayout">
+       <item>
+        <widget class="QTextBrowser" name="argumentsText"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="sharedTab">
+      <attribute name="title">
+       <string>Arguments Partagés</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="sharedLayout">
+       <item>
+        <widget class="QTextBrowser" name="sharedText"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="validationTab">
+      <attribute name="title">
+       <string>Validation</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="validationLayout">
+       <item>
+        <widget class="QTextBrowser" name="validationText"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="examplesTab">
+      <attribute name="title">
+       <string>Exemples Complets</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="examplesLayout">
+       <item>
+        <widget class="QTextBrowser" name="examplesText"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Fermer</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>35</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>HelpWindow</receiver>
+   <slot>accept()</slot>
+  </connection>
+ </connections>
+</ui>

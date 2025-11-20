@@ -7,6 +7,8 @@ from .argument_component import ArgumentComponent
 from .command_component import CommandComponent
 from .command_form import CommandForm
 from .console_output import ConsoleOutput
+from .help_button import HelpButton
+from .help_window import HelpWindow
 from .main_window import MainWindow
 from .task_component import TaskComponent
 from .task_list import TaskList
@@ -19,4 +21,6 @@ __all__ = [
     "TaskComponent",
     "ArgumentComponent",
     "CommandComponent",
+    "HelpButton",
+    "HelpWindow",
 ]

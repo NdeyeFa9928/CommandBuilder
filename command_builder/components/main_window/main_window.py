@@ -21,6 +21,8 @@ from PySide6.QtWidgets import (
 from command_builder.components.command_form import CommandForm
 from command_builder.components.console_output import ConsoleOutput
 from command_builder.components.error_display.error_display import ErrorsPanel
+from command_builder.components.help_button import HelpButton
+from command_builder.components.help_window import HelpWindow
 from command_builder.components.task_list import TaskList
 from command_builder.models.yaml_error import YamlError
 
@@ -116,7 +118,10 @@ class MainWindow(QMainWindow):
 
         # Configurer la fenêtre
         self.setMenuBar(ui.menuBar())
-        self.setStatusBar(ui.statusBar())
+        
+        # Récupérer et configurer la barre de statut
+        status_bar = ui.statusBar()
+        self.setStatusBar(status_bar)
 
         # Stocker les références aux conteneurs pour une utilisation ultérieure
         self.command_form_container = command_form_container
@@ -124,6 +129,13 @@ class MainWindow(QMainWindow):
 
     def _setup_components(self):
         """Configure les composants de l'interface."""
+        # Créer et configurer le bouton Help dans la barre de statut
+        self.help_button = HelpButton()
+        status_bar = self.statusBar()
+        if status_bar:
+            # Ajouter le bouton à droite de la barre de statut
+            status_bar.addPermanentWidget(self.help_button)
+        
         # Créer et configurer le composant TaskList
         self.task_list = TaskList()
         if self.task_list_container:
@@ -199,6 +211,10 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         """Connecte les signaux aux slots."""
+        if self.help_button:
+            # Connecter le bouton Help pour ouvrir la fenêtre d'aide
+            self.help_button.help_clicked.connect(self._show_help_window)
+        
         if self.task_list:
             # Connecter le signal de sélection de commande à l'affichage du formulaire
             self.task_list.command_selected.connect(self._on_command_selected)
@@ -209,6 +225,11 @@ class MainWindow(QMainWindow):
                 self.console_output.execute_commands
             )
 
+    def _show_help_window(self):
+        """Affiche la fenêtre d'aide YAML."""
+        help_window = HelpWindow(self)
+        help_window.exec()
+    
     def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
         if task := next((t for t in self.task_list.tasks if t.name == task_name), None):
