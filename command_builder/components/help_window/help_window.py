@@ -70,226 +70,267 @@ class HelpWindow(QDialog):
     def _populate_intro(self):
         """Remplit l'onglet Introduction."""
         content = """
-        <h2>Qu'est-ce qu'un fichier YAML de tâche ?</h2>
-        <p>
-        Un fichier YAML de tâche permet de définir une séquence de commandes Windows CLI 
-        qui seront exécutées dans un ordre précis. C'est un format simple et lisible pour 
-        créer des workflows automatisés.
-        </p>
+        <h2> Guide rapide YAML</h2>
         
-        <h3>Avantages</h3>
-        <ul>
-            <li><b>Simplicité</b> : Format texte facile à lire et à modifier</li>
-            <li><b>Réutilisabilité</b> : Définissez une fois, exécutez plusieurs fois</li>
-            <li><b>Arguments partagés</b> : Évitez la duplication avec des variables communes</li>
-            <li><b>Validation</b> : Vérification automatique des valeurs saisies</li>
-            <li><b>Documentation intégrée</b> : Descriptions et noms explicites</li>
+        <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 15px 0;">
+            <h3 style="margin-top: 0;"> En bref</h3>
+            <p style="font-size: 14px; line-height: 1.6;">
+            Les fichiers YAML permettent de créer des <b>tâches automatisées</b> avec plusieurs commandes CLI.<br>
+            Placez vos fichiers <code>.yaml</code> dans <code>command_builder/data/tasks/</code> et redémarrez l'application.
+            </p>
+        </div>
+        
+        <h3> Emplacement</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #2196F3;">
+command_builder/data/tasks/ma_tache.yaml
+        </pre>
+        
+        <h3> Code couleur dans cette aide</h3>
+        <table border="0" cellpadding="10" cellspacing="0" style="width: 100%; margin: 15px 0;">
+            <tr>
+                <td style="background-color: #ffebee; border-radius: 4px; width: 50%;">
+                    <b style="color: #c62828;"> ROUGE = OBLIGATOIRE</b><br>
+                    <span style="font-size: 12px;">Ces champs doivent toujours être présents</span>
+                </td>
+                <td style="background-color: #e3f2fd; border-radius: 4px; width: 50%;">
+                    <b style="color: #1565c0;">🔵 BLEU = OPTIONNEL</b><br>
+                    <span style="font-size: 12px;">Ces champs peuvent être omis</span>
+                </td>
+            </tr>
+        </table>
+        
+        <h3>📖 Navigation</h3>
+        <ul style="line-height: 1.8;">
+            <li><b>Structure</b> → Templates prêts à copier</li>
+            <li><b>Arguments</b> → Les 5 types disponibles avec exemples</li>
+            <li><b>Arguments Partagés</b> → Éviter la duplication</li>
+            <li><b>Validation</b> → Vérifier les valeurs saisies</li>
+            <li><b>Exemples</b> → Cas d'usage complets</li>
         </ul>
-        
-        <h3>Emplacement des fichiers</h3>
-        <p>
-        Les fichiers YAML doivent être placés dans le dossier : 
-        <code>command_builder/data/tasks/</code>
-        </p>
-        <p>
-        L'application charge automatiquement tous les fichiers <code>.yaml</code> ou <code>.yml</code> 
-        présents dans ce dossier au démarrage.
-        </p>
-        
-        <h3>Rechargement</h3>
-        <p>
-        Après avoir créé ou modifié un fichier YAML, redémarrez l'application pour voir les changements.
-        </p>
         """
         self.intro_text.setHtml(content)
     
     def _populate_structure(self):
         """Remplit l'onglet Structure."""
         content = """
-        <h2>Structure d'un fichier YAML</h2>
+        <h2>📐 Templates prêts à copier</h2>
         
-        <h3>Champs obligatoires</h3>
-        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <tr style="background-color: #e3f2fd;">
-                <th>Champ</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td><code>name</code></td>
-                <td>string</td>
-                <td>Nom de la tâche (affiché dans la liste)</td>
-            </tr>
-            <tr>
-                <td><code>description</code></td>
-                <td>string</td>
-                <td>Description détaillée de la tâche</td>
-            </tr>
-            <tr>
-                <td><code>commands</code></td>
-                <td>list</td>
-                <td>Liste des commandes à exécuter</td>
-            </tr>
-        </table>
-        
-        <h3>Champs optionnels</h3>
-        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <tr style="background-color: #e3f2fd;">
-                <th>Champ</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td><code>shared_arguments</code></td>
-                <td>list</td>
-                <td>Arguments communs à plusieurs commandes</td>
-            </tr>
-        </table>
-        
-        <h3>Exemple minimal</h3>
-        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #2196F3;">
-name: "Ma première tâche"
-description: "Une tâche simple avec une commande"
-commands:
-  - name: "Afficher un message"
-    description: "Affiche Hello World"
-    command: "echo Hello World"
-    arguments: []
+        <h3>Template 1 : Tâche simple (minimum requis)</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #c62828;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Ma tâche"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Description de la tâche"
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Ma commande"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Description de la commande"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "echo Hello World"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span> []
         </pre>
+        <p style="color: #666; font-size: 13px;">✅ Tous les champs en rouge sont obligatoires</p>
         
-        <h3>Structure d'une commande</h3>
-        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <tr style="background-color: #e3f2fd;">
-                <th>Champ</th>
-                <th>Type</th>
-                <th>Obligatoire</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td><code>name</code></td>
-                <td>string</td>
-                <td>Oui</td>
-                <td>Nom de la commande</td>
-            </tr>
-            <tr>
-                <td><code>description</code></td>
-                <td>string</td>
-                <td>Oui</td>
-                <td>Description de la commande</td>
-            </tr>
-            <tr>
-                <td><code>command</code></td>
-                <td>string</td>
-                <td>Oui</td>
-                <td>Commande CLI à exécuter</td>
-            </tr>
-            <tr>
-                <td><code>arguments</code></td>
-                <td>list</td>
-                <td>Oui</td>
-                <td>Liste des arguments (peut être vide [])</td>
-            </tr>
-        </table>
+        <h3>Template 2 : Commande avec arguments</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Traitement de fichier"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Traite un fichier CSV"
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Process"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Traite le fichier"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "process.exe {INPUT_FILE} {OUTPUT_FILE}"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span>
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "INPUT_FILE"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Fichier d'entrée"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 1
+      
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "OUTPUT_FILE"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Fichier de sortie"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 0
+        <span style="color: #1565c0;">default:</span> "output.csv"
+        </pre>
+        <p style="color: #666; font-size: 13px;">💡 <code>{INPUT_FILE}</code> et <code>{OUTPUT_FILE}</code> sont remplacés par les valeurs saisies</p>
+        
+        <h3>Template 3 : Avec flags et options</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Traitement avancé"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Avec options CLI"
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Process"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Traite avec options"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "process {INPUT} {DEBUG} --log-level {LOG_LEVEL}"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span>
+      # Fichier obligatoire
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "INPUT"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Fichier"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 1
+      
+      # Flag (checkbox seule)
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "DEBUG"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Mode debug"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "flag"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 0
+        <span style="color: #c62828; font-weight: bold;">value:</span> "--debug"
+      
+      # Option avec valeur (checkbox + champ)
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "LOG_LEVEL"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Niveau de log"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "valued_option"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 0
+        <span style="color: #1565c0;">default:</span> "INFO"
+        </pre>
+        <p style="color: #666; font-size: 13px;">⚠️ Pour les <code>flag</code> : le champ <code>value</code> est obligatoire</p>
+        
+        <h3>Template 4 : Avec arguments partagés</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Pipeline"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Plusieurs commandes avec argument commun"
+<span style="color: #1565c0;">shared_arguments:</span>
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "DATABASE"
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Base de données"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Import"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Importe les données"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "import.exe --db {DATABASE}"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span> []
+  
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Export"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Exporte les données"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "export.exe --db {DATABASE}"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span> []
+        </pre>
+        <p style="color: #666; font-size: 13px;">💡 L'argument DATABASE est saisi une seule fois et utilisé par toutes les commandes</p>
         """
         self.structure_text.setHtml(content)
     
     def _populate_arguments(self):
         """Remplit l'onglet Arguments."""
         content = """
-        <h2>Définition des arguments</h2>
+        <h2>🔧 Les 5 types d'arguments</h2>
         
-        <h3>Champs d'un argument</h3>
-        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
+            <b>💡 Astuce :</b> Utilisez le <code>code</code> entre accolades dans votre commande : <code>{CODE}</code>
+        </div>
+        
+        <table border="0" cellpadding="15" cellspacing="10" style="width: 100%;">
+            <tr>
+                <td style="background-color: #e8f5e9; border-radius: 8px; width: 50%;">
+                    <h3 style="margin-top: 0;"> Type "string"</h3>
+                    <p><b>Interface :</b> Champ de texte</p>
+                    <p><b>Usage :</b> Texte libre, noms, identifiants</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">
+- <span style="color: #c62828;">code:</span> "PROJECT_NAME"
+  <span style="color: #c62828;">name:</span> "Nom du projet"
+  <span style="color: #c62828;">type:</span> "string"
+  <span style="color: #c62828;">required:</span> 0
+  <span style="color: #1565c0;">default:</span> ""</pre>
+                </td>
+                <td style="background-color: #e8f5e9; border-radius: 8px; width: 50%;">
+                    <h3 style="margin-top: 0;">Type "file"</h3>
+                    <p><b>Interface :</b> Champ + Bouton Parcourir</p>
+                    <p><b>Usage :</b> Sélection de fichiers</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">
+- <span style="color: #c62828;">code:</span> "INPUT_FILE"
+  <span style="color: #c62828;">name:</span> "Fichier d'entrée"
+  <span style="color: #c62828;">type:</span> "file"
+  <span style="color: #c62828;">required:</span> 1
+  <span style="color: #1565c0;">validation:</span>
+    file_extensions: [".csv"]</pre>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color: #e8f5e9; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Type "directory"</h3>
+                    <p><b>Interface :</b> Champ + Bouton Parcourir</p>
+                    <p><b>Usage :</b> Sélection de dossiers</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">
+- <span style="color: #c62828;">code:</span> "OUTPUT_DIR"
+  <span style="color: #c62828;">name:</span> "Dossier de sortie"
+  <span style="color: #c62828;">type:</span> "directory"
+  <span style="color: #c62828;">required:</span> 0</pre>
+                </td>
+                <td style="background-color: #e3f2fd; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Type "flag"</h3>
+                    <p><b>Interface :</b> Case à cocher seule</p>
+                    <p><b>Usage :</b> Options on/off (--debug, -v)</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">
+- <span style="color: #c62828;">code:</span> "DEBUG"
+  <span style="color: #c62828;">name:</span> "Mode debug"
+  <span style="color: #c62828;">type:</span> "flag"
+  <span style="color: #c62828;">required:</span> 0
+  <span style="color: #c62828;">value:</span> "--debug"</pre>
+                    <p style="font-size: 12px;">⚠️ Champ <code>value</code> obligatoire</p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="background-color: #e3f2fd; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Type "valued_option"</h3>
+                    <p><b>Interface :</b> Case à cocher + Champ de saisie</p>
+                    <p><b>Usage :</b> Options avec valeur (--log-level INFO, --threads 4)</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">
+- <span style="color: #c62828;">code:</span> "LOG_LEVEL"
+  <span style="color: #c62828;">name:</span> "Niveau de log"
+  <span style="color: #c62828;">type:</span> "valued_option"
+  <span style="color: #c62828;">required:</span> 0
+  <span style="color: #1565c0;">default:</span> "INFO"</pre>
+                </td>
+            </tr>
+        </table>
+        
+        <h3>Champs disponibles pour un argument</h3>
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; margin: 15px 0;">
             <tr style="background-color: #e3f2fd;">
                 <th>Champ</th>
-                <th>Type</th>
                 <th>Obligatoire</th>
                 <th>Description</th>
             </tr>
-            <tr>
+            <tr style="background-color: #ffebee;">
                 <td><code>code</code></td>
-                <td>string</td>
-                <td>Oui</td>
-                <td>Identifiant unique de l'argument (ex: DATABASE_FILE)</td>
+                <td>🔴 OUI</td>
+                <td>Identifiant unique (ex: INPUT_FILE)</td>
             </tr>
-            <tr>
+            <tr style="background-color: #ffebee;">
                 <td><code>name</code></td>
-                <td>string</td>
-                <td>Oui</td>
-                <td>Nom affiché dans l'interface (ex: "Base de données")</td>
+                <td>🔴 OUI</td>
+                <td>Nom affiché (ex: "Fichier d'entrée")</td>
             </tr>
-            <tr>
+            <tr style="background-color: #ffebee;">
+                <td><code>type</code></td>
+                <td>🔴 OUI</td>
+                <td>"string", "file", "directory", "flag", "valued_option"</td>
+            </tr>
+            <tr style="background-color: #ffebee;">
                 <td><code>required</code></td>
-                <td>int</td>
-                <td>Oui</td>
+                <td>🔴 OUI</td>
                 <td>0 = optionnel, 1 = obligatoire</td>
             </tr>
             <tr>
-                <td><code>type</code></td>
-                <td>string</td>
-                <td>Non</td>
-                <td>"file", "folder", "text" (par défaut: "text")</td>
-            </tr>
-            <tr>
                 <td><code>default</code></td>
-                <td>string</td>
-                <td>Non</td>
+                <td>🔵 Non</td>
                 <td>Valeur par défaut</td>
             </tr>
             <tr>
+                <td><code>value</code></td>
+                <td>🔴 Pour flag</td>
+                <td>Valeur à insérer si coché (ex: "--debug")</td>
+            </tr>
+            <tr>
                 <td><code>validation</code></td>
-                <td>dict</td>
-                <td>Non</td>
+                <td>🔵 Non</td>
                 <td>Règles de validation (voir onglet Validation)</td>
             </tr>
         </table>
         
-        <h3>Types d'arguments</h3>
-        
-        <h4>1. Type "text" (par défaut)</h4>
-        <p>Champ de saisie libre pour du texte.</p>
-        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #4CAF50;">
-arguments:
-  - code: "TABLE_NAME"
-    name: "Nom de la table"
-    required: 1
-    type: "text"
-    default: "ma_table"
-        </pre>
-        
-        <h4>2. Type "file"</h4>
-        <p>Champ avec bouton "Parcourir" pour sélectionner un fichier.</p>
-        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #4CAF50;">
-arguments:
-  - code: "INPUT_FILE"
-    name: "Fichier d'entrée"
-    required: 1
-    type: "file"
-        </pre>
-        
-        <h4>3. Type "folder"</h4>
-        <p>Champ avec bouton "Parcourir" pour sélectionner un dossier.</p>
-        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #4CAF50;">
-arguments:
-  - code: "OUTPUT_DIR"
-    name: "Dossier de sortie"
-    required: 1
-    type: "folder"
-        </pre>
-        
-        <h3>Arguments obligatoires vs optionnels</h3>
-        <p>
-        Les arguments obligatoires (<code>required: 1</code>) sont marqués d'une astérisque rouge <span style="color: red;">*</span> 
-        dans l'interface. L'application empêche l'exécution si un champ obligatoire est vide.
-        </p>
-        
-        <h3>Utilisation dans la commande</h3>
-        <p>
-        Utilisez le <code>code</code> de l'argument entre accolades <code>{}</code> dans la commande :
-        </p>
-        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #FF9800;">
-command: "python script.py --input {INPUT_FILE} --output {OUTPUT_DIR}"
-        </pre>
+        <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
+            <b>⚠️ Important :</b>
+            <ul style="margin: 5px 0;">
+                <li>Les types <code>flag</code> et <code>valued_option</code> doivent toujours avoir <code>required: 0</code></li>
+                <li>Pour <code>flag</code>, le champ <code>value</code> est obligatoire</li>
+                <li>Les placeholders vides sont automatiquement supprimés de la commande</li>
+            </ul>
+        </div>
         """
         self.arguments_text.setHtml(content)
     
@@ -298,94 +339,90 @@ command: "python script.py --input {INPUT_FILE} --output {OUTPUT_DIR}"
         content = """
         <h2>🔗 Arguments partagés</h2>
         
-        <h3>Qu'est-ce qu'un argument partagé ?</h3>
-        <p>
-        Un argument partagé est une valeur commune utilisée par plusieurs commandes. 
-        Au lieu de définir le même argument pour chaque commande, vous le définissez 
-        une seule fois au niveau de la tâche.
-        </p>
+        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;">
+            <h3 style="margin-top: 0;">Pourquoi utiliser des arguments partagés ?</h3>
+            <p style="font-size: 14px; line-height: 1.6;">
+            Quand plusieurs commandes utilisent <b>la même valeur</b> (ex: une base de données), 
+            définissez-la une seule fois au lieu de la répéter pour chaque commande.<br>
+            <b>Résultat :</b> L'utilisateur saisit la valeur une seule fois ✅
+            </p>
+        </div>
         
-        <h3>Avantages</h3>
-        <ul>
-            <li>Évite la duplication</li>
-            <li>L'utilisateur saisit la valeur une seule fois</li>
-            <li>Facilite la maintenance</li>
-            <li>Réduit les erreurs de saisie</li>
-        </ul>
-        
-        <h3>Définition</h3>
-        <p>Les arguments partagés se définissent au niveau de la tâche :</p>
+        <h3>📝 Exemple simple</h3>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #9C27B0;">
-name: "Traitement de données"
-description: "Import et validation"
-shared_arguments:
-  - code: "DATABASE_FILE"
-    name: "Base de données"
-    required: 1
-    type: "file"
-  
-  - code: "LOG_LEVEL"
-    name: "Niveau de log"
-    required: 0
-    type: "text"
-    default: "INFO"
+<span style="color: #c62828; font-weight: bold;">name:</span> "Pipeline de traitement"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Import et validation"
 
-commands:
-  - name: "Import"
-    description: "Importe les données"
-    command: "import.exe --db {DATABASE_FILE} --log {LOG_LEVEL}"
-    arguments: []
+<span style="color: #1565c0; font-weight: bold;">shared_arguments:</span>
+  - <span style="color: #c62828;">code:</span> "DATABASE"
+    <span style="color: #c62828;">name:</span> "Base de données"
+    <span style="color: #c62828;">type:</span> "file"
+    <span style="color: #c62828;">required:</span> 1
+
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828;">name:</span> "Import"
+    <span style="color: #c62828;">description:</span> "Importe les données"
+    <span style="color: #c62828;">command:</span> "import.exe --db {DATABASE}"
+    <span style="color: #c62828;">arguments:</span> []
   
-  - name: "Validation"
-    description: "Valide les données"
-    command: "validate.exe --db {DATABASE_FILE} --log {LOG_LEVEL}"
-    arguments: []
+  - <span style="color: #c62828;">name:</span> "Validation"
+    <span style="color: #c62828;">description:</span> "Valide les données"
+    <span style="color: #c62828;">command:</span> "validate.exe --db {DATABASE}"
+    <span style="color: #c62828;">arguments:</span> []
         </pre>
-        
-        <h3>Mapping vers les commandes</h3>
-        <p>
-        Si les codes ne correspondent pas exactement, utilisez le champ <code>shared_argument_mapping</code> :
+        <p style="color: #666; font-size: 13px;">
+        L'utilisateur saisit DATABASE une seule fois<br>
+        Les deux commandes utilisent la même valeur automatiquement
         </p>
+        
+        <h3>🔄 Mapping (codes différents)</h3>
+        <p>Si vos commandes utilisent des codes différents, utilisez <code>shared_argument_mapping</code> :</p>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #9C27B0;">
-shared_arguments:
-  - code: "INPUT_FILE"
-    name: "Fichier source"
-    required: 1
-    type: "file"
+<span style="color: #1565c0;">shared_arguments:</span>
+  - <span style="color: #c62828;">code:</span> "INPUT_FILE"
+    <span style="color: #c62828;">name:</span> "Fichier source"
+    <span style="color: #c62828;">type:</span> "file"
+    <span style="color: #c62828;">required:</span> 1
 
-commands:
-  - name: "Import"
-    command: "import.exe --source {SOURCE_FILE}"
-    arguments: []
-    shared_argument_mapping:
+<span style="color: #c62828;">commands:</span>
+  - <span style="color: #c62828;">name:</span> "Import"
+    <span style="color: #c62828;">command:</span> "import.exe --source {SOURCE_FILE}"
+    <span style="color: #c62828;">arguments:</span> []
+    <span style="color: #1565c0;">shared_argument_mapping:</span>
       INPUT_FILE: "SOURCE_FILE"
   
-  - name: "Backup"
-    command: "backup.exe --file {FILE_PATH}"
-    arguments: []
-    shared_argument_mapping:
+  - <span style="color: #c62828;">name:</span> "Backup"
+    <span style="color: #c62828;">command:</span> "backup.exe --file {FILE_PATH}"
+    <span style="color: #c62828;">arguments:</span> []
+    <span style="color: #1565c0;">shared_argument_mapping:</span>
       INPUT_FILE: "FILE_PATH"
         </pre>
+        <p style="color: #666; font-size: 13px;">
+        INPUT_FILE est mappé vers SOURCE_FILE pour la première commande et FILE_PATH pour la seconde
+        </p>
         
         <h3>Combinaison avec arguments locaux</h3>
-        <p>Une commande peut avoir à la fois des arguments partagés et des arguments locaux :</p>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #9C27B0;">
-shared_arguments:
-  - code: "DATABASE"
-    name: "Base de données"
-    required: 1
-    type: "file"
+<span style="color: #1565c0;">shared_arguments:</span>
+  - <span style="color: #c62828;">code:</span> "DATABASE"
+    <span style="color: #c62828;">name:</span> "Base de données"
+    <span style="color: #c62828;">type:</span> "file"
+    <span style="color: #c62828;">required:</span> 1
 
-commands:
-  - name: "Export"
-    command: "export.exe --db {DATABASE} --format {FORMAT}"
-    arguments:
-      - code: "FORMAT"
-        name: "Format de sortie"
-        required: 1
-        type: "text"
-        default: "CSV"
+<span style="color: #c62828;">commands:</span>
+  - <span style="color: #c62828;">name:</span> "Export"
+    <span style="color: #c62828;">command:</span> "export.exe --db {DATABASE} --format {FORMAT}"
+    <span style="color: #c62828;">arguments:</span>
+      - <span style="color: #c62828;">code:</span> "FORMAT"
+        <span style="color: #c62828;">name:</span> "Format de sortie"
+        <span style="color: #c62828;">type:</span> "string"
+        <span style="color: #c62828;">required:</span> 0
+        <span style="color: #1565c0;">default:</span> "CSV"
         </pre>
+        <p style="color: #666; font-size: 13px;">
+        DATABASE est partagé (saisi une fois)<br>
+        FORMAT est local à la commande Export
+        </p>
         """
         self.shared_text.setHtml(content)
     
@@ -637,6 +674,60 @@ commands:
       OUTPUT_DIR: "OUT"
         </pre>
         
+        <h3>Exemple 5 : Avec flags et options</h3>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #00BCD4;">
+name: "Traitement de données"
+description: "Traite des données avec options avancées"
+commands:
+  - name: "Process"
+    description: "Traite les données"
+    command: "process {INPUT} {OUTPUT} {DEBUG} {VERBOSE} --log-level {LOG_LEVEL} --threads {THREADS}"
+    arguments:
+      # Fichier obligatoire
+      - code: "INPUT"
+        name: "Fichier d'entrée"
+        type: "file"
+        required: 1
+        validation:
+          file_extensions: [".csv", ".json"]
+      
+      # Fichier optionnel
+      - code: "OUTPUT"
+        name: "Fichier de sortie"
+        type: "file"
+        required: 0
+      
+      # Flags simples (checkbox seule)
+      - code: "DEBUG"
+        name: "Mode debug"
+        type: "flag"
+        required: 0
+        value: "--debug"
+      
+      - code: "VERBOSE"
+        name: "Mode verbeux"
+        type: "flag"
+        required: 0
+        value: "-v"
+      
+      # Options avec valeur (checkbox + champ)
+      - code: "LOG_LEVEL"
+        name: "Niveau de log"
+        type: "valued_option"
+        required: 0
+        default: "INFO"
+      
+      - code: "THREADS"
+        name: "Nombre de threads"
+        type: "valued_option"
+        required: 0
+        default: "4"
+        </pre>
+        <p><b>Résultat avec DEBUG coché, VERBOSE décoché :</b></p>
+        <pre style="background-color: #e8f5e9; padding: 10px; border-radius: 4px;">
+process input.csv output.csv --debug --log-level INFO --threads 4
+        </pre>
+        
         <h3>💡 Conseils</h3>
         <ul>
             <li>Utilisez des noms explicites pour les arguments</li>
@@ -644,6 +735,8 @@ commands:
             <li>Définissez des valeurs par défaut quand c'est pertinent</li>
             <li>Utilisez la validation pour éviter les erreurs</li>
             <li>Privilégiez les arguments partagés pour éviter la duplication</li>
+            <li>Utilisez <code>flag</code> pour les options on/off simples</li>
+            <li>Utilisez <code>valued_option</code> pour les options avec valeur</li>
             <li>Testez vos fichiers YAML avant de les déployer</li>
         </ul>
         """
