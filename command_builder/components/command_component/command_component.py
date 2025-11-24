@@ -254,6 +254,8 @@ class CommandComponent(QWidget):
         Returns:
             La commande complète sous forme de chaîne
         """
+        import re
+        
         # Commencer avec la commande de base
         full_command = self.command.command
 
@@ -275,20 +277,29 @@ class CommandComponent(QWidget):
                     full_command = full_command.replace(placeholder, value)
                 else:
                     # Pour les options (flag ou valued_option), supprimer complètement le placeholder
-                    # Pour les autres types, afficher un placeholder stylisé
+                    # Pour les autres types, vérifier si l'argument est optionnel
                     arg_type = argument.type or "string"
                     if arg_type in ["flag", "valued_option"]:
-                        # Supprimer le placeholder vide (option non activée)
+                        # Pour valued_option, supprimer aussi le mot précédent (ex: --project {PROJECT_NAME})
+                        if arg_type == "valued_option":
+                            # Regex pour supprimer le mot précédent + le placeholder
+                            # Cherche un mot (--option ou -o) suivi d'espaces puis du placeholder
+                            pattern = r'(\s+--?\S+)?\s*' + re.escape(placeholder)
+                            full_command = re.sub(pattern, '', full_command)
+                        else:
+                            # Pour flag, supprimer seulement le placeholder
+                            full_command = full_command.replace(placeholder, "")
+                    elif argument.required == 0:
+                        # Pour les arguments optionnels (required=0) vides, supprimer le placeholder
                         full_command = full_command.replace(placeholder, "")
                     else:
-                        # Afficher un placeholder stylisé si pas de valeur
+                        # Pour les arguments obligatoires vides, afficher un placeholder stylisé
                         display_placeholder = argument.name
                         full_command = full_command.replace(
                             placeholder, f"{{{display_placeholder}}}"
                         )
 
         # Nettoyer les espaces multiples consécutifs
-        import re
         full_command = re.sub(r'\s+', ' ', full_command).strip()
 
         return full_command
