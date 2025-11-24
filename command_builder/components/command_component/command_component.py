@@ -274,11 +274,22 @@ class CommandComponent(QWidget):
                 if value:
                     full_command = full_command.replace(placeholder, value)
                 else:
-                    # Afficher un placeholder stylisé si pas de valeur
-                    display_placeholder = argument.name
-                    full_command = full_command.replace(
-                        placeholder, f"{{{display_placeholder}}}"
-                    )
+                    # Pour les options (flag ou valued_option), supprimer complètement le placeholder
+                    # Pour les autres types, afficher un placeholder stylisé
+                    arg_type = argument.type or "string"
+                    if arg_type in ["flag", "valued_option"]:
+                        # Supprimer le placeholder vide (option non activée)
+                        full_command = full_command.replace(placeholder, "")
+                    else:
+                        # Afficher un placeholder stylisé si pas de valeur
+                        display_placeholder = argument.name
+                        full_command = full_command.replace(
+                            placeholder, f"{{{display_placeholder}}}"
+                        )
+
+        # Nettoyer les espaces multiples consécutifs
+        import re
+        full_command = re.sub(r'\s+', ' ', full_command).strip()
 
         return full_command
 
