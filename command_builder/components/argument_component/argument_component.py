@@ -180,9 +180,15 @@ class ArgumentComponent(QWidget):
                 return self.argument.value if self.argument.value else "1"
             return ""
         elif arg_type == "valued_option":
-            # Pour les options avec valeur, retourner la valeur seulement si la checkbox est cochée
+            # Pour les options avec valeur, retourner le préfixe + valeur si la checkbox est cochée
             if self.checkbox and self.checkbox.isChecked() and self.line_edit:
-                return self.line_edit.text()
+                user_value = self.line_edit.text().strip()
+                if user_value:
+                    # Si un préfixe est défini dans argument.value, l'ajouter avant la valeur
+                    prefix = self.argument.value if self.argument.value else ""
+                    if prefix:
+                        return f"{prefix} {user_value}"
+                    return user_value
             return ""
         else:
             # Pour les types classiques, retourner le texte du champ
