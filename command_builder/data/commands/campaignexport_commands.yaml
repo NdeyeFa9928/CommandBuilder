@@ -1,6 +1,6 @@
 name: "campaignexport"
 description: "Exporte les tables SQLite en fichiers texte + images"
-command: "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} {TOLIMAGE}"
+command: "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} {TOLIMAGE} > {LOG_FILE}"
 arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"
@@ -25,6 +25,14 @@ arguments:
   - code: "TOLIMAGE"
     name: "Tolérance image"
     description: "Valeur de tolérance pour les images (--tolimage)"
-    type: "float"
+    type: "valued_option"
     required: 0
+    value: "--tolimage"
     default: ""
+
+  - code: "LOG_FILE"
+    name: "Fichier de log"
+    description: "Fichier de log pour l'export"
+    type: "string"
+    required: 1
+    default: "log_campaignexport.txt"
