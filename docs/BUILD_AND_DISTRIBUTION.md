@@ -62,12 +62,28 @@ graph TD
 
 ## 4. Ajouter / mettre à jour des tâches après build
 
-1. **Créer** (si absent) le dossier :
+Le dossier `data/` est **automatiquement copié** à côté de l'exe lors du build :
+
 ```
-dist/data/tasks/
+dist/
+├── CommandBuilder_0.1.0.exe
+└── data/
+    ├── tasks/
+    │   ├── traitement_campagne_task.yaml
+    │   ├── import_tdms_task.yaml
+    │   └── ...
+    └── commands/
+        ├── tdmsimport_commands.yaml
+        ├── csvexport_commands.yaml
+        └── ...
 ```
-2. Déposer vos fichiers `*.yaml` dedans.
-3. Relancer `CommandBuilder.exe` : les nouvelles tâches sont chargées sans recompilation.
+
+**Pour modifier ou ajouter des tâches** :
+1. Ouvrir `dist/data/tasks/`
+2. Modifier un fichier `.yaml` existant ou en créer un nouveau
+3. Relancer `CommandBuilder.exe` : les changements sont pris en compte immédiatement
+
+>  **Avantage** : Les utilisateurs peuvent personnaliser les tâches sans recompiler l'application.
 
 ---
 
