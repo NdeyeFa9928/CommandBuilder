@@ -122,6 +122,34 @@ class HelpWindow(QDialog):
             </tr>
         </table>
         
+        <h3>🖥️ Comprendre l'interface</h3>
+        <table border="0" cellpadding="10" cellspacing="0" style="width: 100%; margin: 10px 0;">
+            <tr>
+                <td style="background-color: #ffebee; border-radius: 4px; width: 50%;">
+                    <b style="color: #c62828;">🔴 Astérisque rouge (*)</b><br>
+                    <span style="font-size: 13px;">Champ obligatoire (<code>required: 1</code>)<br>
+                    Affiché APRÈS le nom : "Base de données : *"</span>
+                </td>
+                <td style="background-color: #e8f5e9; border-radius: 4px; width: 50%;">
+                    <b style="color: #2e7d32;">✅ Case à cocher</b><br>
+                    <span style="font-size: 13px;">Type <code>flag</code> ou <code>valued_option</code><br>
+                    Coché = inclus dans la commande</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color: #e3f2fd; border-radius: 4px;">
+                    <b style="color: #1565c0;">🔵 Couleur du label</b><br>
+                    <span style="font-size: 13px;">Noir = champ vide<br>
+                    Bleu = champ rempli</span>
+                </td>
+                <td style="background-color: #fff3e0; border-radius: 4px;">
+                    <b style="color: #f57c00;">📋 Étapes d'exécution</b><br>
+                    <span style="font-size: 13px;">Les commandes s'exécutent dans l'ordre<br>
+                    Si erreur → arrêt immédiat</span>
+                </td>
+            </tr>
+        </table>
+        
         <h3>📖 Onglets</h3>
         <ul style="line-height: 1.6;">
             <li><b>Structure</b> → Templates complets</li>
