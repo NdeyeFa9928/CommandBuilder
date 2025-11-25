@@ -179,6 +179,13 @@ def copy_data_directory(base_dir, dist_dir):
     
     print(f"  - {len(task_files)} task files")
     print(f"  - {len(command_files)} command files")
+    
+    # Copy README for end users
+    readme_source = base_dir / "README_DISTRIBUTION.txt"
+    if readme_source.exists():
+        readme_dest = dist_dir / "README.txt"
+        shutil.copy2(readme_source, readme_dest)
+        print(f"[OK] README.txt copied")
 
 
 def build_executable(dev_mode=False):
