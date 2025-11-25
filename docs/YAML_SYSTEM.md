@@ -74,24 +74,106 @@ Au démarrage, CommandBuilder charge **automatiquement** tous les fichiers YAML 
 
 ## Types d'arguments
 
-CommandBuilder supporte plusieurs types d'arguments avec validation :
+CommandBuilder supporte 5 types d'arguments pour couvrir tous les cas d'usage :
 
-| Type | Description | Exemple | Validation |
-|------|-------------|---------|-----------|
-| `text` | Texte libre (par défaut) | `"mon_fichier"` | Longueur min/max, pattern regex |
-| `file` | Chemin vers un fichier | `"C:\data\input.csv"` | Fichier doit exister |
-| `folder` | Chemin vers un dossier | `"C:\output"` | Dossier doit exister |
+| Type | Interface | Description | Usage |
+|------|-----------|-------------|-------|
+| `string` |  Champ texte | Texte libre | Noms, identifiants, texte simple |
+| `file` |  Champ + Parcourir | Chemin vers un fichier | Fichiers d'entrée/sortie |
+| `directory` | Champ + Parcourir | Chemin vers un dossier | Dossiers de travail |
+| `flag` | ☑ Checkbox | Option on/off | Flags CLI (`--debug`, `--verbose`) |
+| `valued_option` | ☑ +  Checkbox + Champ | Option avec valeur | Options CLI (`--log-level INFO`) |
+
+### 1. Type `string` - Texte simple
+
+```yaml
+- code: "PROJECT_NAME"
+  name: "Nom du projet"
+  type: "string"
+  required: 0
+  default: ""
+```
+
+**Interface** : Champ de saisie texte  
+**Usage** : Texte libre, noms, identifiants
+
+### 2. Type `file` - Fichier
+
+```yaml
+- code: "INPUT_FILE"
+  name: "Fichier d'entrée"
+  type: "file"
+  required: 1
+  validation:
+    file_extensions: [".txt", ".csv", ".json"]
+```
+
+**Interface** : Champ de saisie + bouton "Parcourir..."  
+**Usage** : Chemins de fichiers  
+**Validation** : Extensions autorisées
+
+### 3. Type `directory` - Dossier
+
+```yaml
+- code: "OUTPUT_DIR"
+  name: "Dossier de sortie"
+  type: "directory"
+  required: 0
+```
+
+**Interface** : Champ de saisie + bouton "Parcourir..." (sélection de dossier)  
+**Usage** : Chemins de dossiers
+
+### 4. Type `flag` - Flag simple (option booléenne)
+
+```yaml
+- code: "DEBUG_FLAG"
+  name: "Mode debug"
+  type: "flag"
+  required: 0
+  value: "--debug"  # ← Valeur insérée si coché
+  default: ""
+```
+
+**Interface** : Case à cocher seule  
+**Usage** : Options on/off qui n'ont pas besoin de valeur (`--debug`, `--verbose`, `--force`)  
+**Comportement** :
+- ✅ Coché → insère la valeur du champ `value` dans la commande
+- ❌ Décoché → supprimé complètement de la commande
+- Toujours `required: 0` (un flag ne peut pas être obligatoire)
+
+**⚠️ Important** : Le champ `value` est obligatoire pour définir ce qui sera inséré dans la commande.
+
+### 5. Type `valued_option` - Option avec valeur
+
+```yaml
+- code: "LOG_LEVEL"
+  name: "Niveau de log"
+  type: "valued_option"
+  required: 0
+  default: "INFO"  # Optionnel : valeur par défaut
+```
+
+**Interface** : Case à cocher + champ de saisie  
+**Usage** : Options qui nécessitent une valeur (`--log-level INFO`, `--threads 4`)  
+**Comportement** :
+- ✅ Coché + rempli → insère la valeur du champ
+- ❌ Décoché ou vide → supprimé complètement de la commande
+- Toujours `required: 0` (une valued_option ne peut pas être obligatoire)
 
 ### Propriétés communes d'un argument
 
 ```yaml
 arguments:
-  - code: "ARG_CODE"              # Identifiant unique (utilisé dans la commande)
+  - code: "ARG_CODE"              # Identifiant unique (utilisé dans {ARG_CODE})
     name: "Nom affiché"           # Nom visible dans l'interface
-    type: "text"                  # Type : "text", "file", "folder"
+    type: "string"                # Type : "string", "file", "directory", "flag", "valued_option"
     required: 1                   # 1 = obligatoire, 0 = optionnel
     default: "valeur_defaut"      # Valeur par défaut (optionnel)
+    value: "--flag"               # Pour type "flag" : valeur à insérer si coché
+    description: "Description"    # Description affichée (optionnel)
     validation:                   # Validation (optionnel)
+      file_extensions: [".csv"]   # Pour type "file"
       min_length: 1
       max_length: 100
       pattern: "^[a-zA-Z0-9_]+$"  # Regex
@@ -143,32 +225,73 @@ arguments:
 - **command** : Commande CLI avec placeholders `{CODE}`
 - **arguments** : Liste des arguments (peut être vide)
 
-### Exemple complet
+### Exemple complet avec tous les types
 
 ```yaml
-name: "csvexport"
-description: "Exporte les données en fichier CSV"
-command: "csvexport.exe --database={DATABASE} --output={OUTPUT_FILE} --format={FORMAT}"
+name: "process_data"
+description: "Traite des données avec options avancées"
+command: "process {INPUT} {OUTPUT} {DEBUG} {VERBOSE} --log-level {LOG_LEVEL} --threads {THREADS}"
 arguments:
-  - code: "DATABASE"
-    name: "Base de données"
+  # Fichier obligatoire
+  - code: "INPUT"
+    name: "Fichier d'entrée"
+    description: "Fichier de données à traiter"
     type: "file"
-    required: true
+    required: 1
     validation:
-      file_extensions: [".db", ".sqlite"]
+      file_extensions: [".csv", ".json", ".txt"]
   
-  - code: "OUTPUT_FILE"
+  # Fichier optionnel
+  - code: "OUTPUT"
     name: "Fichier de sortie"
+    description: "Fichier de résultat (optionnel)"
     type: "file"
-    required: true
-    default: "export.csv"
+    required: 0
+    default: ""
   
-  - code: "FORMAT"
-    name: "Format"
-    type: "select"
-    required: true
-    options: ["csv", "json", "xml"]
-    default: "csv"
+  # Flag simple
+  - code: "DEBUG"
+    name: "Mode debug"
+    description: "Activer le mode debug"
+    type: "flag"
+    required: 0
+    value: "--debug"
+    default: ""
+  
+  # Flag simple
+  - code: "VERBOSE"
+    name: "Mode verbeux"
+    description: "Afficher plus d'informations"
+    type: "flag"
+    required: 0
+    value: "-v"
+    default: ""
+  
+  # Option avec valeur
+  - code: "LOG_LEVEL"
+    name: "Niveau de log"
+    description: "Niveau de log (INFO, DEBUG, ERROR)"
+    type: "valued_option"
+    required: 0
+    default: "INFO"
+  
+  # Option avec valeur
+  - code: "THREADS"
+    name: "Nombre de threads"
+    description: "Nombre de threads pour le traitement"
+    type: "valued_option"
+    required: 0
+    default: "4"
+```
+
+**Résultat avec DEBUG coché, VERBOSE décoché, LOG_LEVEL="INFO", THREADS="4"** :
+```bash
+process input.csv output.csv --debug --log-level INFO --threads 4
+```
+
+**Résultat avec tous les flags décochés et options vides** :
+```bash
+process input.csv
 ```
 
 ---
@@ -693,32 +816,32 @@ commands:
 
 ### La commande n'apparaît pas
 
-- ✅ Vérifiez que le fichier est dans `data/commands/`
-- ✅ Vérifiez que le YAML est valide (pas d'erreur de syntaxe)
-- ✅ Vérifiez que la tâche inclut bien la commande
-- ✅ Redémarrez l'application
-- ✅ Vérifiez la dialog d'erreurs au démarrage
+- Vérifiez que le fichier est dans `data/commands/`
+- Vérifiez que le YAML est valide (pas d'erreur de syntaxe)
+- Vérifiez que la tâche inclut bien la commande
+- Redémarrez l'application
+- Vérifiez la dialog d'erreurs au démarrage
 
 ### L'argument partagé ne se propage pas
 
-- ✅ Vérifiez que le nom de la commande est correct
-- ✅ Vérifiez que le code de l'argument est correct
-- ✅ Vérifiez que l'argument existe dans la commande
-- ✅ Vérifiez la structure de `values`
+- Vérifiez que le nom de la commande est correct
+- Vérifiez que le code de l'argument est correct
+- Vérifiez que l'argument existe dans la commande
+- Vérifiez la structure de `values`
 
 ### Erreur de chemin d'inclusion
 
-- ✅ Vérifiez que le chemin est relatif au fichier courant
-- ✅ Vérifiez que le fichier inclus existe
-- ✅ Vérifiez la syntaxe `!include ../chemin/fichier.yaml`
-- ✅ Vérifiez la dialog d'erreurs pour le message exact
+- Vérifiez que le chemin est relatif au fichier courant
+- Vérifiez que le fichier inclus existe
+- Vérifiez la syntaxe `!include ../chemin/fichier.yaml`
+- Vérifiez la dialog d'erreurs pour le message exact
 
 ### Validation échoue
 
-- ✅ Vérifiez les extensions de fichier autorisées
-- ✅ Vérifiez les valeurs min/max pour les nombres
-- ✅ Vérifiez que la valeur correspond au type attendu
-- ✅ Consultez la dialog d'erreurs pour les détails
+-  Vérifiez les extensions de fichier autorisées
+-  Vérifiez les valeurs min/max pour les nombres
+-  Vérifiez que la valeur correspond au type attendu
+- Consultez la dialog d'erreurs pour les détails
 
 ---
 
