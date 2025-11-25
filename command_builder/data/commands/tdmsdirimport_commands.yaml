@@ -1,48 +1,94 @@
-name: "tdmsdirimport"
+name: "tdmsdirimport_tc"
 description: "Importe tous les fichiers TDMS d'un dossier vers une base SQLite"
-command: "tdmsdirimport {INPUT_TDMS_DIR} {DATABASE_DIR} --config {CONFIG_FILE} --keys {KEYS_FILE} {OFFROAD_FLAG} {PROJECT_NAME} {TABLE_NAME}"
+command: "tdmsdirimport {TDMS_DIR} --pname {PNAME} --keys {KEYS_FILE} --config {CONFIG} {TOL} {PTABLE} {IMU_LAG_TIME} {IMU_CHAN} {GPS_LAG_TIME} {GPS_CHAN} {IMAGE_LAG_TIME} > {LOG_FILE}"
 arguments:
-  - code: "INPUT_TDMS_DIR"
+  - code: "TDMS_DIR"
     name: "Répertoire TDMS"
     description: "Répertoire contenant les fichiers TDMS"
     type: "directory"
     required: 1
+    default: "L:\\999999_CDG_2025\\E3D_S29\\AP\\TDMS"
   
-  - code: "DATABASE_DIR"
-    name: "Répertoire base SQLite"
-    description: "Répertoire pour la base de données"
-    type: "directory"
+  - code: "PNAME"
+    name: "Nom du projet"
+    description: "Nom du projet (--pname)"
+    type: "string"
     required: 1
-  
-  - code: "CONFIG_FILE"
-    name: "Configuration"
-    description: "Fichier de configuration"
-    type: "file"
-    required: 1
+    default: "E3D_S29"
   
   - code: "KEYS_FILE"
     name: "Fichier de clés"
     description: "Fichier de clés pour l'import"
     type: "file"
     required: 1
-  
-  - code: "OFFROAD_FLAG"
-    name: "Mode hors route"
-    description: "Activer le mode hors route"
-    type: "boolean"
-    required: 0
-    default: ""
-  
-  - code: "PROJECT_NAME"
-    name: "Nom du projet"
-    description: "Nom du projet (--pname)"
+    default: "L:\\999999_CDG_2025\\E3D_S29\\AP\\clavier_debut_fin_unique.csv"
+
+  - code: "CONFIG"
+    name: "Configuration"
+    description: "Fichier de configuration"
     type: "string"
+    required: 1
+    default: "default"
+
+  - code: "TOL"
+    name: "Tolérance"
+    description: "Tolérance pour l'import"
+    type: "valued_option"
     required: 0
+    value: "--tol"
+    default: "0"
+
+  - code: "PTABLE"
+    name: "Table de points"
+    description: "Table de points pour l'import"
+    type: "flag"
+    required: 0
+    value: "--ptable"
     default: ""
-  
-  - code: "TABLE_NAME"
-    name: "Nom de la table"
-    description: "Nom de la table (--ptable)"
+
+  - code: "IMU_LAG_TIME"
+    name: "Lag IMU"
+    description: "Lag IMU pour l'import"
+    type: "valued_option"
+    required: 0
+    value: "--imu-lag-time"
+    default: "7"
+
+  - code: "IMU_CHAN"
+    name: "Canal IMU"
+    description: "Canal IMU pour l'import"
+    type: "valued_option"
+    required: 0
+    value: "--imu-chan"
+    default: "PPS"
+
+  - code: "GPS_LAG_TIME"
+    name: "Lag GPS"
+    description: "Lag GPS pour l'import"
+    type: "valued_option"
+    required: 0
+    value: "--gps-lag-time"
+    default: "7"
+
+  - code: "GPS_CHAN"
+    name: "Canal GPS"
+    description: "Canal GPS pour l'import"
+    type: "valued_option"
+    required: 0
+    value: "--gps-chan"
+    default: "PPS"
+
+  - code: "IMAGE_LAG_TIME"
+    name: "Lag Image"
+    description: "Lag Image pour l'import"
+    type: "valued_option"
+    required: 0
+    value: "--image-lag-time"
+    default: "125"
+
+  - code: "LOG_FILE"
+    name: "Fichier de log"
+    description: "Fichier de log pour l'import"
     type: "string"
-    required: 0
-    default: ""
+    required: 1
+    default: "log_tdmsdirimport.txt"

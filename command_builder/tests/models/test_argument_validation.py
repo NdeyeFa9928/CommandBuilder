@@ -1,6 +1,7 @@
 """Tests unitaires pour la validation des arguments (types, formats, etc.)."""
 
 import pytest
+
 from command_builder.models.arguments import Argument
 from command_builder.models.command import Command
 from command_builder.models.with_argument import WithArguments
@@ -13,7 +14,7 @@ class TestArgumentValidationRequired:
         """Test qu'un argument obligatoire vide échoue."""
         arg = Argument(code="INPUT", name="Input", required=1, type="text")
         is_valid, error = WithArguments.validate_single_argument(arg, "")
-        
+
         assert not is_valid
         assert "obligatoire" in error.lower()
 
@@ -21,7 +22,7 @@ class TestArgumentValidationRequired:
         """Test qu'un argument obligatoire avec espaces échoue."""
         arg = Argument(code="INPUT", name="Input", required=1, type="text")
         is_valid, error = WithArguments.validate_single_argument(arg, "   ")
-        
+
         assert not is_valid
         assert "obligatoire" in error.lower()
 
@@ -29,7 +30,7 @@ class TestArgumentValidationRequired:
         """Test qu'un argument obligatoire rempli réussit."""
         arg = Argument(code="INPUT", name="Input", required=1, type="text")
         is_valid, error = WithArguments.validate_single_argument(arg, "value")
-        
+
         assert is_valid
         assert error is None
 
@@ -37,7 +38,7 @@ class TestArgumentValidationRequired:
         """Test qu'un argument optionnel vide réussit."""
         arg = Argument(code="OPT", name="Optional", required=0, type="text")
         is_valid, error = WithArguments.validate_single_argument(arg, "")
-        
+
         assert is_valid
         assert error is None
 
@@ -48,7 +49,7 @@ class TestArgumentValidationTypes:
     def test_text_argument_accepts_any_string(self):
         """Test que le type text accepte n'importe quelle chaîne."""
         arg = Argument(code="TEXT", name="Text", type="text", required=1)
-        
+
         assert WithArguments.validate_single_argument(arg, "simple")[0]
         assert WithArguments.validate_single_argument(arg, "with spaces")[0]
         assert WithArguments.validate_single_argument(arg, "123")[0]
@@ -58,18 +59,18 @@ class TestArgumentValidationTypes:
     def test_number_argument_validates_numeric(self):
         """Test que le type number valide les nombres."""
         arg = Argument(code="NUM", name="Number", type="number", required=1)
-        
+
         # Valides
         assert WithArguments.validate_single_argument(arg, "123")[0]
         assert WithArguments.validate_single_argument(arg, "123.45")[0]
         assert WithArguments.validate_single_argument(arg, "-10")[0]
         assert WithArguments.validate_single_argument(arg, "0")[0]
-        
+
         # Invalides
         is_valid, error = WithArguments.validate_single_argument(arg, "abc")
         assert not is_valid
         assert "nombre" in error.lower()
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "12.34.56")
         assert not is_valid
 
@@ -77,7 +78,7 @@ class TestArgumentValidationTypes:
     def test_file_argument_validates_path_exists(self):
         """Test que le type file valide l'existence du fichier."""
         arg = Argument(code="FILE", name="File", type="file", required=1)
-        
+
         # Fichier inexistant
         is_valid, error = WithArguments.validate_single_argument(arg, "nonexistent.txt")
         assert not is_valid
@@ -87,16 +88,16 @@ class TestArgumentValidationTypes:
     def test_directory_argument_validates_path_exists(self):
         """Test que le type directory valide l'existence du dossier."""
         arg = Argument(code="DIR", name="Directory", type="directory", required=1)
-        
+
         # Dossier inexistant
         is_valid, error = WithArguments.validate_single_argument(arg, "nonexistent_dir")
         assert not is_valid
         assert "existe pas" in error.lower() or "not found" in error.lower()
 
-    def test_boolean_argument_accepts_any_value(self):
-        """Test que le type boolean accepte n'importe quelle valeur (checkbox)."""
-        arg = Argument(code="BOOL", name="Boolean", type="boolean", required=0)
-        
+    def test_flag_argument_accepts_any_value(self):
+        """Test que le type flag accepte n'importe quelle valeur (checkbox)."""
+        arg = Argument(code="BOOL", name="Boolean", type="flag", required=0)
+
         # Les booléens sont généralement optionnels et acceptent tout
         assert WithArguments.validate_single_argument(arg, "true")[0]
         assert WithArguments.validate_single_argument(arg, "false")[0]
@@ -115,20 +116,20 @@ class TestCommandValidationIntegration:
             arguments=[
                 Argument(code="INPUT", name="Input", required=1, type="text"),
                 Argument(code="OPT", name="Optional", required=0, type="text"),
-            ]
+            ],
         )
-        
+
         # Tous remplis
         is_valid, errors = command.validate_arguments({"INPUT": "value", "OPT": "opt"})
         assert is_valid
         assert len(errors) == 0
-        
+
         # Argument obligatoire manquant
         is_valid, errors = command.validate_arguments({"INPUT": "", "OPT": "opt"})
         assert not is_valid
         assert len(errors) == 1
         assert "Input" in errors[0]
-        
+
         # Argument optionnel manquant (OK)
         is_valid, errors = command.validate_arguments({"INPUT": "value", "OPT": ""})
         assert is_valid
@@ -144,9 +145,9 @@ class TestCommandValidationIntegration:
                 Argument(code="A", name="Arg A", required=1, type="text"),
                 Argument(code="B", name="Arg B", required=1, type="text"),
                 Argument(code="C", name="Arg C", required=0, type="text"),
-            ]
+            ],
         )
-        
+
         # Deux arguments obligatoires manquants
         is_valid, errors = command.validate_arguments({"A": "", "B": "", "C": ""})
         assert not is_valid
@@ -163,7 +164,7 @@ class TestArgumentValidationEdgeCases:
         # Créer un argument sans le champ required (cas limite)
         arg = Argument(code="TEST", name="Test", type="text")
         arg.required = None  # Simuler l'absence du champ
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "")
         assert is_valid  # Devrait être valide par défaut
 
@@ -171,7 +172,7 @@ class TestArgumentValidationEdgeCases:
         """Test que required=True fonctionne (en plus de required=1)."""
         arg = Argument(code="TEST", name="Test", type="text")
         arg.required = True
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "")
         assert not is_valid
         assert "obligatoire" in error.lower()
@@ -180,14 +181,14 @@ class TestArgumentValidationEdgeCases:
         """Test que required=False fonctionne (en plus de required=0)."""
         arg = Argument(code="TEST", name="Test", type="text")
         arg.required = False
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "")
         assert is_valid
 
     def test_validation_with_default_value(self):
         """Test que la validation utilise la valeur fournie, pas la valeur par défaut."""
         arg = Argument(code="TEST", name="Test", required=1, default="default_value")
-        
+
         # Même avec une valeur par défaut, si on passe "", ça doit échouer
         is_valid, error = WithArguments.validate_single_argument(arg, "")
         assert not is_valid
@@ -204,13 +205,13 @@ class TestArgumentValidationCustomRules:
             name="Text",
             type="text",
             required=1,
-            validation={"min_length": 5}
+            validation={"min_length": 5},
         )
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "abc")
         assert not is_valid
         assert "5" in error
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "abcdef")
         assert is_valid
 
@@ -222,12 +223,12 @@ class TestArgumentValidationCustomRules:
             name="Text",
             type="text",
             required=1,
-            validation={"max_length": 10}
+            validation={"max_length": 10},
         )
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "12345678901")
         assert not is_valid
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "12345")
         assert is_valid
 
@@ -239,13 +240,15 @@ class TestArgumentValidationCustomRules:
             name="Email",
             type="text",
             required=1,
-            validation={"pattern": r"^[\w\.-]+@[\w\.-]+\.\w+$"}
+            validation={"pattern": r"^[\w\.-]+@[\w\.-]+\.\w+$"},
         )
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "invalid-email")
         assert not is_valid
-        
-        is_valid, error = WithArguments.validate_single_argument(arg, "user@example.com")
+
+        is_valid, error = WithArguments.validate_single_argument(
+            arg, "user@example.com"
+        )
         assert is_valid
 
     @pytest.mark.skip(reason="Validation personnalisée non implémentée - à implémenter")
@@ -256,14 +259,14 @@ class TestArgumentValidationCustomRules:
             name="Port",
             type="number",
             required=1,
-            validation={"min": 1024, "max": 65535}
+            validation={"min": 1024, "max": 65535},
         )
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "80")
         assert not is_valid
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "8080")
         assert is_valid
-        
+
         is_valid, error = WithArguments.validate_single_argument(arg, "70000")
         assert not is_valid

@@ -18,7 +18,8 @@ arguments:
   
   - code: "DEBUG_FLAG"
     name: "Mode debug"
-    description: "Activer le mode debug (--debug)"
-    type: "boolean"
+    description: "Activer le mode debug"
+    type: "flag"
     required: 0
+    value: "--debug"
     default: ""

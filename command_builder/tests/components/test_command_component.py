@@ -87,16 +87,18 @@ class TestCommandComponentBuildFullCommand:
     def test_build_full_command_with_empty_arguments(
         self, mock_setup, mock_stylesheet, mock_ui, qapp, sample_command_with_args
     ):
-        """Test que _build_full_command affiche les placeholders quand les arguments sont vides."""
+        """Test que _build_full_command affiche les placeholders pour les arguments obligatoires vides."""
         component = CommandComponent(sample_command_with_args)
         component.argument_components = {}
 
         result = component._build_full_command()
 
-        # Les placeholders doivent être remplacés par les noms des arguments
+        # Les placeholders des arguments obligatoires doivent être affichés
         assert "{Input File}" in result
         assert "{Output File}" in result
-        assert "{Mode}" in result
+        # Les arguments optionnels vides sont supprimés (MODE est optionnel)
+        assert "{Mode}" not in result
+        assert "MODE" not in result
         assert "myapp --input" in result
 
     @patch.object(CommandComponent, "_load_ui")

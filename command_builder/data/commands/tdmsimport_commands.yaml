@@ -33,13 +33,15 @@ arguments:
   - code: "OFFROAD_FLAG"
     name: "Mode hors route"
     description: "Activer le mode hors route"
-    type: "boolean"
+    type: "flag"
     required: 0
+    value: "--offroad"
     default: ""
   
   - code: "PROJECT_NAME"
     name: "Nom du projet"
     description: "Nom du projet à créer"
-    type: "string"
+    type: "valued_option"
     required: 0
+    value: "--pname"
     default: ""

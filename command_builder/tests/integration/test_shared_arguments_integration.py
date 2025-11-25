@@ -1,9 +1,10 @@
 """Tests d'intégration pour le système d'arguments partagés."""
 
 import pytest
-from command_builder.models.task import Task
+
+from command_builder.models.arguments import Argument, ArgumentValue, TaskArgument
 from command_builder.models.command import Command
-from command_builder.models.arguments import Argument, TaskArgument, ArgumentValue
+from command_builder.models.task import Task
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def task_with_shared_arguments():
                 values=[
                     ArgumentValue(command="Import Data", argument="db_path"),
                     ArgumentValue(command="Process Data", argument="database"),
-                ]
+                ],
             ),
             TaskArgument(
                 code="OUTPUT_DIR",
@@ -33,8 +34,8 @@ def task_with_shared_arguments():
                 values=[
                     ArgumentValue(command="Import Data", argument="output"),
                     ArgumentValue(command="Process Data", argument="output_dir"),
-                ]
-            )
+                ],
+            ),
         ],
         commands=[
             Command(
@@ -42,9 +43,13 @@ def task_with_shared_arguments():
                 description="Import data from file",
                 command="import --db {db_path} --output {output}",
                 arguments=[
-                    Argument(code="db_path", name="Database Path", type="file", required=1),
-                    Argument(code="output", name="Output", type="directory", required=0),
-                ]
+                    Argument(
+                        code="db_path", name="Database Path", type="file", required=1
+                    ),
+                    Argument(
+                        code="output", name="Output", type="directory", required=0
+                    ),
+                ],
             ),
             Command(
                 name="Process Data",
@@ -52,10 +57,15 @@ def task_with_shared_arguments():
                 command="process --database {database} --output-dir {output_dir}",
                 arguments=[
                     Argument(code="database", name="Database", type="file", required=1),
-                    Argument(code="output_dir", name="Output Directory", type="directory", required=0),
-                ]
-            )
-        ]
+                    Argument(
+                        code="output_dir",
+                        name="Output Directory",
+                        type="directory",
+                        required=0,
+                    ),
+                ],
+            ),
+        ],
     )
 
 
@@ -65,18 +75,15 @@ class TestSharedArgumentsBasicFlow:
     def test_apply_shared_arguments_propagates_values(self, task_with_shared_arguments):
         """Test que apply_shared_arguments propage les valeurs aux commandes."""
         task = task_with_shared_arguments
-        
+
         # Appliquer les valeurs partagées
-        shared_values = {
-            "DATABASE_FILE": "data.db",
-            "OUTPUT_DIR": "./results"
-        }
+        shared_values = {"DATABASE_FILE": "data.db", "OUTPUT_DIR": "./results"}
         task.apply_shared_arguments(shared_values)
-        
+
         # Vérifier que les valeurs ont été propagées
         import_cmd = task.commands[0]
         process_cmd = task.commands[1]
-        
+
         assert import_cmd.get_argument_by_code("db_path").default == "data.db"
         assert import_cmd.get_argument_by_code("output").default == "./results"
         assert process_cmd.get_argument_by_code("database").default == "data.db"
@@ -85,32 +92,29 @@ class TestSharedArgumentsBasicFlow:
     def test_apply_shared_arguments_with_empty_values(self, task_with_shared_arguments):
         """Test avec des valeurs vides."""
         task = task_with_shared_arguments
-        
-        shared_values = {
-            "DATABASE_FILE": "",
-            "OUTPUT_DIR": ""
-        }
+
+        shared_values = {"DATABASE_FILE": "", "OUTPUT_DIR": ""}
         task.apply_shared_arguments(shared_values)
-        
+
         # Les valeurs ne devraient pas être propagées si vides
         import_cmd = task.commands[0]
         # La valeur par défaut de la commande devrait être préservée
         assert import_cmd.get_argument_by_code("db_path").default == ""
 
-    def test_apply_shared_arguments_uses_task_defaults(self, task_with_shared_arguments):
+    def test_apply_shared_arguments_uses_task_defaults(
+        self, task_with_shared_arguments
+    ):
         """Test que les valeurs par défaut de la tâche sont utilisées."""
         task = task_with_shared_arguments
-        
+
         # Ne pas fournir OUTPUT_DIR, devrait utiliser la valeur par défaut de la tâche
-        shared_values = {
-            "DATABASE_FILE": "data.db"
-        }
+        shared_values = {"DATABASE_FILE": "data.db"}
         task.apply_shared_arguments(shared_values)
-        
+
         # OUTPUT_DIR devrait utiliser sa valeur par défaut "./output"
         import_cmd = task.commands[0]
         process_cmd = task.commands[1]
-        
+
         assert import_cmd.get_argument_by_code("output").default == "./output"
         assert process_cmd.get_argument_by_code("output_dir").default == "./output"
 
@@ -128,9 +132,7 @@ class TestSharedArgumentsPriority:
                     code="SHARED",
                     name="Shared",
                     default="task_default",
-                    values=[
-                        ArgumentValue(command="Command", argument="arg")
-                    ]
+                    values=[ArgumentValue(command="Command", argument="arg")],
                 )
             ],
             commands=[
@@ -140,14 +142,14 @@ class TestSharedArgumentsPriority:
                     command="test {arg}",
                     arguments=[
                         Argument(code="arg", name="Arg", default="command_default")
-                    ]
+                    ],
                 )
-            ]
+            ],
         )
-        
+
         # Appliquer avec la valeur par défaut de la tâche
         task.apply_shared_arguments({"SHARED": "task_default"})
-        
+
         # La valeur de la tâche devrait écraser celle de la commande
         assert task.commands[0].get_argument_by_code("arg").default == "task_default"
 
@@ -161,9 +163,7 @@ class TestSharedArgumentsPriority:
                     code="SHARED",
                     name="Shared",
                     default="task_default",
-                    values=[
-                        ArgumentValue(command="Command", argument="arg")
-                    ]
+                    values=[ArgumentValue(command="Command", argument="arg")],
                 )
             ],
             commands=[
@@ -173,14 +173,14 @@ class TestSharedArgumentsPriority:
                     command="test {arg}",
                     arguments=[
                         Argument(code="arg", name="Arg", default="command_default")
-                    ]
+                    ],
                 )
-            ]
+            ],
         )
-        
+
         # Appliquer avec une valeur utilisateur
         task.apply_shared_arguments({"SHARED": "user_value"})
-        
+
         # La valeur utilisateur devrait être utilisée
         assert task.commands[0].get_argument_by_code("arg").default == "user_value"
 
@@ -202,7 +202,7 @@ class TestSharedArgumentsMultipleCommands:
                         ArgumentValue(command="Command 1", argument="arg1"),
                         ArgumentValue(command="Command 2", argument="arg2"),
                         ArgumentValue(command="Command 3", argument="arg3"),
-                    ]
+                    ],
                 )
             ],
             commands=[
@@ -210,25 +210,25 @@ class TestSharedArgumentsMultipleCommands:
                     name="Command 1",
                     description="Test",
                     command="test1 {arg1}",
-                    arguments=[Argument(code="arg1", name="Arg1")]
+                    arguments=[Argument(code="arg1", name="Arg1")],
                 ),
                 Command(
                     name="Command 2",
                     description="Test",
                     command="test2 {arg2}",
-                    arguments=[Argument(code="arg2", name="Arg2")]
+                    arguments=[Argument(code="arg2", name="Arg2")],
                 ),
                 Command(
                     name="Command 3",
                     description="Test",
                     command="test3 {arg3}",
-                    arguments=[Argument(code="arg3", name="Arg3")]
-                )
-            ]
+                    arguments=[Argument(code="arg3", name="Arg3")],
+                ),
+            ],
         )
-        
+
         task.apply_shared_arguments({"SHARED": "shared_value"})
-        
+
         # Vérifier que toutes les commandes ont reçu la valeur
         assert task.commands[0].get_argument_by_code("arg1").default == "shared_value"
         assert task.commands[1].get_argument_by_code("arg2").default == "shared_value"
@@ -244,14 +244,14 @@ class TestSharedArgumentsMultipleCommands:
                     code="SHARED1",
                     name="Shared 1",
                     default="value1",
-                    values=[ArgumentValue(command="Command", argument="arg1")]
+                    values=[ArgumentValue(command="Command", argument="arg1")],
                 ),
                 TaskArgument(
                     code="SHARED2",
                     name="Shared 2",
                     default="value2",
-                    values=[ArgumentValue(command="Command", argument="arg2")]
-                )
+                    values=[ArgumentValue(command="Command", argument="arg2")],
+                ),
             ],
             commands=[
                 Command(
@@ -260,14 +260,14 @@ class TestSharedArgumentsMultipleCommands:
                     command="test {arg1} {arg2}",
                     arguments=[
                         Argument(code="arg1", name="Arg1"),
-                        Argument(code="arg2", name="Arg2")
-                    ]
+                        Argument(code="arg2", name="Arg2"),
+                    ],
                 )
-            ]
+            ],
         )
-        
+
         task.apply_shared_arguments({"SHARED1": "value1", "SHARED2": "value2"})
-        
+
         # Les deux arguments devraient être propagés
         assert task.commands[0].get_argument_by_code("arg1").default == "value1"
         assert task.commands[0].get_argument_by_code("arg2").default == "value2"
@@ -284,14 +284,11 @@ class TestSharedArgumentsEdgeCases:
             arguments=[],
             commands=[
                 Command(
-                    name="Command",
-                    description="Test",
-                    command="test",
-                    arguments=[]
+                    name="Command", description="Test", command="test", arguments=[]
                 )
-            ]
+            ],
         )
-        
+
         # Ne devrait pas planter
         task.apply_shared_arguments({"NONEXISTENT": "value"})
 
@@ -307,7 +304,7 @@ class TestSharedArgumentsEdgeCases:
                     default="value",
                     values=[
                         ArgumentValue(command="Nonexistent Command", argument="arg")
-                    ]
+                    ],
                 )
             ],
             commands=[
@@ -315,11 +312,11 @@ class TestSharedArgumentsEdgeCases:
                     name="Real Command",
                     description="Test",
                     command="test",
-                    arguments=[]
+                    arguments=[],
                 )
-            ]
+            ],
         )
-        
+
         # Ne devrait pas planter
         task.apply_shared_arguments({"SHARED": "value"})
 
@@ -335,7 +332,7 @@ class TestSharedArgumentsEdgeCases:
                     default="value",
                     values=[
                         ArgumentValue(command="Command", argument="nonexistent_arg")
-                    ]
+                    ],
                 )
             ],
             commands=[
@@ -343,27 +340,25 @@ class TestSharedArgumentsEdgeCases:
                     name="Command",
                     description="Test",
                     command="test {real_arg}",
-                    arguments=[
-                        Argument(code="real_arg", name="Real Arg")
-                    ]
+                    arguments=[Argument(code="real_arg", name="Real Arg")],
                 )
-            ]
+            ],
         )
-        
+
         # Ne devrait pas planter
         task.apply_shared_arguments({"SHARED": "value"})
-        
+
         # L'argument réel ne devrait pas être affecté
         assert task.commands[0].get_argument_by_code("real_arg").default == ""
 
     def test_apply_shared_arguments_multiple_times(self, task_with_shared_arguments):
         """Test d'applications successives d'arguments partagés."""
         task = task_with_shared_arguments
-        
+
         # Première application
         task.apply_shared_arguments({"DATABASE_FILE": "data1.db"})
         assert task.commands[0].get_argument_by_code("db_path").default == "data1.db"
-        
+
         # Deuxième application avec une valeur différente
         task.apply_shared_arguments({"DATABASE_FILE": "data2.db"})
         assert task.commands[0].get_argument_by_code("db_path").default == "data2.db"
@@ -382,9 +377,7 @@ class TestSharedArgumentsValidation:
                     code="REQUIRED_SHARED",
                     name="Required Shared",
                     required=1,
-                    values=[
-                        ArgumentValue(command="Command", argument="arg")
-                    ]
+                    values=[ArgumentValue(command="Command", argument="arg")],
                 )
             ],
             commands=[
@@ -392,18 +385,16 @@ class TestSharedArgumentsValidation:
                     name="Command",
                     description="Test",
                     command="test {arg}",
-                    arguments=[
-                        Argument(code="arg", name="Arg", required=1)
-                    ]
+                    arguments=[Argument(code="arg", name="Arg", required=1)],
                 )
-            ]
+            ],
         )
-        
+
         # Sans valeur
         is_valid, errors = task.validate_arguments({"REQUIRED_SHARED": ""})
         assert not is_valid
         assert len(errors) > 0
-        
+
         # Avec valeur
         is_valid, errors = task.validate_arguments({"REQUIRED_SHARED": "value"})
         assert is_valid

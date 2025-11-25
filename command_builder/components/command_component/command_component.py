@@ -254,6 +254,8 @@ class CommandComponent(QWidget):
         Returns:
             La commande complète sous forme de chaîne
         """
+        import re
+
         # Commencer avec la commande de base
         full_command = self.command.command
 
@@ -274,11 +276,25 @@ class CommandComponent(QWidget):
                 if value:
                     full_command = full_command.replace(placeholder, value)
                 else:
-                    # Afficher un placeholder stylisé si pas de valeur
-                    display_placeholder = argument.name
-                    full_command = full_command.replace(
-                        placeholder, f"{{{display_placeholder}}}"
-                    )
+                    # Pour les options (flag ou valued_option), supprimer complètement le placeholder
+                    # Pour les autres types, vérifier si l'argument est optionnel
+                    arg_type = argument.type or "string"
+                    if arg_type in ["flag", "valued_option"]:
+                        # Pour flag et valued_option, supprimer seulement le placeholder
+                        # (pour valued_option, le préfixe est déjà inclus dans la valeur retournée par get_value())
+                        full_command = full_command.replace(placeholder, "")
+                    elif argument.required == 0:
+                        # Pour les arguments optionnels (required=0) vides, supprimer le placeholder
+                        full_command = full_command.replace(placeholder, "")
+                    else:
+                        # Pour les arguments obligatoires vides, afficher un placeholder stylisé
+                        display_placeholder = argument.name
+                        full_command = full_command.replace(
+                            placeholder, f"{{{display_placeholder}}}"
+                        )
+
+        # Nettoyer les espaces multiples consécutifs
+        full_command = re.sub(r"\s+", " ", full_command).strip()
 
         return full_command
 

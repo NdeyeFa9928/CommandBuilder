@@ -69,19 +69,9 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="validationTab">
-      <attribute name="title">
-       <string>Validation</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="validationLayout">
-       <item>
-        <widget class="QTextBrowser" name="validationText"/>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="examplesTab">
       <attribute name="title">
-       <string>Exemples Complets</string>
+       <string>Exemples</string>
       </attribute>
       <layout class="QVBoxLayout" name="examplesLayout">
        <item>

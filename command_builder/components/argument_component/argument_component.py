@@ -8,6 +8,7 @@ from typing import List, Optional
 from PySide6.QtCore import Signal
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
+    QCheckBox,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -67,6 +68,7 @@ class ArgumentComponent(QWidget):
         # Stocker les références aux widgets importants
         self.line_edit = ui.findChild(QLineEdit, "argumentLineEdit")
         self.browse_button = ui.findChild(QPushButton, "browseButton")
+        self.checkbox = ui.findChild(QCheckBox, "checkBox")
         self.commands_label = ui.findChild(QLabel, "commandsLabel")
 
     def _load_stylesheet(self):
@@ -80,20 +82,51 @@ class ArgumentComponent(QWidget):
 
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de l'argument."""
-        if self.line_edit:
+        arg_type = self.argument.type or "string"
+
+        # Masquer/afficher les widgets selon le type
+        if arg_type == "flag":
+            # Pour les flags : checkbox visible, line_edit caché
+            self.checkbox.setVisible(True)
+            self.line_edit.setVisible(False)
+            self.browse_button.setVisible(False)
+            self.checkbox.setToolTip(f"Activer {self.argument.name}")
+            # Cocher si une valeur par défaut existe
+            if self.argument.default:
+                self.checkbox.setChecked(True)
+            self.checkbox.stateChanged.connect(self._on_checkbox_changed)
+        elif arg_type == "valued_option":
+            # Pour les options avec valeur : checkbox + line_edit visibles
+            self.checkbox.setVisible(True)
+            self.line_edit.setVisible(True)
+            self.browse_button.setVisible(False)
+            self.checkbox.setToolTip(f"Activer {self.argument.name}")
+            # Cocher si une valeur par défaut existe
+            if self.argument.default:
+                self.checkbox.setChecked(True)
+                self.line_edit.setText(self.argument.default)
+                self._has_default_value = True
             self.line_edit.setPlaceholderText(
                 self.argument.description or self.argument.name
             )
-            # Initialiser avec la valeur par défaut si elle existe
+            self.checkbox.stateChanged.connect(self._on_checkbox_changed)
+            self.line_edit.textChanged.connect(self._on_value_changed)
+        else:
+            # Type string/file : champ texte classique, pas de checkbox
+            self.checkbox.setVisible(False)
+            self.line_edit.setPlaceholderText(
+                self.argument.description or self.argument.name
+            )
             if self.argument.default:
                 self.line_edit.setText(self.argument.default)
                 self._has_default_value = True
             self.line_edit.textChanged.connect(self._on_value_changed)
-
-        # Par défaut, cacher le bouton de parcours (peut être activé selon le type)
-        if self.browse_button:
-            self.browse_button.setVisible(False)
-            self.browse_button.clicked.connect(self._on_browse_clicked)
+            # Afficher le bouton parcourir pour les fichiers/dossiers
+            if arg_type in ["file", "directory"]:
+                self.browse_button.setVisible(True)
+                self.browse_button.clicked.connect(self._on_browse_clicked)
+            else:
+                self.browse_button.setVisible(False)
 
         # Afficher les commandes concernées si disponibles
         if self.commands_label:
@@ -108,6 +141,24 @@ class ArgumentComponent(QWidget):
         """Gère le changement de valeur dans le champ de saisie."""
         self.value_changed.emit(self.argument.code, text)
 
+    def _on_checkbox_changed(self, state: int):
+        """Gère le changement d'état de la checkbox."""
+        arg_type = self.argument.type or "string"
+
+        if arg_type == "flag":
+            # Pour les flags, émettre la valeur définie ou "1" par défaut si coché
+            if state:
+                value = self.argument.value if self.argument.value else "1"
+            else:
+                value = ""
+            self.value_changed.emit(self.argument.code, value)
+        elif arg_type == "valued_option":
+            # Pour les options avec valeur, émettre la valeur du champ si coché, "" si décoché
+            if state and self.line_edit:
+                self.value_changed.emit(self.argument.code, self.line_edit.text())
+            else:
+                self.value_changed.emit(self.argument.code, "")
+
     def _on_browse_clicked(self):
         """Ouvre une boîte de dialogue pour sélectionner un fichier ou dossier."""
         file_path, _ = QFileDialog.getOpenFileName(self, "Sélectionner un fichier")
@@ -121,7 +172,27 @@ class ArgumentComponent(QWidget):
         Returns:
             La valeur saisie
         """
-        return self.line_edit.text() if self.line_edit else ""
+        arg_type = self.argument.type or "string"
+
+        if arg_type == "flag":
+            # Pour les flags, retourner la valeur définie ou "1" par défaut si coché
+            if self.checkbox and self.checkbox.isChecked():
+                return self.argument.value if self.argument.value else "1"
+            return ""
+        elif arg_type == "valued_option":
+            # Pour les options avec valeur, retourner le préfixe + valeur si la checkbox est cochée
+            if self.checkbox and self.checkbox.isChecked() and self.line_edit:
+                user_value = self.line_edit.text().strip()
+                if user_value:
+                    # Si un préfixe est défini dans argument.value, l'ajouter avant la valeur
+                    prefix = self.argument.value if self.argument.value else ""
+                    if prefix:
+                        return f"{prefix} {user_value}"
+                    return user_value
+            return ""
+        else:
+            # Pour les types classiques, retourner le texte du champ
+            return self.line_edit.text() if self.line_edit else ""
 
     def set_value(self, value: str, is_default: bool = False):
         """
@@ -131,9 +202,24 @@ class ArgumentComponent(QWidget):
             value: La valeur à définir
             is_default: Indique si la valeur est une valeur par défaut
         """
-        if self.line_edit:
-            self.line_edit.setText(value)
+        arg_type = self.argument.type or "string"
+
+        if arg_type == "flag":
+            # Pour les flags, cocher/décocher la checkbox
+            if self.checkbox:
+                self.checkbox.setChecked(value in ["1", "true", "True"])
+        elif arg_type == "valued_option":
+            # Pour les options avec valeur, définir la valeur et cocher si non vide
+            if self.line_edit:
+                self.line_edit.setText(value)
+            if self.checkbox:
+                self.checkbox.setChecked(bool(value))
             self._has_default_value = is_default
+        else:
+            # Pour les types classiques
+            if self.line_edit:
+                self.line_edit.setText(value)
+                self._has_default_value = is_default
 
     def get_argument(self) -> Argument:
         """
