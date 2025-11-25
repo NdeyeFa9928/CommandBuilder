@@ -280,15 +280,9 @@ class CommandComponent(QWidget):
                     # Pour les autres types, vérifier si l'argument est optionnel
                     arg_type = argument.type or "string"
                     if arg_type in ["flag", "valued_option"]:
-                        # Pour valued_option, supprimer aussi le mot précédent (ex: --project {PROJECT_NAME})
-                        if arg_type == "valued_option":
-                            # Regex pour supprimer le mot précédent + le placeholder
-                            # Cherche un mot (--option ou -o) suivi d'espaces puis du placeholder
-                            pattern = r'(\s+--?\S+)?\s*' + re.escape(placeholder)
-                            full_command = re.sub(pattern, '', full_command)
-                        else:
-                            # Pour flag, supprimer seulement le placeholder
-                            full_command = full_command.replace(placeholder, "")
+                        # Pour flag et valued_option, supprimer seulement le placeholder
+                        # (pour valued_option, le préfixe est déjà inclus dans la valeur retournée par get_value())
+                        full_command = full_command.replace(placeholder, "")
                     elif argument.required == 0:
                         # Pour les arguments optionnels (required=0) vides, supprimer le placeholder
                         full_command = full_command.replace(placeholder, "")
