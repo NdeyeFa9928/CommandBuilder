@@ -1,16 +1,17 @@
 """Fenêtre d'aide avec documentation complète YAML."""
 
 from pathlib import Path
-from PySide6.QtWidgets import QDialog
+
 from PySide6 import QtUiTools
+from PySide6.QtWidgets import QDialog
 
 
 class HelpWindow(QDialog):
     """Fenêtre d'aide affichant la documentation YAML complète."""
-    
+
     def __init__(self, parent=None):
         """Initialise la fenêtre d'aide.
-        
+
         Args:
             parent: Widget parent
         """
@@ -19,23 +20,23 @@ class HelpWindow(QDialog):
         self._load_stylesheet()
         self._connect_signals()
         self._populate_content()
-    
+
     def _load_ui(self):
         """Charge l'interface depuis le fichier .ui."""
-        from PySide6.QtWidgets import QTabWidget, QTextBrowser, QPushButton
-        
+        from PySide6.QtWidgets import QPushButton, QTabWidget, QTextBrowser
+
         ui_file = Path(__file__).parent / "help_window.ui"
         loader = QtUiTools.QUiLoader()
         ui = loader.load(str(ui_file))
-        
+
         # Copier les propriétés
         self.setWindowTitle(ui.windowTitle())
         self.resize(ui.size())
-        
+
         # Récupérer le layout de l'UI chargée et l'appliquer à ce dialog
         ui_layout = ui.layout()
         self.setLayout(ui_layout)
-        
+
         # Récupérer les widgets
         self.tab_widget = self.findChild(QTabWidget, "tabWidget")
         self.intro_text = self.findChild(QTextBrowser, "introText")
@@ -44,19 +45,19 @@ class HelpWindow(QDialog):
         self.shared_text = self.findChild(QTextBrowser, "sharedText")
         self.examples_text = self.findChild(QTextBrowser, "examplesText")
         self.close_button = self.findChild(QPushButton, "closeButton")
-    
+
     def _load_stylesheet(self):
         """Charge la feuille de style depuis le fichier .qss."""
         qss_file = Path(__file__).parent / "help_window.qss"
         if qss_file.exists():
             with open(qss_file, "r", encoding="utf-8") as f:
                 self.setStyleSheet(f.read())
-    
+
     def _connect_signals(self):
         """Connecte les signaux des widgets."""
         if self.close_button:
             self.close_button.clicked.connect(self.accept)
-    
+
     def _populate_content(self):
         """Remplit le contenu de chaque onglet."""
         self._populate_intro()
@@ -64,7 +65,7 @@ class HelpWindow(QDialog):
         self._populate_arguments()
         self._populate_shared()
         self._populate_examples()
-    
+
     def _populate_intro(self):
         """Remplit l'onglet Introduction."""
         content = """
@@ -159,7 +160,7 @@ class HelpWindow(QDialog):
         </ul>
         """
         self.intro_text.setHtml(content)
-    
+
     def _populate_structure(self):
         """Remplit l'onglet Structure."""
         content = """
@@ -254,7 +255,7 @@ class HelpWindow(QDialog):
         <p style="color: #666; font-size: 13px;">💡 L'argument DATABASE est saisi une seule fois et utilisé par toutes les commandes</p>
         """
         self.structure_text.setHtml(content)
-    
+
     def _populate_arguments(self):
         """Remplit l'onglet Arguments."""
         content = """
@@ -371,7 +372,7 @@ class HelpWindow(QDialog):
         </div>
         """
         self.arguments_text.setHtml(content)
-    
+
     def _populate_shared(self):
         """Remplit l'onglet Arguments Partagés."""
         content = """
@@ -462,12 +463,12 @@ class HelpWindow(QDialog):
         </p>
         """
         self.shared_text.setHtml(content)
-    
+
     def _populate_validation(self):
         """Remplit l'onglet Validation (non utilisé actuellement)."""
         # Onglet supprimé pour simplifier l'aide
         pass
-    
+
     def _populate_examples(self):
         """Remplit l'onglet Exemples Complets."""
         content = """

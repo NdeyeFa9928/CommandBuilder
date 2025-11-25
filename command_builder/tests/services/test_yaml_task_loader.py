@@ -97,7 +97,9 @@ def test_load_yaml_tasks_with_mock():
         patch(
             "command_builder.services.yaml_task_loader.list_yaml_task_files"
         ) as mock_list,
-        patch("command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task") as mock_load,
+        patch(
+            "command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task"
+        ) as mock_load,
     ):
         # Configurer les mocks
         mock_list.return_value = [Path("task1.yaml"), Path("task2.yaml")]
@@ -125,7 +127,9 @@ def test_load_yaml_tasks_with_error():
         patch(
             "command_builder.services.yaml_task_loader.list_yaml_task_files"
         ) as mock_list,
-        patch("command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task") as mock_load,
+        patch(
+            "command_builder.services.yaml_error_handler.YamlErrorHandler.load_yaml_task"
+        ) as mock_load,
     ):
         # Configurer les mocks - première tâche OK, deuxième retourne None (erreur)
         mock_list.return_value = [Path("task1.yaml"), Path("task2.yaml")]

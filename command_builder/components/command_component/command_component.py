@@ -255,7 +255,7 @@ class CommandComponent(QWidget):
             La commande complète sous forme de chaîne
         """
         import re
-        
+
         # Commencer avec la commande de base
         full_command = self.command.command
 
@@ -294,7 +294,7 @@ class CommandComponent(QWidget):
                         )
 
         # Nettoyer les espaces multiples consécutifs
-        full_command = re.sub(r'\s+', ' ', full_command).strip()
+        full_command = re.sub(r"\s+", " ", full_command).strip()
 
         return full_command
 

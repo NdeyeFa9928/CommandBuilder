@@ -83,7 +83,7 @@ class ArgumentComponent(QWidget):
     def _setup_ui(self):
         """Configure l'interface utilisateur avec les données de l'argument."""
         arg_type = self.argument.type or "string"
-        
+
         # Masquer/afficher les widgets selon le type
         if arg_type == "flag":
             # Pour les flags : checkbox visible, line_edit caché
@@ -140,11 +140,11 @@ class ArgumentComponent(QWidget):
     def _on_value_changed(self, text: str):
         """Gère le changement de valeur dans le champ de saisie."""
         self.value_changed.emit(self.argument.code, text)
-    
+
     def _on_checkbox_changed(self, state: int):
         """Gère le changement d'état de la checkbox."""
         arg_type = self.argument.type or "string"
-        
+
         if arg_type == "flag":
             # Pour les flags, émettre la valeur définie ou "1" par défaut si coché
             if state:
@@ -173,7 +173,7 @@ class ArgumentComponent(QWidget):
             La valeur saisie
         """
         arg_type = self.argument.type or "string"
-        
+
         if arg_type == "flag":
             # Pour les flags, retourner la valeur définie ou "1" par défaut si coché
             if self.checkbox and self.checkbox.isChecked():
@@ -203,7 +203,7 @@ class ArgumentComponent(QWidget):
             is_default: Indique si la valeur est une valeur par défaut
         """
         arg_type = self.argument.type or "string"
-        
+
         if arg_type == "flag":
             # Pour les flags, cocher/décocher la checkbox
             if self.checkbox:

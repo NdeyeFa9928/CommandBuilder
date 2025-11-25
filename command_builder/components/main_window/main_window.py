@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
 
         # Configurer la fenêtre
         self.setMenuBar(ui.menuBar())
-        
+
         # Récupérer et configurer la barre de statut
         status_bar = ui.statusBar()
         self.setStatusBar(status_bar)
@@ -135,7 +135,7 @@ class MainWindow(QMainWindow):
         if status_bar:
             # Ajouter le bouton à droite de la barre de statut
             status_bar.addPermanentWidget(self.help_button)
-        
+
         # Créer et configurer le composant TaskList
         self.task_list = TaskList()
         if self.task_list_container:
@@ -214,7 +214,7 @@ class MainWindow(QMainWindow):
         if self.help_button:
             # Connecter le bouton Help pour ouvrir la fenêtre d'aide
             self.help_button.help_clicked.connect(self._show_help_window)
-        
+
         if self.task_list:
             # Connecter le signal de sélection de commande à l'affichage du formulaire
             self.task_list.command_selected.connect(self._on_command_selected)
@@ -229,7 +229,7 @@ class MainWindow(QMainWindow):
         """Affiche la fenêtre d'aide YAML."""
         help_window = HelpWindow(self)
         help_window.exec()
-    
+
     def _on_command_selected(self, _unused, task_name):
         """Gère la sélection d'une tâche dans la liste."""
         if task := next((t for t in self.task_list.tasks if t.name == task_name), None):

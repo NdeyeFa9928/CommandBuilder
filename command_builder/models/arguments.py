@@ -16,7 +16,9 @@ class Argument(BaseModel):
     type: Optional[str] = "string"
     required: Optional[int] = 0
     default: Optional[str] = ""
-    value: Optional[str] = None  # Valeur à insérer pour les options booléennes (ex: "--debug")
+    value: Optional[str] = (
+        None  # Valeur à insérer pour les options booléennes (ex: "--debug")
+    )
     validation: Optional[dict[str, Any]] = None
 
 
@@ -40,6 +42,8 @@ class TaskArgument(BaseModel):
     type: Optional[str] = "string"
     required: Optional[int] = 0
     default: Optional[str] = ""
-    value: Optional[str] = None  # Valeur à insérer pour les options booléennes (ex: "--debug")
+    value: Optional[str] = (
+        None  # Valeur à insérer pour les options booléennes (ex: "--debug")
+    )
     validation: Optional[dict[str, Any]] = None
     values: List[ArgumentValue] = []  # Liste des commandes/arguments cibles

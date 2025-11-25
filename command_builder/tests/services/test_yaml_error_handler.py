@@ -1,9 +1,11 @@
 """Tests unitaires pour YamlErrorHandler."""
 
-import pytest
 from pathlib import Path
-from command_builder.services.yaml_error_handler import YamlErrorHandler
+
+import pytest
+
 from command_builder.models.yaml_error import YamlError
+from command_builder.services.yaml_error_handler import YamlErrorHandler
 
 
 class TestYamlErrorHandlerCreation:
@@ -40,10 +42,10 @@ commands:
     command: "echo test"
     arguments: []
 """)
-        
+
         handler = YamlErrorHandler()
         task = handler.load_yaml_task(yaml_file)
-        
+
         assert task is not None
         assert task.name == "Test Task"
         assert len(handler.errors) == 0
@@ -53,7 +55,7 @@ commands:
         """Test du chargement d'un fichier inexistant."""
         handler = YamlErrorHandler()
         task = handler.load_yaml_task(Path("nonexistent.yaml"))
-        
+
         assert task is None
         assert len(handler.errors) == 1
         assert handler.errors[0].error_type == "FileNotFoundError"
@@ -67,10 +69,10 @@ name: "Test Task"
 description: "Missing closing quote
 commands: []
 """)
-        
+
         handler = YamlErrorHandler()
         task = handler.load_yaml_task(yaml_file)
-        
+
         assert task is None
         assert len(handler.errors) == 1
         assert handler.errors[0].error_type == "SyntaxError"
@@ -83,10 +85,10 @@ commands: []
 description: "Missing name field"
 commands: []
 """)
-        
+
         handler = YamlErrorHandler()
         task = handler.load_yaml_task(yaml_file)
-        
+
         assert task is None
         assert len(handler.errors) == 1
         assert handler.errors[0].error_type == "ValidationError"
@@ -108,10 +110,10 @@ commands:
       command: "echo 2"
       arguments: []
 """)
-        
+
         handler = YamlErrorHandler()
         task = handler.load_yaml_task(yaml_file)
-        
+
         assert task is not None
         assert len(task.commands) == 2
         assert task.commands[0].name == "Command 1"
@@ -125,7 +127,7 @@ class TestYamlErrorHandlerLoadAll:
         """Test du chargement d'une liste vide."""
         handler = YamlErrorHandler()
         tasks, errors = handler.load_all_tasks([])
-        
+
         assert tasks == []
         assert errors == []
 
@@ -142,17 +144,17 @@ commands:
     command: "echo test"
     arguments: []
 """)
-        
+
         # Tâche invalide
         invalid_file = tmp_path / "invalid.yaml"
         invalid_file.write_text("""
 description: "Missing name"
 commands: []
 """)
-        
+
         handler = YamlErrorHandler()
         tasks, errors = handler.load_all_tasks([valid_file, invalid_file])
-        
+
         assert len(tasks) == 1
         assert tasks[0].name == "Valid Task"
         assert len(errors) == 1
@@ -166,13 +168,13 @@ name: "Task"
 description: "Test"
 commands: []
 """)
-        
+
         handler = YamlErrorHandler()
-        
+
         # Premier chargement
         tasks1, errors1 = handler.load_all_tasks([valid_file])
         assert len(tasks1) == 1
-        
+
         # Deuxième chargement
         tasks2, errors2 = handler.load_all_tasks([valid_file])
         assert len(tasks2) == 1
@@ -186,13 +188,13 @@ class TestYamlErrorHandlerErrorSummary:
         """Test du résumé avec plusieurs erreurs."""
         invalid1 = tmp_path / "invalid1.yaml"
         invalid1.write_text("invalid: yaml: syntax")
-        
+
         invalid2 = tmp_path / "invalid2.yaml"
         invalid2.write_text("description: 'Missing name'\ncommands: []")
-        
+
         handler = YamlErrorHandler()
         handler.load_all_tasks([invalid1, invalid2])
-        
+
         summary = handler.get_error_summary()
         assert "2 erreur(s)" in summary
         assert "invalid1.yaml" in summary
@@ -204,9 +206,9 @@ class TestYamlErrorHandlerErrorSummary:
         # Ce test peut évoluer si on ajoute des erreurs non-critiques
         invalid_file = tmp_path / "invalid.yaml"
         invalid_file.write_text("invalid")
-        
+
         handler = YamlErrorHandler()
         handler.load_yaml_task(invalid_file)
-        
+
         assert handler.has_errors()
         # Dépend de l'implémentation de YamlError.is_critical()
