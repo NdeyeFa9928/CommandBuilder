@@ -19,20 +19,23 @@ arguments:
   - code: "IMAGE_LAG_TIME"
     name: "Temps de retard image"
     description: "Temps de retard pour les images (--image-lag-time)"
-    type: "float"
+    type: "valued_option"
     required: 0
+    value: "--image-lag-time"
     default: ""
   
   - code: "TABLE_NAME"
     name: "Nom de la table"
     description: "Nom de la table de projet (--ptable)"
-    type: "string"
+    type: "valued_option"
     required: 0
+    value: "--ptable"
     default: ""
   
   - code: "TS_METHOD"
     name: "Méthode timestamp"
     description: "Méthode de timestamp (--ts-method)"
-    type: "string"
+    type: "valued_option"
     required: 0
+    value: "--ts-method"
     default: ""
