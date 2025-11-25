@@ -93,9 +93,9 @@ class TestArgumentValidationTypes:
         assert not is_valid
         assert "existe pas" in error.lower() or "not found" in error.lower()
 
-    def test_boolean_argument_accepts_any_value(self):
-        """Test que le type boolean accepte n'importe quelle valeur (checkbox)."""
-        arg = Argument(code="BOOL", name="Boolean", type="boolean", required=0)
+    def test_flag_argument_accepts_any_value(self):
+        """Test que le type flag accepte n'importe quelle valeur (checkbox)."""
+        arg = Argument(code="BOOL", name="Boolean", type="flag", required=0)
         
         # Les booléens sont généralement optionnels et acceptent tout
         assert WithArguments.validate_single_argument(arg, "true")[0]
