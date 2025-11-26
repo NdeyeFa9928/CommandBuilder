@@ -74,9 +74,17 @@ class HelpWindow(QDialog):
         <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196F3;">
             <h3 style="margin-top: 0;">Principe</h3>
             <p style="font-size: 14px; line-height: 1.6;">
-            Un fichier YAML = Une <b>tâche</b> contenant une ou plusieurs <b>commandes CLI</b> à exécuter en séquence.<br>
-            <b>Emplacement :</b> <code>command_builder/data/tasks/ma_tache.yaml</code>
+            CommandBuilder utilise deux types de fichiers YAML :<br>
+            <b>1. Fichiers de commandes</b> (réutilisables) : définissent une commande CLI<br>
+            <b>2. Fichiers de tâches</b> (workflows) : groupent plusieurs commandes à exécuter en séquence
             </p>
+        </div>
+        
+        <h3>📁 Structure des fichiers</h3>
+        <div style="background-color: #f5f5f5; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 13px;">
+        <b>Commandes :</b> <code>command_builder/data/commands/ma_commande.yaml</code><br>
+        <b>Tâches :</b> <code>command_builder/data/tasks/ma_tache.yaml</code><br>
+        <b>Recommandation :</b> <span style="color: #d32f2f; font-weight: bold;">Un fichier = Une commande ou une tâche</span>
         </div>
         
         <h3>🎯 Structure minimale (copier-coller)</h3>
@@ -131,10 +139,10 @@ class HelpWindow(QDialog):
                     <span style="font-size: 13px;">Champ obligatoire (<code>required: 1</code>)<br>
                     Affiché APRÈS le nom : "Base de données : *"</span>
                 </td>
-                <td style="background-color: #e8f5e9; border-radius: 4px; width: 50%;">
-                    <b style="color: #2e7d32;">✅ Case à cocher</b><br>
-                    <span style="font-size: 13px;">Type <code>flag</code> ou <code>valued_option</code><br>
-                    Coché = inclus dans la commande</span>
+                <td style="background-color: #c8e6c9; border-radius: 4px; width: 50%;">
+                    <b style="color: #1b5e20;">🟢 Texte vert</b><br>
+                    <span style="font-size: 13px;">Valeur pré-remplie (par défaut)<br>
+                    Modifiable par l'utilisateur</span>
                 </td>
             </tr>
             <tr>
@@ -149,14 +157,33 @@ class HelpWindow(QDialog):
                     Si erreur → arrêt immédiat</span>
                 </td>
             </tr>
+            <tr>
+                <td style="background-color: #e8f5e9; border-radius: 4px;">
+                    <b style="color: #2e7d32;">✅ Case à cocher</b><br>
+                    <span style="font-size: 13px;">Type <code>flag</code> ou <code>valued_option</code><br>
+                    Coché = inclus dans la commande</span>
+                </td>
+                <td style="background-color: #f3e5f5; border-radius: 4px;">
+                    <b style="color: #6a1b9a;">📂 Listes</b><br>
+                    <span style="font-size: 13px;">Gauche = tâches disponibles<br>
+                    Cliquez pour voir ses commandes</span>
+                </td>
+            </tr>
         </table>
         
-        <h3>📖 Onglets</h3>
+        <h3>📖 Onglets de cette aide</h3>
         <ul style="line-height: 1.6;">
-            <li><b>Structure</b> → Templates complets</li>
+            <li><b>Structure</b> → Templates complets (fichiers, !include)</li>
             <li><b>Arguments</b> → Les 5 types expliqués</li>
             <li><b>Arguments Partagés</b> → Éviter la répétition</li>
-            <li><b>Exemples</b> → Cas réels</li>
+            <li><b>Exemples</b> → Cas réels avec !include</li>
+        </ul>
+        
+        <h3>⚡ Points clés supplémentaires</h3>
+        <ul style="line-height: 1.6; color: #d32f2f;">
+            <li><b>Valeurs par défaut des tâches</b> → Prioritaires sur celles des commandes</li>
+            <li><b>!include</b> → Réutilisez les commandes dans plusieurs tâches</li>
+            <li><b>Modification post-build</b> → Les fichiers YAML sont modifiables sans recompilation</li>
         </ul>
         """
         self.intro_text.setHtml(content)
@@ -166,7 +193,26 @@ class HelpWindow(QDialog):
         content = """
         <h2>📐 Templates prêts à copier</h2>
         
-        <h3>Template 1 : Tâche simple (minimum requis)</h3>
+        <div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ff9800;">
+            <b>💡 Bonne pratique :</b> Créez <b>un fichier par commande</b> dans <code>data/commands/</code>,<br>
+            puis <b>réutilisez-les</b> dans les tâches avec <code>!include</code>
+        </div>
+        
+        <h3>Template 1 : Fichier de commande (réutilisable)</h3>
+        <p style="color: #666; font-size: 13px;"><b>Fichier :</b> <code>data/commands/ma_commande.yaml</code></p>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #4caf50;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Ma commande"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Description de la commande"
+<span style="color: #c62828; font-weight: bold;">command:</span> "executable.exe {ARG1} {ARG2}"
+<span style="color: #c62828; font-weight: bold;">arguments:</span>
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "ARG1"
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Argument 1"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+        </pre>
+        <p style="color: #666; font-size: 13px;">✅ Cette commande peut être incluse dans plusieurs tâches</p>
+        
+        <h3>Template 2 : Tâche simple (minimum requis)</h3>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #c62828;">
 <span style="color: #c62828; font-weight: bold;">name:</span> "Ma tâche"
 <span style="color: #c62828; font-weight: bold;">description:</span> "Description de la tâche"
@@ -178,7 +224,22 @@ class HelpWindow(QDialog):
         </pre>
         <p style="color: #666; font-size: 13px;">✅ Tous les champs en rouge sont obligatoires</p>
         
-        <h3>Template 2 : Commande avec arguments</h3>
+        <h3>Template 3 : Tâche avec inclusion de commandes</h3>
+        <p style="color: #666; font-size: 13px;"><b>Fichier :</b> <code>data/tasks/ma_tache.yaml</code></p>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #9c27b0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Ma tâche"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Exécute plusieurs commandes"
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #9c27b0; font-weight: bold;">!include</span> ../commands/ma_commande.yaml
+  - <span style="color: #9c27b0; font-weight: bold;">!include</span> ../commands/autre_commande.yaml
+        </pre>
+        <p style="color: #666; font-size: 13px;">
+        ✅ <code>!include</code> charge le fichier de commande<br>
+        ✅ Les chemins sont relatifs au fichier YAML<br>
+        ✅ <code>../commands/</code> remonte d'un niveau (de tasks vers data)
+        </p>
+        
+        <h3>Template 4 : Commande avec arguments</h3>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
 <span style="color: #c62828; font-weight: bold;">name:</span> "Traitement de fichier"
 <span style="color: #c62828; font-weight: bold;">description:</span> "Traite un fichier CSV"
@@ -200,7 +261,7 @@ class HelpWindow(QDialog):
         </pre>
         <p style="color: #666; font-size: 13px;">💡 <code>{INPUT_FILE}</code> et <code>{OUTPUT_FILE}</code> sont remplacés par les valeurs saisies</p>
         
-        <h3>Template 3 : Avec flags et options</h3>
+        <h3>Template 5 : Avec flags et options</h3>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
 <span style="color: #c62828; font-weight: bold;">name:</span> "Traitement avancé"
 <span style="color: #c62828; font-weight: bold;">description:</span> "Avec options CLI"
@@ -231,7 +292,7 @@ class HelpWindow(QDialog):
         </pre>
         <p style="color: #666; font-size: 13px;">⚠️ Pour les <code>flag</code> : le champ <code>value</code> est obligatoire</p>
         
-        <h3>Template 4 : Avec arguments partagés</h3>
+        <h3>Template 6 : Avec arguments partagés</h3>
         <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
 <span style="color: #c62828; font-weight: bold;">name:</span> "Pipeline"
 <span style="color: #c62828; font-weight: bold;">description:</span> "Plusieurs commandes avec argument commun"
@@ -368,6 +429,8 @@ class HelpWindow(QDialog):
                 <li><code>flag</code> et <code>valued_option</code> → toujours <code>required: 0</code></li>
                 <li><code>flag</code> → le champ <code>value</code> est OBLIGATOIRE</li>
                 <li>Placeholders vides → automatiquement supprimés de la commande finale</li>
+                <li><code>default</code> dans la tâche → <b>prioritaire</b> sur celui de la commande</li>
+                <li>Les valeurs préremplies s'affichent en <span style="color: #2e7d32; font-weight: bold;">vert</span></li>
             </ul>
         </div>
         """
@@ -383,7 +446,8 @@ class HelpWindow(QDialog):
             <p style="font-size: 14px; line-height: 1.6;">
             Quand plusieurs commandes utilisent <b>la même valeur</b> (ex: base de données, fichier d'entrée),<br>
             → Définir une seule fois au lieu de répéter<br>
-            → L'utilisateur saisit <b>une seule fois</b> ✅
+            → L'utilisateur saisit <b>une seule fois</b> ✅<br>
+            → Les valeurs par défaut de la tâche <b>remplacent</b> celles des commandes
             </p>
         </div>
         
@@ -594,13 +658,16 @@ class HelpWindow(QDialog):
         
         <h3>💡 Conseils pratiques</h3>
         <ul style="line-height: 1.8;">
+            <li><b>Structure des fichiers</b> : Un fichier = une commande (réutilisable)</li>
+            <li><b>!include</b> : Réutilisez les commandes dans plusieurs tâches</li>
             <li><b>Noms clairs</b> : Utilisez des noms explicites pour les arguments</li>
             <li><b>Descriptions</b> : Ajoutez toujours une description pour aider l'utilisateur</li>
-            <li><b>Valeurs par défaut</b> : Définissez-les quand c'est pertinent</li>
+            <li><b>Valeurs par défaut</b> : Définissez-les quand c'est pertinent (tâche > commande)</li>
             <li><b>Arguments partagés</b> : Évitez la duplication pour les valeurs communes</li>
             <li><b>Extensions</b> : Utilisez <code>validation: file_extensions</code> pour les fichiers</li>
             <li>Utilisez <code>flag</code> pour les options on/off simples</li>
             <li>Utilisez <code>valued_option</code> pour les options avec valeur</li>
+            <li><b>Modification post-build</b> : Les fichiers YAML dans <code>dist/data/</code> sont modifiables</li>
             <li>Testez vos fichiers YAML avant de les déployer</li>
         </ul>
         """
