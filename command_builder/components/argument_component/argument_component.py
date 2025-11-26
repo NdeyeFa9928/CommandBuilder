@@ -161,9 +161,22 @@ class ArgumentComponent(QWidget):
 
     def _on_browse_clicked(self):
         """Ouvre une boîte de dialogue pour sélectionner un fichier ou dossier."""
-        file_path, _ = QFileDialog.getOpenFileName(self, "Sélectionner un fichier")
-        if file_path and self.line_edit:
-            self.line_edit.setText(file_path)
+        arg_type = self.argument.type or "string"
+        
+        if arg_type == "directory":
+            # Pour les dossiers, utiliser getExistingDirectory
+            path = QFileDialog.getExistingDirectory(
+                self, 
+                "Sélectionner un dossier",
+                "",
+                QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
+            )
+        else:
+            # Pour les fichiers, utiliser getOpenFileName
+            path, _ = QFileDialog.getOpenFileName(self, "Sélectionner un fichier")
+        
+        if path and self.line_edit:
+            self.line_edit.setText(path)
 
     def get_value(self) -> str:
         """

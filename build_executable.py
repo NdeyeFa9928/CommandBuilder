@@ -154,6 +154,40 @@ def install_pyinstaller_if_needed():
             return False
 
 
+def copy_data_directory(base_dir, dist_dir):
+    """Copy the data directory to dist/ so users can modify YAML files."""
+    import shutil
+    
+    source_data = base_dir / "command_builder" / "data"
+    dest_data = dist_dir / "data"
+    
+    if not source_data.exists():
+        print(f"Warning: Source data directory not found: {source_data}")
+        return
+    
+    # Remove existing data directory if present
+    if dest_data.exists():
+        shutil.rmtree(dest_data)
+    
+    # Copy the entire data directory
+    shutil.copytree(source_data, dest_data)
+    print(f"[OK] Data directory copied to: {dest_data}")
+    
+    # Count files copied
+    task_files = list((dest_data / "tasks").glob("*.yaml")) if (dest_data / "tasks").exists() else []
+    command_files = list((dest_data / "commands").glob("*.yaml")) if (dest_data / "commands").exists() else []
+    
+    print(f"  - {len(task_files)} task files")
+    print(f"  - {len(command_files)} command files")
+    
+    # Copy README for end users
+    readme_source = base_dir / "README_DISTRIBUTION.txt"
+    if readme_source.exists():
+        readme_dest = dist_dir / "README.txt"
+        shutil.copy2(readme_source, readme_dest)
+        print(f"[OK] README.txt copied")
+
+
 def build_executable(dev_mode=False):
     """Build the executable using PyInstaller."""
     base_dir = get_project_root()
@@ -237,6 +271,10 @@ def build_executable(dev_mode=False):
 
         print("\nBuild completed successfully!")
         print(f"Executable is available in: {dist_dir}")
+
+        # Copy data directory next to the executable
+        print("\nCopying data directory...")
+        copy_data_directory(base_dir, dist_dir)
 
         # List built files
         if dist_dir.exists():
