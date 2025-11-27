@@ -1,5 +1,19 @@
 name: "Traitement campagne"
 description: "Import TDMS du dossier + export campagne (TXT + IMAGES)"
+arguments:
+  - code: "base"
+    name: "Base de données"
+    description: "Base de données"
+    type: "directory"
+    required: 1
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\BASE"
+    values:
+    - command: "tdmsdirimport_tc"
+      argument: "OUTPUT_DIR"
+    - command: "campaignexport"
+      argument: "DATABASE_FILE"
+      
+
 commands:
   - !include ../commands/tdmsdirimport_commands.yaml
   - !include ../commands/campaignexport_commands.yaml

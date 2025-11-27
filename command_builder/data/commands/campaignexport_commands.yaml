@@ -1,6 +1,6 @@
 name: "campaignexport"
 description: "Exporte les tables SQLite en fichiers texte + images"
-command: "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} {TOLIMAGE} > {LOG_FILE}"
+command: "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} > {LOG_FILE}"
 arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"
@@ -9,30 +9,25 @@ arguments:
     required: 1
     validation:
       file_extensions: [".db", ".sqlite", ".sqlite3"]
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\BASE"
   
   - code: "TXT_OUTPUT_DIRECTORY"
     name: "Répertoire texte"
     description: "Répertoire de sortie pour les fichiers texte"
     type: "directory"
     required: 1
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\TXT"  
   
   - code: "IMG_OUTPUT_DIRECTORY"
     name: "Répertoire images"
     description: "Répertoire de sortie pour les images"
     type: "directory"
     required: 1
-  
-  - code: "TOLIMAGE"
-    name: "Tolérance image"
-    description: "Valeur de tolérance pour les images (--tolimage)"
-    type: "valued_option"
-    required: 0
-    value: "--tolimage"
-    default: ""
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\IMG"  
 
   - code: "LOG_FILE"
     name: "Fichier de log"
     description: "Fichier de log pour l'export"
     type: "string"
     required: 1
-    default: "log_campaignexport.txt"
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\log_campaignexport.txt"
