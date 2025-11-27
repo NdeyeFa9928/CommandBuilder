@@ -3,6 +3,7 @@ Service d'exécution de commandes Windows.
 """
 
 import subprocess
+import time
 from typing import Callable, Optional
 
 from PySide6.QtCore import QObject, QThread, Signal
@@ -29,6 +30,7 @@ class CommandExecutor(QThread):
         super().__init__(parent)
         self.command = command
         self._is_cancelled = False
+        self._process = None  # Stocker le processus pour pouvoir le tuer de l'extérieur
 
     def run(self):
         """Exécute la commande dans un thread séparé."""
@@ -48,9 +50,13 @@ class CommandExecutor(QThread):
                 encoding=encoding,
                 errors="replace",
             )
+            
+            # Stocker le processus pour pouvoir le tuer depuis cancel()
+            self._process = process
 
-            # Lire la sortie ligne par ligne
+            # Lire la sortie ligne par ligne avec vérification fréquente de l'annulation
             while True:
+                # Vérifier l'annulation AVANT de lire (plus réactif)
                 if self._is_cancelled:
                     try:
                         process.terminate()
@@ -63,16 +69,23 @@ class CommandExecutor(QThread):
                         pass
                     break
 
-                # Lire stdout
+                # Vérifier si le processus est terminé
+                poll_result = process.poll()
+                if poll_result is not None:
+                    break
+
+                # Lire stdout avec vérification périodique de l'annulation
                 try:
                     output = process.stdout.readline()
                     if output:
                         self.output_received.emit(output.rstrip())
+                    elif poll_result is not None:
+                        # Processus terminé et plus de sortie
+                        break
+                    else:
+                        # Petite pause pour permettre la vérification de l'annulation
+                        time.sleep(0.05)
                 except Exception:
-                    break
-
-                # Vérifier si le processus est terminé
-                if output == "" and process.poll() is not None:
                     break
 
             # Lire les erreurs restantes (seulement si pas annulé)
@@ -104,6 +117,18 @@ class CommandExecutor(QThread):
     def cancel(self):
         """Annule l'exécution de la commande."""
         self._is_cancelled = True
+        
+        # Tuer le processus immédiatement pour débloquer readline()
+        if self._process is not None and self._process.poll() is None:
+            try:
+                self._process.terminate()
+                # Attendre un peu
+                time.sleep(0.1)
+                # Si toujours vivant, forcer
+                if self._process.poll() is None:
+                    self._process.kill()
+            except Exception:
+                pass
 
 
 class CommandExecutorService:
