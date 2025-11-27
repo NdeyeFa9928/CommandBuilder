@@ -32,6 +32,7 @@ class CommandExecutor(QThread):
 
     def run(self):
         """Exécute la commande dans un thread séparé."""
+        process = None
         try:
             # Utiliser CP850 pour la console Windows (OEM)
             # CP850 est l'encodage standard de la console Windows française
@@ -51,30 +52,54 @@ class CommandExecutor(QThread):
             # Lire la sortie ligne par ligne
             while True:
                 if self._is_cancelled:
-                    process.terminate()
+                    try:
+                        process.terminate()
+                        # Attendre un peu pour que le processus se termine proprement
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        # Si le processus ne se termine pas, le forcer
+                        process.kill()
+                    except Exception:
+                        pass
                     break
 
                 # Lire stdout
-                output = process.stdout.readline()
-                if output:
-                    self.output_received.emit(output.rstrip())
+                try:
+                    output = process.stdout.readline()
+                    if output:
+                        self.output_received.emit(output.rstrip())
+                except Exception:
+                    break
 
                 # Vérifier si le processus est terminé
                 if output == "" and process.poll() is not None:
                     break
 
-            # Lire les erreurs restantes
-            stderr = process.stderr.read()
-            if stderr:
-                self.error_received.emit(stderr.rstrip())
+            # Lire les erreurs restantes (seulement si pas annulé)
+            if not self._is_cancelled:
+                try:
+                    stderr = process.stderr.read()
+                    if stderr:
+                        self.error_received.emit(stderr.rstrip())
+                except Exception:
+                    pass
 
             # Émettre le code de retour
             return_code = process.poll()
-            self.execution_finished.emit(return_code if return_code is not None else 0)
+            if return_code is None:
+                return_code = -1 if self._is_cancelled else 0
+            self.execution_finished.emit(return_code)
 
         except Exception as e:
             self.error_received.emit(f"Erreur lors de l'exécution: {str(e)}")
             self.execution_finished.emit(-1)
+        finally:
+            # S'assurer que le processus est bien terminé
+            if process is not None and process.poll() is None:
+                try:
+                    process.kill()
+                except Exception:
+                    pass
 
     def cancel(self):
         """Annule l'exécution de la commande."""
@@ -89,6 +114,7 @@ class CommandExecutorService:
     def __init__(self):
         """Initialise le service d'exécution."""
         self.current_executor: Optional[CommandExecutor] = None
+        self._stop_requested = False
 
     def execute_command(
         self,
@@ -135,3 +161,24 @@ class CommandExecutorService:
         if self.current_executor and self.current_executor.isRunning():
             self.current_executor.cancel()
             self.current_executor.wait()
+
+    def request_stop(self):
+        """
+        Demande l'arrêt de toutes les exécutions en cours et futures.
+        Cette méthode doit être appelée pour arrêter complètement l'exécution d'une séquence.
+        """
+        self._stop_requested = True
+        self.cancel_current_execution()
+
+    def is_stop_requested(self) -> bool:
+        """
+        Vérifie si un arrêt a été demandé.
+
+        Returns:
+            True si un arrêt a été demandé, False sinon
+        """
+        return self._stop_requested
+
+    def reset_stop_flag(self):
+        """Réinitialise le flag d'arrêt pour permettre de nouvelles exécutions."""
+        self._stop_requested = False
