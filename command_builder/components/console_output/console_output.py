@@ -60,6 +60,7 @@ class ConsoleOutput(QWidget):
 
         # Stocker les références aux widgets importants
         self.text_edit_console = ui.findChild(QPlainTextEdit, "textEditConsole")
+        self.button_stop = ui.findChild(QPushButton, "buttonStop")
         self.button_effacer = ui.findChild(QPushButton, "buttonEffacer")
         self.button_exporter = ui.findChild(QPushButton, "buttonExporter")
 
@@ -77,6 +78,7 @@ class ConsoleOutput(QWidget):
 
     def _connect_signals(self):
         """Connecte les signaux aux slots."""
+        self.button_stop.clicked.connect(self._on_stop_clicked)
         self.button_effacer.clicked.connect(self.clear)
         self.button_exporter.clicked.connect(self.export_console)
 
@@ -153,9 +155,15 @@ class ConsoleOutput(QWidget):
         if not commands_list:
             return
 
+        # Réinitialiser le flag d'arrêt
+        self.executor_service.reset_stop_flag()
+
         # Initialiser la file d'attente
         self.commands_queue = commands_list
         self.current_command_index = 0
+
+        # Activer le bouton Stop
+        self.button_stop.setEnabled(True)
 
         # Afficher l'en-tête global avec timestamp de début
         start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -172,6 +180,11 @@ class ConsoleOutput(QWidget):
         """
         Exécute la prochaine commande dans la file d'attente.
         """
+        # Vérifier si un arrêt a été demandé
+        if self.executor_service.is_stop_requested():
+            self._on_execution_stopped_by_user()
+            return
+
         if self.current_command_index >= len(self.commands_queue):
             # Toutes les commandes ont été exécutées
             self._on_all_commands_finished()
@@ -245,6 +258,9 @@ class ConsoleOutput(QWidget):
         )
         self.append_text("=" * 80 + "\n")
 
+        # Désactiver le bouton Stop
+        self.button_stop.setEnabled(False)
+
         # Émettre le signal
         self.all_commands_finished.emit()
 
@@ -258,5 +274,35 @@ class ConsoleOutput(QWidget):
         self.append_text(f"TOUTES LES COMMANDES TERMINÉES - Fin: {end_time}")
         self.append_text("=" * 80 + "\n")
 
+        # Désactiver le bouton Stop
+        self.button_stop.setEnabled(False)
+
         # Émettre le signal
         self.all_commands_finished.emit()
+
+    def _on_execution_stopped_by_user(self):
+        """
+        Appelé lorsque l'utilisateur arrête manuellement l'exécution.
+        """
+        end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        self.append_text("")
+        self.append_text("=" * 80)
+        self.append_text(f"EXÉCUTION ARRÊTÉE PAR L'UTILISATEUR - Fin: {end_time}")
+        self.append_text(
+            f"Commandes non exécutées: {len(self.commands_queue) - self.current_command_index}"
+        )
+        self.append_text("=" * 80 + "\n")
+
+        # Désactiver le bouton Stop
+        self.button_stop.setEnabled(False)
+
+        # Émettre le signal
+        self.all_commands_finished.emit()
+
+    def _on_stop_clicked(self):
+        """
+        Appelé lorsque l'utilisateur clique sur le bouton Stop.
+        """
+        self.append_text("\n[STOP] Arrêt demandé par l'utilisateur...")
+        self.executor_service.request_stop()
