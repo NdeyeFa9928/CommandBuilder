@@ -438,93 +438,122 @@ class HelpWindow(QDialog):
 
     def _populate_shared(self):
         """Remplit l'onglet Arguments Partagés."""
-        content = """
-        <h2>🔗 Arguments partagés</h2>
+        content = r"""
+        <h2>🔗 Arguments partagés entre commandes</h2>
         
         <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;">
-            <h3 style="margin-top: 0;">💡 Pourquoi ?</h3>
+            <h3 style="margin-top: 0;">💡 Pourquoi utiliser des arguments partagés ?</h3>
             <p style="font-size: 14px; line-height: 1.6;">
-            Quand plusieurs commandes utilisent <b>la même valeur</b> (ex: base de données, fichier d'entrée),<br>
-            → Définir une seule fois au lieu de répéter<br>
+            Quand plusieurs commandes utilisent <b>la même valeur</b> (ex: répertoire de base, fichier de sortie),<br>
+            → <b>Définir une seule fois</b> au niveau de la tâche<br>
             → L'utilisateur saisit <b>une seule fois</b> ✅<br>
+            → La valeur est <b>automatiquement injectée</b> dans les commandes concernées<br>
             → Les valeurs par défaut de la tâche <b>remplacent</b> celles des commandes
             </p>
         </div>
         
-        <h3>📝 Cas simple : Même code partout</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #9C27B0;">
-<span style="color: #c62828; font-weight: bold;">name:</span> "Pipeline"
-<span style="color: #c62828; font-weight: bold;">description:</span> "Import puis validation"
+        <h3>📝 Syntaxe : Section <code>arguments</code> avec <code>values</code></h3>
+        <div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #ff9800;">
+            <b>⚠️ IMPORTANT :</b> La section s'appelle <code>arguments</code> (pas <code>shared_arguments</code>)<br>
+            Chaque argument contient une liste <code>values</code> qui indique où l'injecter.
+        </div>
+        
+        <h3>🎯 Exemple réel : Traitement de campagne</h3>
+        <p style="color: #666; font-size: 13px;">Cas d'usage : Import TDMS vers une base, puis export de cette base vers TXT/Images</p>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Traitement campagne"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Import TDMS du dossier + export campagne (TXT + IMAGES)"
 
-<span style="color: #1565c0; font-weight: bold;">shared_arguments:</span>
-  - <span style="color: #c62828;">code:</span> "DATABASE"
-    <span style="color: #c62828;">name:</span> "Base de données"
-    <span style="color: #c62828;">type:</span> "file"
+<span style="color: #1565c0; font-weight: bold;">arguments:</span>  <span style="color: #666;"># ← Arguments partagés de la tâche</span>
+  - <span style="color: #c62828;">code:</span> "base"  <span style="color: #666;"># ← Code de l'argument partagé</span>
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">description:</span> "Répertoire contenant la base de données"
+    <span style="color: #c62828;">type:</span> "directory"
     <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
+    <span style="color: #1565c0; font-weight: bold;">values:</span>  <span style="color: #666;"># ← Liste des injections</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"  <span style="color: #666;"># ← Nom de la commande</span>
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"       <span style="color: #666;"># ← Code de l'argument cible</span>
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"    <span style="color: #666;"># ← Injecté ici aussi</span>
 
 <span style="color: #c62828; font-weight: bold;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "Import"
-    <span style="color: #c62828;">command:</span> "import.exe --db {DATABASE}"
-    <span style="color: #c62828;">arguments:</span> []
-  
-  - <span style="color: #c62828;">name:</span> "Validation"
-    <span style="color: #c62828;">command:</span> "validate.exe --db {DATABASE}"
-    <span style="color: #c62828;">arguments:</span> []
+  - !include ../commands/tdmsdirimport_commands.yaml
+  - !include ../commands/campaignexport_commands.yaml
 </pre>
-        <p style="color: #666; margin: 5px 0 20px 0;">
-        ✅ L'utilisateur saisit DATABASE <b>une seule fois</b><br>
-        ✅ Les deux commandes utilisent automatiquement la même valeur
-        </p>
         
-        <h3>🔄 Cas avancé : Codes différents (mapping)</h3>
-        <p>Si vos commandes utilisent des codes différents pour le même concept :</p>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #9C27B0;">
-<span style="color: #1565c0;">shared_arguments:</span>
-  - <span style="color: #c62828;">code:</span> "INPUT_FILE"
-    <span style="color: #c62828;">name:</span> "Fichier source"
-    <span style="color: #c62828;">type:</span> "file"
+        <div style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #2196F3;">
+            <b>🔍 Comment ça fonctionne :</b>
+            <ol style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                <li>L'utilisateur saisit <b>une seule fois</b> le répertoire de base : <code>L:\PROJET\BASE</code></li>
+                <li>Cette valeur est injectée dans <code>OUTPUT_DIR</code> de <code>tdmsdirimport_tc</code></li>
+                <li>Cette même valeur est injectée dans <code>DATABASE_FILE</code> de <code>campaignexport</code></li>
+                <li>Résultat : <b>cohérence garantie</b> entre les deux commandes ✅</li>
+            </ol>
+        </div>
+        
+        <h3>🔄 Cas avec plusieurs arguments partagés</h3>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #1565c0;">arguments:</span>
+  - <span style="color: #c62828;">code:</span> "projet"  <span style="color: #666;"># ← Argument partagé 1</span>
+    <span style="color: #c62828;">name:</span> "Nom du projet"
+    <span style="color: #c62828;">type:</span> "string"
     <span style="color: #c62828;">required:</span> 1
-
-<span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "Import"
-    <span style="color: #c62828;">command:</span> "import.exe --source {SOURCE_FILE}"
-    <span style="color: #c62828;">arguments:</span> []
-    <span style="color: #1565c0;">shared_argument_mapping:</span>
-      INPUT_FILE: "SOURCE_FILE"  <span style="color: #666;"># INPUT_FILE → SOURCE_FILE</span>
+    <span style="color: #1565c0;">default:</span> "E3D_S29"
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "PNAME"
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "PROJECT_NAME"
   
-  - <span style="color: #c62828;">name:</span> "Backup"
-    <span style="color: #c62828;">command:</span> "backup.exe --file {FILE_PATH}"
-    <span style="color: #c62828;">arguments:</span> []
-    <span style="color: #1565c0;">shared_argument_mapping:</span>
-      INPUT_FILE: "FILE_PATH"    <span style="color: #666;"># INPUT_FILE → FILE_PATH</span>
+  - <span style="color: #c62828;">code:</span> "base_dir"  <span style="color: #666;"># ← Argument partagé 2</span>
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"
 </pre>
-        <p style="color: #666; margin: 5px 0 20px 0;">
-        ✅ L'utilisateur saisit INPUT_FILE une fois<br>
-        ✅ Mappé vers SOURCE_FILE pour Import et FILE_PATH pour Backup
-        </p>
         
-        <h3>🔀 Combinaison : Partagés + Locaux</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #9C27B0;">
-<span style="color: #1565c0;">shared_arguments:</span>
-  - <span style="color: #c62828;">code:</span> "DATABASE"
+        <h3>🔀 Combinaison : Arguments partagés + Arguments locaux</h3>
+        <p style="color: #666; font-size: 13px;">Les commandes peuvent avoir leurs propres arguments EN PLUS des arguments partagés :</p>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #1565c0;">arguments:</span>  <span style="color: #666;"># ← Partagés (niveau tâche)</span>
+  - <span style="color: #c62828;">code:</span> "base"
     <span style="color: #c62828;">name:</span> "Base de données"
-    <span style="color: #c62828;">type:</span> "file"
+    <span style="color: #c62828;">type:</span> "directory"
     <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "export_cmd"
+        <span style="color: #c62828;">argument:</span> "DATABASE"
 
 <span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "Export"
-    <span style="color: #c62828;">command:</span> "export.exe --db {DATABASE} --format {FORMAT}"
-    <span style="color: #c62828;">arguments:</span>
-      - <span style="color: #c62828;">code:</span> "FORMAT"        <span style="color: #666;"># ← Argument LOCAL</span>
-        <span style="color: #c62828;">name:</span> "Format"
+  - <span style="color: #c62828;">name:</span> "export_cmd"
+    <span style="color: #c62828;">command:</span> "export.exe {DATABASE} {FORMAT}"
+    <span style="color: #c62828;">arguments:</span>  <span style="color: #666;"># ← Locaux (spécifiques à cette commande)</span>
+      - <span style="color: #c62828;">code:</span> "FORMAT"
+        <span style="color: #c62828;">name:</span> "Format de sortie"
         <span style="color: #c62828;">type:</span> "string"
         <span style="color: #c62828;">required:</span> 0
         <span style="color: #1565c0;">default:</span> "CSV"
 </pre>
         <p style="color: #666; margin: 5px 0;">
-        ✅ DATABASE = partagé (saisi une fois, utilisé partout)<br>
-        ✅ FORMAT = local (spécifique à la commande Export)
+        ✅ <code>DATABASE</code> = partagé (saisi une fois, utilisé partout)<br>
+        ✅ <code>FORMAT</code> = local (spécifique à la commande export_cmd)
         </p>
+        
+        <div style="background-color: #ffebee; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #f44336;">
+            <b>⚠️ Règles importantes :</b>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>Section <code>arguments</code> (pas <code>shared_arguments</code>)</li>
+                <li>Chaque argument doit avoir une liste <code>values</code></li>
+                <li>Dans <code>values</code> : <code>command</code> = nom de la commande, <code>argument</code> = code de l'argument cible</li>
+                <li>Les valeurs <code>default</code> de la tâche <b>remplacent</b> celles des commandes</li>
+                <li>Un argument partagé peut être injecté dans <b>plusieurs commandes</b></li>
+            </ul>
+        </div>
         """
         self.shared_text.setHtml(content)
 
@@ -535,140 +564,146 @@ class HelpWindow(QDialog):
 
     def _populate_examples(self):
         """Remplit l'onglet Exemples Complets."""
-        content = """
-        <h2>📚 Exemples complets</h2>
+        content = r"""
+        <h2>📚 Exemples réels de votre projet</h2>
         
-        <h3>1️⃣ Tâche simple - Une commande</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #00BCD4;">
-<span style="color: #c62828;">name:</span> "Export CSV"
-<span style="color: #c62828;">description:</span> "Exporte une table vers CSV"
-<span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "csvexport"
-    <span style="color: #c62828;">description:</span> "Export vers fichier CSV"
-    <span style="color: #c62828;">command:</span> "csvexport.exe {DATABASE} {TABLE} {OUTPUT}"
-    <span style="color: #c62828;">arguments:</span>
-      - <span style="color: #c62828;">code:</span> "DATABASE"
-        <span style="color: #c62828;">name:</span> "Base de données"
-        <span style="color: #c62828;">type:</span> "file"
-        <span style="color: #c62828;">required:</span> 1
-      
-      - <span style="color: #c62828;">code:</span> "TABLE"
-        <span style="color: #c62828;">name:</span> "Nom de la table"
-        <span style="color: #c62828;">type:</span> "string"
-        <span style="color: #c62828;">required:</span> 1
-      
-      - <span style="color: #c62828;">code:</span> "OUTPUT"
-        <span style="color: #c62828;">name:</span> "Fichier de sortie"
-        <span style="color: #c62828;">type:</span> "file"
-        <span style="color: #c62828;">required:</span> 0
-        <span style="color: #1565c0;">default:</span> "output.csv"
-</pre>
-        
-        <h3>2️⃣ Plusieurs commandes - Arguments partagés</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #00BCD4;">
-<span style="color: #c62828;">name:</span> "Import TDMS complet"
-<span style="color: #c62828;">description:</span> "Import TDMS puis calcul des profils"
-
-<span style="color: #1565c0;">shared_arguments:</span>
-  - <span style="color: #c62828;">code:</span> "DATABASE"
+        <h3>1️⃣ Commande simple : campaignexport</h3>
+        <p style="color: #666; font-size: 13px;">Fichier : <code>data/commands/campaignexport_commands.yaml</code></p>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #00BCD4;">
+<span style="color: #c62828;">name:</span> "campaignexport"
+<span style="color: #c62828;">description:</span> "Exporte les tables SQLite en fichiers texte + images"
+<span style="color: #c62828;">command:</span> "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} > {LOG_FILE}"
+<span style="color: #c62828;">arguments:</span>
+  - <span style="color: #c62828;">code:</span> "DATABASE_FILE"
     <span style="color: #c62828;">name:</span> "Base de données"
     <span style="color: #c62828;">type:</span> "file"
     <span style="color: #c62828;">required:</span> 1
-
-<span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "tdmsimport"
-    <span style="color: #c62828;">description:</span> "Import fichier TDMS"
-    <span style="color: #c62828;">command:</span> "tdmsimport.exe {TDMS_FILE} {DATABASE}"
-    <span style="color: #c62828;">arguments:</span>
-      - <span style="color: #c62828;">code:</span> "TDMS_FILE"
-        <span style="color: #c62828;">name:</span> "Fichier TDMS"
-        <span style="color: #c62828;">type:</span> "file"
-        <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">validation:</span>
+      file_extensions: [".db", ".sqlite", ".sqlite3"]
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE\\E3D_S29.sqlite"
   
-  - <span style="color: #c62828;">name:</span> "computeprofile"
-    <span style="color: #c62828;">description:</span> "Calcul des profils"
-    <span style="color: #c62828;">command:</span> "computeprofile.exe {DATABASE}"
-    <span style="color: #c62828;">arguments:</span> []
-</pre>
-        <p style="color: #666; margin: 5px 0 20px 0;">
-        ✅ DATABASE saisi <b>une seule fois</b>, utilisé par les 2 commandes<br>
-        ✅ Les commandes s'exécutent en séquence
-        </p>
-        
-        <h3>3️⃣ Avec flags et options</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #00BCD4;">
-<span style="color: #c62828;">name:</span> "Import avec options"
-<span style="color: #c62828;">description:</span> "Import TDMS avec mode debug"
-<span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "tdmsimport"
-    <span style="color: #c62828;">description:</span> "Import TDMS"
-    <span style="color: #c62828;">command:</span> "tdmsimport.exe {INPUT} {DATABASE} {DEBUG}"
-    <span style="color: #c62828;">arguments:</span>
-      - <span style="color: #c62828;">code:</span> "INPUT"
-        <span style="color: #c62828;">name:</span> "Fichier TDMS"
-        <span style="color: #c62828;">type:</span> "file"
-        <span style="color: #c62828;">required:</span> 1
-      
-      - <span style="color: #c62828;">code:</span> "DATABASE"
-        <span style="color: #c62828;">name:</span> "Base de données"
-        <span style="color: #c62828;">type:</span> "file"
-        <span style="color: #c62828;">required:</span> 1
-      
-      - <span style="color: #c62828;">code:</span> "DEBUG"
-        <span style="color: #c62828;">name:</span> "Mode debug"
-        <span style="color: #c62828;">type:</span> "flag"
-        <span style="color: #c62828;">required:</span> 0
-        <span style="color: #c62828;">value:</span> "--debug"
-</pre>
-        <p style="color: #666; margin: 5px 0 20px 0;">
-        ✅ DEBUG coché → <code>tdmsimport.exe input.tdms data.db --debug</code><br>
-        ✅ DEBUG décoché → <code>tdmsimport.exe input.tdms data.db</code>
-        </p>
-        
-        <h3>4️⃣ Mapping avancé (codes différents)</h3>
-        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 13px; border-left: 3px solid #00BCD4;">
-<span style="color: #c62828;">name:</span> "Pipeline avec mapping"
-<span style="color: #c62828;">description:</span> "Commandes avec codes différents"
-
-<span style="color: #1565c0;">shared_arguments:</span>
-  - <span style="color: #c62828;">code:</span> "INPUT_FILE"
-    <span style="color: #c62828;">name:</span> "Fichier source"
-    <span style="color: #c62828;">type:</span> "file"
+  - <span style="color: #c62828;">code:</span> "TXT_OUTPUT_DIRECTORY"
+    <span style="color: #c62828;">name:</span> "Répertoire texte"
+    <span style="color: #c62828;">type:</span> "directory"
     <span style="color: #c62828;">required:</span> 1
-
-<span style="color: #c62828;">commands:</span>
-  - <span style="color: #c62828;">name:</span> "Import"
-    <span style="color: #c62828;">command:</span> "import.exe --source {SOURCE_FILE}"
-    <span style="color: #c62828;">arguments:</span> []
-    <span style="color: #1565c0;">shared_argument_mapping:</span>
-      INPUT_FILE: "SOURCE_FILE"
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\TXT"
   
-  - <span style="color: #c62828;">name:</span> "Backup"
-    <span style="color: #c62828;">command:</span> "backup.exe --file {FILE_PATH}"
-    <span style="color: #c62828;">arguments:</span> []
-    <span style="color: #1565c0;">shared_argument_mapping:</span>
-      INPUT_FILE: "FILE_PATH"
+  - <span style="color: #c62828;">code:</span> "IMG_OUTPUT_DIRECTORY"
+    <span style="color: #c62828;">name:</span> "Répertoire images"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\IMG"
+  
+  - <span style="color: #c62828;">code:</span> "LOG_FILE"
+    <span style="color: #c62828;">name:</span> "Fichier de log"
+    <span style="color: #c62828;">type:</span> "string"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "log_campaignexport.txt"
 </pre>
-        <p style="color: #666; margin: 5px 0;">
-        ✅ INPUT_FILE saisi une fois<br>
-        ✅ Mappé vers SOURCE_FILE pour Import et FILE_PATH pour Backup
+        <p style="color: #666; margin: 5px 0 20px 0;">
+        ✅ Commande générée : <code>campaignexport L:\PROJET\BASE\E3D_S29.sqlite L:\PROJET\TXT L:\PROJET\IMG > log.txt</code>
         </p>
         
-        <hr style="margin: 25px 0; border: none; border-top: 2px solid #e0e0e0;">
+        <h3>2️⃣ Commande avec options : tdmsdirimport</h3>
+        <p style="color: #666; font-size: 13px;">Fichier : <code>data/commands/tdmsdirimport_commands.yaml</code></p>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 11px; border-left: 3px solid #00BCD4;">
+<span style="color: #c62828;">name:</span> "tdmsdirimport_tc"
+<span style="color: #c62828;">description:</span> "Importe tous les fichiers TDMS d'un dossier vers une base SQLite"
+<span style="color: #c62828;">command:</span> "tdmsdirimport {TDMS_DIR} {OUTPUT_DIR} --pname {PNAME} --keys {KEYS_FILE} --config {CONFIG} {TOL} {PTABLE} {IMU_LAG_TIME} > {LOG_FILE}"
+<span style="color: #c62828;">arguments:</span>
+  - <span style="color: #c62828;">code:</span> "TDMS_DIR"
+    <span style="color: #c62828;">name:</span> "Répertoire TDMS (entrée)"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\TDMS"
+  
+  - <span style="color: #c62828;">code:</span> "OUTPUT_DIR"
+    <span style="color: #c62828;">name:</span> "Répertoire de sortie (base)"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
+  
+  - <span style="color: #c62828;">code:</span> "PNAME"
+    <span style="color: #c62828;">name:</span> "Nom du projet"
+    <span style="color: #c62828;">type:</span> "string"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "E3D_S29"
+  
+  - <span style="color: #c62828;">code:</span> "TOL"
+    <span style="color: #c62828;">name:</span> "Tolérance"
+    <span style="color: #c62828;">type:</span> "valued_option"  <span style="color: #666;"># ← Option avec valeur</span>
+    <span style="color: #c62828;">required:</span> 0
+    <span style="color: #c62828;">value:</span> "--tol"
+    <span style="color: #1565c0;">default:</span> "0"
+  
+  - <span style="color: #c62828;">code:</span> "PTABLE"
+    <span style="color: #c62828;">name:</span> "Table de points"
+    <span style="color: #c62828;">type:</span> "valued_option"
+    <span style="color: #c62828;">required:</span> 0
+    <span style="color: #c62828;">value:</span> "--ptable"
+    <span style="color: #1565c0;">default:</span> "IMU"
+</pre>
+        <p style="color: #666; margin: 5px 0 20px 0;">
+        ✅ Commande générée : <code>tdmsdirimport L:\PROJET\TDMS L:\PROJET\BASE --pname E3D_S29 --tol 0 --ptable IMU ...</code>
+        </p>
         
-        <h3>💡 Conseils pratiques</h3>
-        <ul style="line-height: 1.8;">
-            <li><b>Structure des fichiers</b> : Un fichier = une commande (réutilisable)</li>
-            <li><b>!include</b> : Réutilisez les commandes dans plusieurs tâches</li>
-            <li><b>Noms clairs</b> : Utilisez des noms explicites pour les arguments</li>
-            <li><b>Descriptions</b> : Ajoutez toujours une description pour aider l'utilisateur</li>
-            <li><b>Valeurs par défaut</b> : Définissez-les quand c'est pertinent (tâche > commande)</li>
-            <li><b>Arguments partagés</b> : Évitez la duplication pour les valeurs communes</li>
-            <li><b>Extensions</b> : Utilisez <code>validation: file_extensions</code> pour les fichiers</li>
-            <li>Utilisez <code>flag</code> pour les options on/off simples</li>
-            <li>Utilisez <code>valued_option</code> pour les options avec valeur</li>
-            <li><b>Modification post-build</b> : Les fichiers YAML dans <code>dist/data/</code> sont modifiables</li>
-            <li>Testez vos fichiers YAML avant de les déployer</li>
-        </ul>
+        <h3>3️⃣ Tâche avec !include : Traitement campagne</h3>
+        <p style="color: #666; font-size: 13px;">Fichier : <code>data/tasks/traitement_campagne_task.yaml</code></p>
+        <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #4caf50;">
+<span style="color: #c62828;">name:</span> "Traitement campagne"
+<span style="color: #c62828;">description:</span> "Import TDMS du dossier + export campagne (TXT + IMAGES)"
+
+<span style="color: #1565c0;">arguments:</span>  <span style="color: #666;"># ← Argument partagé entre les 2 commandes</span>
+  - <span style="color: #c62828;">code:</span> "base"
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">description:</span> "Répertoire contenant la base de données"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
+    <span style="color: #1565c0;">values:</span>  <span style="color: #666;"># ← Où injecter cette valeur</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"  <span style="color: #666;"># ← Commande 1</span>
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"       <span style="color: #666;"># ← Injecté dans OUTPUT_DIR</span>
+      - <span style="color: #c62828;">command:</span> "campaignexport"   <span style="color: #666;"># ← Commande 2</span>
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"    <span style="color: #666;"># → Injecté dans DATABASE_FILE</span>
+
+<span style="color: #c62828;">commands:</span>
+  - !include ../commands/tdmsdirimport_commands.yaml  <span style="color: #666;"># ← Réutilisation</span>
+  - !include ../commands/campaignexport_commands.yaml
+</pre>
+        
+        <div style="background-color: #e8f5e9; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #4caf50;">
+            <b>🎯 Résultat :</b>
+            <ol style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                <li>L'utilisateur saisit <b>une seule fois</b> : <code>L:\PROJET\BASE</code></li>
+                <li>Commande 1 : <code>tdmsdirimport ... <b>L:\PROJET\BASE</b> ...</code> (OUTPUT_DIR)</li>
+                <li>Commande 2 : <code>campaignexport <b>L:\PROJET\BASE\E3D_S29.sqlite</b> ...</code> (DATABASE_FILE)</li>
+                <li>✅ <b>Cohérence garantie</b> : la base créée par tdmsdirimport est exportée par campaignexport</li>
+            </ol>
+        </div>
+        
+        <h3>4️⃣ Conseils pratiques</h3>
+        <div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #ff9800;">
+            <b>💡 Bonnes pratiques :</b>
+            <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                <li><b>Commandes réutilisables</b> : Créez des fichiers de commandes dans <code>data/commands/</code></li>
+                <li><b>Tâches spécifiques</b> : Combinez les commandes avec <code>!include</code> dans <code>data/tasks/</code></li>
+                <li><b>Arguments partagés</b> : Utilisez <code>arguments</code> + <code>values</code> pour éviter la répétition</li>
+                <li><b>Valeurs par défaut</b> : Définissez des <code>default</code> pour accélérer la saisie</li>
+                <li><b>Validation</b> : Utilisez <code>file_extensions</code> pour les fichiers</li>
+                <li><b>Logs</b> : Redirigez la sortie avec <code>> {LOG_FILE}</code></li>
+            </ul>
+        </div>
+        
+        <h3>5️⃣ Bouton Stop ⏹️</h3>
+        <div style="background-color: #ffebee; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #f44336;">
+            <b>⚠️ Arrêt d'exécution :</b>
+            <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                <li>Le bouton <b>"⏹ Arrêter"</b> apparaît pendant l'exécution des commandes</li>
+                <li>Cliquez dessus pour <b>arrêter immédiatement</b> la commande en cours</li>
+                <li>Les commandes suivantes <b>ne seront pas exécutées</b></li>
+                <li>Utile pour les commandes longues (import TDMS, calculs, etc.)</li>
+                <li>L'arrêt est <b>quasi-instantané</b> même si la commande est avancée</li>
+            </ul>
+        </div>
         """
         self.examples_text.setHtml(content)
