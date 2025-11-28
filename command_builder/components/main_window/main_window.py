@@ -73,11 +73,11 @@ class MainWindow(QMainWindow):
 
         # Créer le splitter horizontal principal
         self.main_splitter = QSplitter(Qt.Horizontal)
-        self.main_splitter.setHandleWidth(4)
+        self.main_splitter.setHandleWidth(3)
 
         # Créer le splitter vertical pour le côté droit
         self.right_splitter = QSplitter(Qt.Vertical)
-        self.right_splitter.setHandleWidth(4)
+        self.right_splitter.setHandleWidth(3)
 
         # Récupérer les conteneurs depuis l'UI chargée
         self.task_list_container = ui.findChild(QWidget, "taskListContainer")
@@ -223,6 +223,14 @@ class MainWindow(QMainWindow):
             # Connecter directement le formulaire à la console pour l'exécution
             self.command_form.commands_to_execute.connect(
                 self.console_output.execute_commands
+            )
+            # Connecter le bouton Exécuter de la console au formulaire
+            self.console_output.execute_requested.connect(
+                self.command_form._on_execute_clicked
+            )
+            # Activer le bouton Exécuter quand une tâche est chargée
+            self.command_form.task_loaded.connect(
+                lambda: self.console_output.set_execute_enabled(True)
             )
 
     def _show_help_window(self):
