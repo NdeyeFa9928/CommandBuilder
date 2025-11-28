@@ -43,30 +43,67 @@ QPushButton:disabled {
     color: #666666;
 }
 
+/* Style spécifique pour le bouton Exécuter */
+#buttonExecute {
+    background-color: transparent;
+    color: #4caf50;
+    border: 1px solid #4caf50;
+    border-radius: 3px;
+    padding: 4px 12px;
+    margin: 5px;
+    font-size: 12px;
+}
+
+#buttonExecute:hover:enabled {
+    background-color: #4caf50;
+    color: #ffffff;
+    border-color: #4caf50;
+}
+
+#buttonExecute:pressed {
+    background-color: #45a049;
+    color: #ffffff;
+    border-color: #45a049;
+}
+
+#buttonExecute:disabled {
+    background-color: #2a2f45;
+    color: #555555;
+    border: 1px solid #3a3f55;
+}
+
+/* État "en cours" pour le bouton Exécuter (via propriété dynamique) */
+#buttonExecute[executing="true"] {
+    background-color: #2a2f45;
+    color: #888888;
+    border: 1px solid #3a3f55;
+}
+
 /* Style spécifique pour le bouton Stop */
 #buttonStop {
-    background-color: #3a3f55;
-    color: #ff6b6b;  /* Texte rouge subtil */
-    border: 1px solid #ff6b6b;  /* Bordure rouge */
+    background-color: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
     border-radius: 3px;
-    padding: 5px 15px;
+    padding: 4px 12px;
     margin: 5px;
+    font-size: 12px;
 }
 
 #buttonStop:hover:enabled {
-    background-color: #4a4f65;
-    color: #ff8787;
-    border-color: #ff8787;
+    background-color: #ff6b6b;
+    color: #ffffff;
+    border-color: #ff6b6b;
 }
 
 #buttonStop:pressed {
-    background-color: #2a2f45;
-    color: #ff5252;
+    background-color: #ff5252;
+    color: #ffffff;
     border-color: #ff5252;
 }
 
 #buttonStop:disabled {
-    background-color: #2a2f45;
-    color: #666666;
-    border: 1px solid #444444;
+    background-color: transparent;
+    color: #555555;
+    border: 1px solid #3a3f55;
 }
