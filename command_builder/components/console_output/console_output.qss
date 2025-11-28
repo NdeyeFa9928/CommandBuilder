@@ -37,3 +37,36 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #2a2f45;
 }
+
+QPushButton:disabled {
+    background-color: #2a2f45;
+    color: #666666;
+}
+
+/* Style spécifique pour le bouton Stop */
+#buttonStop {
+    background-color: #3a3f55;
+    color: #ff6b6b;  /* Texte rouge subtil */
+    border: 1px solid #ff6b6b;  /* Bordure rouge */
+    border-radius: 3px;
+    padding: 5px 15px;
+    margin: 5px;
+}
+
+#buttonStop:hover:enabled {
+    background-color: #4a4f65;
+    color: #ff8787;
+    border-color: #ff8787;
+}
+
+#buttonStop:pressed {
+    background-color: #2a2f45;
+    color: #ff5252;
+    border-color: #ff5252;
+}
+
+#buttonStop:disabled {
+    background-color: #2a2f45;
+    color: #666666;
+    border: 1px solid #444444;
+}

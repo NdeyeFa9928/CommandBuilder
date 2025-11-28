@@ -1,13 +1,20 @@
 name: "tdmsdirimport_tc"
 description: "Importe tous les fichiers TDMS d'un dossier vers une base SQLite"
-command: "tdmsdirimport {TDMS_DIR} --pname {PNAME} --keys {KEYS_FILE} --config {CONFIG} {TOL} {PTABLE} {IMU_LAG_TIME} {IMU_CHAN} {GPS_LAG_TIME} {GPS_CHAN} {IMAGE_LAG_TIME} > {LOG_FILE}"
+command: "tdmsdirimport {TDMS_DIR} {OUTPUT_DIR} --pname {PNAME} --keys {KEYS_FILE} --config {CONFIG} {TOL} {PTABLE} {IMU_LAG_TIME} {IMU_CHAN} {GPS_LAG_TIME} {GPS_CHAN} {IMAGE_LAG_TIME} > {LOG_FILE}"
 arguments:
   - code: "TDMS_DIR"
-    name: "Répertoire TDMS"
-    description: "Répertoire contenant les fichiers TDMS"
+    name: "Répertoire TDMS (entrée)"
+    description: "Répertoire contenant les fichiers TDMS à importer"
     type: "directory"
     required: 1
-    default: "L:\\999999_CDG_2025\\E3D_S29\\AP\\TDMS"
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\TDMS"
+  
+  - code: "OUTPUT_DIR"
+    name: "Répertoire de sortie (base)"
+    description: "Répertoire où sera créée la base de données SQLite"
+    type: "directory"
+    required: 1
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\BASE"
   
   - code: "PNAME"
     name: "Nom du projet"
@@ -21,7 +28,7 @@ arguments:
     description: "Fichier de clés pour l'import"
     type: "file"
     required: 1
-    default: "L:\\999999_CDG_2025\\E3D_S29\\AP\\clavier_debut_fin_unique.csv"
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\clavier_debut_fin_unique.csv"
 
   - code: "CONFIG"
     name: "Configuration"
@@ -40,11 +47,11 @@ arguments:
 
   - code: "PTABLE"
     name: "Table de points"
-    description: "Table de points pour l'import"
-    type: "flag"
+    description: "Table de points pour l'import (ex: IMU)"
+    type: "valued_option"
     required: 0
     value: "--ptable"
-    default: ""
+    default: "IMU"
 
   - code: "IMU_LAG_TIME"
     name: "Lag IMU"
@@ -91,4 +98,4 @@ arguments:
     description: "Fichier de log pour l'import"
     type: "string"
     required: 1
-    default: "log_tdmsdirimport.txt"
+    default: "L:\\TEST_COMMAND_BUILDER\\TEST_COMMAND_BUILDER\\AP\\log_tdmsdirimport.txt"

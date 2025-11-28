@@ -1,0 +1,27 @@
+name: "Test bouton Stop"
+description: "Tâche de test avec commandes longues pour tester le bouton Stop"
+commands:
+  - name: "Ping Google 20 fois"
+    description: "Ping google.com 20 fois (environ 20 secondes)"
+    command: "ping -n 20 google.com"
+    arguments: []
+
+  - name: "Ping localhost 30 fois"
+    description: "Ping localhost 30 fois (environ 30 secondes)"
+    command: "ping -n 30 127.0.0.1"
+    arguments: []
+
+  - name: "Attente 15 secondes"
+    description: "Commande timeout de 15 secondes"
+    command: "timeout /t 15"
+    arguments: []
+
+  - name: "Liste repertoire Windows"
+    description: "Liste le contenu de C:\\Windows avec pause"
+    command: "dir C:\\Windows /s"
+    arguments: []
+
+  - name: "Message final"
+    description: "Si vous voyez ce message, vous n'avez pas clique sur Stop"
+    command: "echo ========== VOUS N AVEZ PAS CLIQUE SUR STOP ==========  && echo Toutes les commandes ont ete executees"
+    arguments: []

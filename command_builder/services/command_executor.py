@@ -3,6 +3,7 @@ Service d'exécution de commandes Windows.
 """
 
 import subprocess
+import time
 from typing import Callable, Optional
 
 from PySide6.QtCore import QObject, QThread, Signal
@@ -29,9 +30,11 @@ class CommandExecutor(QThread):
         super().__init__(parent)
         self.command = command
         self._is_cancelled = False
+        self._process = None  # Stocker le processus pour pouvoir le tuer de l'extérieur
 
     def run(self):
         """Exécute la commande dans un thread séparé."""
+        process = None
         try:
             # Utiliser CP850 pour la console Windows (OEM)
             # CP850 est l'encodage standard de la console Windows française
@@ -47,38 +50,85 @@ class CommandExecutor(QThread):
                 encoding=encoding,
                 errors="replace",
             )
+            
+            # Stocker le processus pour pouvoir le tuer depuis cancel()
+            self._process = process
 
-            # Lire la sortie ligne par ligne
+            # Lire la sortie ligne par ligne avec vérification fréquente de l'annulation
             while True:
+                # Vérifier l'annulation AVANT de lire (plus réactif)
                 if self._is_cancelled:
-                    process.terminate()
+                    try:
+                        process.terminate()
+                        # Attendre un peu pour que le processus se termine proprement
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        # Si le processus ne se termine pas, le forcer
+                        process.kill()
+                    except Exception:
+                        pass
                     break
-
-                # Lire stdout
-                output = process.stdout.readline()
-                if output:
-                    self.output_received.emit(output.rstrip())
 
                 # Vérifier si le processus est terminé
-                if output == "" and process.poll() is not None:
+                poll_result = process.poll()
+                if poll_result is not None:
                     break
 
-            # Lire les erreurs restantes
-            stderr = process.stderr.read()
-            if stderr:
-                self.error_received.emit(stderr.rstrip())
+                # Lire stdout avec vérification périodique de l'annulation
+                try:
+                    output = process.stdout.readline()
+                    if output:
+                        self.output_received.emit(output.rstrip())
+                    elif poll_result is not None:
+                        # Processus terminé et plus de sortie
+                        break
+                    else:
+                        # Petite pause pour permettre la vérification de l'annulation
+                        time.sleep(0.05)
+                except Exception:
+                    break
+
+            # Lire les erreurs restantes (seulement si pas annulé)
+            if not self._is_cancelled:
+                try:
+                    stderr = process.stderr.read()
+                    if stderr:
+                        self.error_received.emit(stderr.rstrip())
+                except Exception:
+                    pass
 
             # Émettre le code de retour
             return_code = process.poll()
-            self.execution_finished.emit(return_code if return_code is not None else 0)
+            if return_code is None:
+                return_code = -1 if self._is_cancelled else 0
+            self.execution_finished.emit(return_code)
 
         except Exception as e:
             self.error_received.emit(f"Erreur lors de l'exécution: {str(e)}")
             self.execution_finished.emit(-1)
+        finally:
+            # S'assurer que le processus est bien terminé
+            if process is not None and process.poll() is None:
+                try:
+                    process.kill()
+                except Exception:
+                    pass
 
     def cancel(self):
         """Annule l'exécution de la commande."""
         self._is_cancelled = True
+        
+        # Tuer le processus immédiatement pour débloquer readline()
+        if self._process is not None and self._process.poll() is None:
+            try:
+                self._process.terminate()
+                # Attendre un peu
+                time.sleep(0.1)
+                # Si toujours vivant, forcer
+                if self._process.poll() is None:
+                    self._process.kill()
+            except Exception:
+                pass
 
 
 class CommandExecutorService:
@@ -89,6 +139,7 @@ class CommandExecutorService:
     def __init__(self):
         """Initialise le service d'exécution."""
         self.current_executor: Optional[CommandExecutor] = None
+        self._stop_requested = False
 
     def execute_command(
         self,
@@ -135,3 +186,24 @@ class CommandExecutorService:
         if self.current_executor and self.current_executor.isRunning():
             self.current_executor.cancel()
             self.current_executor.wait()
+
+    def request_stop(self):
+        """
+        Demande l'arrêt de toutes les exécutions en cours et futures.
+        Cette méthode doit être appelée pour arrêter complètement l'exécution d'une séquence.
+        """
+        self._stop_requested = True
+        self.cancel_current_execution()
+
+    def is_stop_requested(self) -> bool:
+        """
+        Vérifie si un arrêt a été demandé.
+
+        Returns:
+            True si un arrêt a été demandé, False sinon
+        """
+        return self._stop_requested
+
+    def reset_stop_flag(self):
+        """Réinitialise le flag d'arrêt pour permettre de nouvelles exécutions."""
+        self._stop_requested = False
