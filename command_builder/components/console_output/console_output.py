@@ -27,6 +27,9 @@ class ConsoleOutput(QWidget):
 
     # Signal émis lorsque toutes les commandes sont terminées
     all_commands_finished = Signal()
+    
+    # Signal émis quand le bouton Exécuter est cliqué
+    execute_requested = Signal()
 
     def __init__(self, parent=None):
         """
@@ -60,6 +63,7 @@ class ConsoleOutput(QWidget):
 
         # Stocker les références aux widgets importants
         self.text_edit_console = ui.findChild(QPlainTextEdit, "textEditConsole")
+        self.button_execute = ui.findChild(QPushButton, "buttonExecute")
         self.button_stop = ui.findChild(QPushButton, "buttonStop")
         self.button_effacer = ui.findChild(QPushButton, "buttonEffacer")
         self.button_exporter = ui.findChild(QPushButton, "buttonExporter")
@@ -78,9 +82,23 @@ class ConsoleOutput(QWidget):
 
     def _connect_signals(self):
         """Connecte les signaux aux slots."""
+        self.button_execute.clicked.connect(self._on_execute_clicked)
         self.button_stop.clicked.connect(self._on_stop_clicked)
         self.button_effacer.clicked.connect(self.clear)
         self.button_exporter.clicked.connect(self.export_console)
+    
+    def _on_execute_clicked(self):
+        """Gère le clic sur le bouton Exécuter."""
+        self.execute_requested.emit()
+    
+    def set_execute_enabled(self, enabled: bool):
+        """
+        Active ou désactive le bouton Exécuter.
+        
+        Args:
+            enabled: True pour activer, False pour désactiver
+        """
+        self.button_execute.setEnabled(enabled)
 
     def append_text(self, text):
         """
@@ -162,8 +180,9 @@ class ConsoleOutput(QWidget):
         self.commands_queue = commands_list
         self.current_command_index = 0
 
-        # Activer le bouton Stop
-        self.button_stop.setEnabled(True)
+        # Gérer les états des boutons
+        self.button_execute.setEnabled(False)  # Désactiver Exécuter
+        self.button_stop.setEnabled(True)  # Activer Stop
 
         # Afficher l'en-tête global avec timestamp de début
         start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -258,7 +277,8 @@ class ConsoleOutput(QWidget):
         )
         self.append_text("=" * 80 + "\n")
 
-        # Désactiver le bouton Stop
+        # Réactiver le bouton Exécuter et désactiver Stop
+        self.button_execute.setEnabled(True)
         self.button_stop.setEnabled(False)
 
         # Émettre le signal
@@ -274,7 +294,8 @@ class ConsoleOutput(QWidget):
         self.append_text(f"TOUTES LES COMMANDES TERMINÉES - Fin: {end_time}")
         self.append_text("=" * 80 + "\n")
 
-        # Désactiver le bouton Stop
+        # Réactiver le bouton Exécuter et désactiver Stop
+        self.button_execute.setEnabled(True)
         self.button_stop.setEnabled(False)
 
         # Émettre le signal
@@ -294,7 +315,8 @@ class ConsoleOutput(QWidget):
         )
         self.append_text("=" * 80 + "\n")
 
-        # Désactiver le bouton Stop
+        # Réactiver le bouton Exécuter et désactiver Stop
+        self.button_execute.setEnabled(True)
         self.button_stop.setEnabled(False)
 
         # Émettre le signal
