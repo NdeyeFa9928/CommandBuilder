@@ -37,6 +37,8 @@ class CommandForm(QWidget):
     form_completed = Signal(dict)  # Dictionnaire des valeurs du formulaire
     # Signal émis lorsque les commandes doivent être exécutées
     commands_to_execute = Signal(list)  # Liste des commandes à exécuter
+    # Signal émis quand une tâche est chargée (pour activer le bouton Exécuter)
+    task_loaded = Signal()
 
     def __init__(
         self,
@@ -209,6 +211,9 @@ class CommandForm(QWidget):
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
+        
+        # Émettre le signal pour activer le bouton Exécuter
+        self.task_loaded.emit()
 
     def set_commands(self, commands, task_name=None):
         """
