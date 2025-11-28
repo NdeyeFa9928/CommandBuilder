@@ -73,11 +73,11 @@ class MainWindow(QMainWindow):
 
         # Créer le splitter horizontal principal
         self.main_splitter = QSplitter(Qt.Horizontal)
-        self.main_splitter.setHandleWidth(2)
+        self.main_splitter.setHandleWidth(4)
 
         # Créer le splitter vertical pour le côté droit
         self.right_splitter = QSplitter(Qt.Vertical)
-        self.right_splitter.setHandleWidth(2)
+        self.right_splitter.setHandleWidth(4)
 
         # Récupérer les conteneurs depuis l'UI chargée
         self.task_list_container = ui.findChild(QWidget, "taskListContainer")
