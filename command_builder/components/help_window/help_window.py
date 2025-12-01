@@ -567,20 +567,24 @@ class HelpWindow(QDialog):
         content = r"""
         <h2>📚 Exemples réels de votre projet</h2>
         
-        <h3>1️⃣ Commande simple : campaignexport</h3>
+        <h3>1️⃣ Commande avec construction de chemin : campaignexport</h3>
         <p style="color: #666; font-size: 13px;">Fichier : <code>data/commands/campaignexport_commands.yaml</code></p>
         <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #00BCD4;">
 <span style="color: #c62828;">name:</span> "campaignexport"
 <span style="color: #c62828;">description:</span> "Exporte les tables SQLite en fichiers texte + images"
-<span style="color: #c62828;">command:</span> "campaignexport {DATABASE_FILE} {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} > {LOG_FILE}"
+<span style="color: #c62828;">command:</span> "campaignexport {DATABASE_FILE}\\{PROJECT_NAME}.sqlite {TXT_OUTPUT_DIRECTORY} {IMG_OUTPUT_DIRECTORY} > {LOG_FILE}"
 <span style="color: #c62828;">arguments:</span>
-  - <span style="color: #c62828;">code:</span> "DATABASE_FILE"
-    <span style="color: #c62828;">name:</span> "Base de données"
-    <span style="color: #c62828;">type:</span> "file"
+  - <span style="color: #c62828;">code:</span> "PROJECT_NAME"
+    <span style="color: #c62828;">name:</span> "Nom de la base"
+    <span style="color: #c62828;">type:</span> "string"
     <span style="color: #c62828;">required:</span> 1
-    <span style="color: #1565c0;">validation:</span>
-      file_extensions: [".db", ".sqlite", ".sqlite3"]
-    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE\\E3D_S29.sqlite"
+    <span style="color: #1565c0;">default:</span> "E3D_S29"
+  
+  - <span style="color: #c62828;">code:</span> "DATABASE_FILE"
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
   
   - <span style="color: #c62828;">code:</span> "TXT_OUTPUT_DIRECTORY"
     <span style="color: #c62828;">name:</span> "Répertoire texte"
@@ -600,6 +604,11 @@ class HelpWindow(QDialog):
     <span style="color: #c62828;">required:</span> 1
     <span style="color: #1565c0;">default:</span> "log_campaignexport.txt"
 </pre>
+        <div style="background-color: #fff3e0; padding: 10px; border-radius: 4px; margin: 10px 0; border-left: 3px solid #ff9800;">
+        <b>💡 Construction de chemin :</b> <code>{DATABASE_FILE}\\{PROJECT_NAME}.sqlite</code><br>
+        Combine un répertoire + un nom de fichier pour créer le chemin complet<br>
+        Résultat : <code>L:\PROJET\BASE\E3D_S29.sqlite</code>
+        </div>
         <p style="color: #666; margin: 5px 0 20px 0;">
         ✅ Commande générée : <code>campaignexport L:\PROJET\BASE\E3D_S29.sqlite L:\PROJET\TXT L:\PROJET\IMG > log.txt</code>
         </p>
@@ -647,37 +656,48 @@ class HelpWindow(QDialog):
         ✅ Commande générée : <code>tdmsdirimport L:\PROJET\TDMS L:\PROJET\BASE --pname E3D_S29 --tol 0 --ptable IMU ...</code>
         </p>
         
-        <h3>3️⃣ Tâche avec !include : Traitement campagne</h3>
+        <h3>3️⃣ Tâche avec !include et arguments partagés</h3>
         <p style="color: #666; font-size: 13px;">Fichier : <code>data/tasks/traitement_campagne_task.yaml</code></p>
         <pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #4caf50;">
 <span style="color: #c62828;">name:</span> "Traitement campagne"
 <span style="color: #c62828;">description:</span> "Import TDMS du dossier + export campagne (TXT + IMAGES)"
 
-<span style="color: #1565c0;">arguments:</span>  <span style="color: #666;"># ← Argument partagé entre les 2 commandes</span>
-  - <span style="color: #c62828;">code:</span> "base"
+<span style="color: #1565c0;">arguments:</span>  <span style="color: #666;"># ← Arguments partagés entre les 2 commandes</span>
+  - <span style="color: #c62828;">code:</span> "PROJECT_NAME"
+    <span style="color: #c62828;">name:</span> "Nom du projet"
+    <span style="color: #c62828;">type:</span> "string"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "E3D_S29"
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "PNAME"           <span style="color: #666;"># → Nom de la table</span>
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "PROJECT_NAME"    <span style="color: #666;"># → Nom du fichier .sqlite</span>
+  
+  - <span style="color: #c62828;">code:</span> "DATABASE_FILE"
     <span style="color: #c62828;">name:</span> "Répertoire de base"
-    <span style="color: #c62828;">description:</span> "Répertoire contenant la base de données"
     <span style="color: #c62828;">type:</span> "directory"
     <span style="color: #c62828;">required:</span> 1
     <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
-    <span style="color: #1565c0;">values:</span>  <span style="color: #666;"># ← Où injecter cette valeur</span>
-      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"  <span style="color: #666;"># ← Commande 1</span>
-        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"       <span style="color: #666;"># ← Injecté dans OUTPUT_DIR</span>
-      - <span style="color: #c62828;">command:</span> "campaignexport"   <span style="color: #666;"># ← Commande 2</span>
-        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"    <span style="color: #666;"># → Injecté dans DATABASE_FILE</span>
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"      <span style="color: #666;"># → Où créer la base</span>
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"   <span style="color: #666;"># → Où lire la base</span>
 
 <span style="color: #c62828;">commands:</span>
-  - !include ../commands/tdmsdirimport_commands.yaml  <span style="color: #666;"># ← Réutilisation</span>
+  - !include ../commands/tdmsdirimport_commands.yaml
   - !include ../commands/campaignexport_commands.yaml
 </pre>
         
         <div style="background-color: #e8f5e9; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #4caf50;">
-            <b>🎯 Résultat :</b>
+            <b>🎯 Résultat avec construction de chemin :</b>
             <ol style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
-                <li>L'utilisateur saisit <b>une seule fois</b> : <code>L:\PROJET\BASE</code></li>
-                <li>Commande 1 : <code>tdmsdirimport ... <b>L:\PROJET\BASE</b> ...</code> (OUTPUT_DIR)</li>
-                <li>Commande 2 : <code>campaignexport <b>L:\PROJET\BASE\E3D_S29.sqlite</b> ...</code> (DATABASE_FILE)</li>
-                <li>✅ <b>Cohérence garantie</b> : la base créée par tdmsdirimport est exportée par campaignexport</li>
+                <li>L'utilisateur saisit : <code>PROJECT_NAME = "E3D_S29"</code> et <code>DATABASE_FILE = "L:\PROJET\BASE"</code></li>
+                <li>Commande 1 : <code>tdmsdirimport ... L:\PROJET\BASE --pname E3D_S29 ...</code></li>
+                <li>Commande 2 : <code>campaignexport <b>L:\PROJET\BASE\E3D_S29.sqlite</b> ...</code></li>
+                <li>✅ Le chemin est construit avec <code>{DATABASE_FILE}\{PROJECT_NAME}.sqlite</code></li>
+                <li>✅ <b>Cohérence garantie</b> : même nom de projet partout</li>
             </ol>
         </div>
         
@@ -694,16 +714,50 @@ class HelpWindow(QDialog):
             </ul>
         </div>
         
-        <h3>5️⃣ Bouton Stop ⏹️</h3>
-        <div style="background-color: #ffebee; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #f44336;">
-            <b>⚠️ Arrêt d'exécution :</b>
+        <h3>5️⃣ Boutons d'exécution</h3>
+        <div style="background-color: #e8f5e9; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #4caf50;">
+            <b>▶️ Bouton "Exécuter" (vert) :</b>
             <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
-                <li>Le bouton <b>"⏹ Arrêter"</b> apparaît pendant l'exécution des commandes</li>
+                <li>Situé dans la <b>console</b>, toujours visible à côté du bouton Stop</li>
+                <li><b>Grisé</b> au démarrage → <b>Vert</b> quand une tâche est sélectionnée</li>
+                <li>Lance l'exécution de <b>toutes les commandes</b> de la tâche en séquence</li>
+                <li>Devient <b>grisé</b> pendant l'exécution (désactivé)</li>
+                <li>Redevient <b>vert</b> à la fin de l'exécution</li>
+            </ul>
+        </div>
+        
+        <div style="background-color: #ffebee; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #f44336;">
+            <b>⏹️ Bouton "Stop" (rouge) :</b>
+            <ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+                <li>Situé dans la <b>console</b>, toujours visible à côté du bouton Exécuter</li>
+                <li><b>Grisé</b> par défaut → <b>Rouge</b> pendant l'exécution</li>
                 <li>Cliquez dessus pour <b>arrêter immédiatement</b> la commande en cours</li>
                 <li>Les commandes suivantes <b>ne seront pas exécutées</b></li>
                 <li>Utile pour les commandes longues (import TDMS, calculs, etc.)</li>
                 <li>L'arrêt est <b>quasi-instantané</b> même si la commande est avancée</li>
             </ul>
+        </div>
+        
+        <div style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2196F3;">
+            <b>🎯 États visuels :</b>
+            <table style="width: 100%; margin-top: 10px; font-size: 13px;">
+                <tr>
+                    <td style="padding: 5px;"><b>Au démarrage :</b></td>
+                    <td style="padding: 5px;"><code>[▶ Exécuter (grisé)]  [⏹ Stop (grisé)]</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;"><b>Tâche sélectionnée :</b></td>
+                    <td style="padding: 5px;"><code>[▶ Exécuter (VERT)]  [⏹ Stop (grisé)]</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;"><b>En exécution :</b></td>
+                    <td style="padding: 5px;"><code>[▶ Exécuter (grisé)]  [⏹ Stop (ROUGE)]</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;"><b>Fin d'exécution :</b></td>
+                    <td style="padding: 5px;"><code>[▶ Exécuter (VERT)]  [⏹ Stop (grisé)]</code></td>
+                </tr>
+            </table>
         </div>
         """
         self.examples_text.setHtml(content)
