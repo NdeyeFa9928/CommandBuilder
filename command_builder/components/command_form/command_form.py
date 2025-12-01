@@ -8,6 +8,7 @@ from typing import Callable, List, Optional
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
+    QCheckBox,
     QHBoxLayout,
     QLabel,
     QMessageBox,
@@ -61,6 +62,7 @@ class CommandForm(QWidget):
         self.current_commands = []  # Liste des commandes multiples
         self.current_task = None  # Tâche courante
         self.command_components = []  # Liste des CommandComponent
+        self.command_checkboxes = []  # Liste des checkboxes pour activer/désactiver les commandes
         self.task_argument_components = []  # Liste des ArgumentComponent pour les arguments de tâche
         self.shared_argument_values = {}  # Valeurs des arguments partagés
         self._command_widget_factory = (
@@ -177,9 +179,17 @@ class CommandForm(QWidget):
             command_container_layout = QVBoxLayout()
             command_container_layout.setSpacing(5)
 
-            # Créer un layout horizontal pour le titre (numéro + nom)
+            # Créer un layout horizontal pour le titre (checkbox + numéro + nom)
             title_layout = QHBoxLayout()
-            title_layout.setSpacing(5)
+            title_layout.setSpacing(10)
+
+            # Créer une checkbox pour activer/désactiver la commande
+            checkbox = QCheckBox()
+            checkbox.setChecked(True)  # Cochée par défaut
+            checkbox.setToolTip("Décochez pour ignorer cette commande lors de l'exécution")
+            checkbox.setStyleSheet("QCheckBox { font-size: 12px; }")
+            self.command_checkboxes.append(checkbox)
+            title_layout.addWidget(checkbox)
 
             # Créer un label pour le numéro et le nom
             title_label = QLabel(f"{i}. {command.name}")
@@ -436,6 +446,7 @@ class CommandForm(QWidget):
 
         # Vider les listes des composants
         self.command_components.clear()
+        self.command_checkboxes.clear()
         self.task_argument_components.clear()
 
     def _refresh_command_displays(self):
@@ -512,14 +523,19 @@ class CommandForm(QWidget):
     def _on_execute_clicked(self):
         """
         Gère le clic sur le bouton "Exécuter".
-        Valide les arguments obligatoires puis exécute toutes les commandes de la liste.
+        Valide les arguments obligatoires puis exécute seulement les commandes cochées.
         """
         if not self.command_components:
             return
 
-        # Valider tous les arguments obligatoires avant l'exécution
+        # Valider tous les arguments obligatoires avant l'exécution (seulement pour les commandes cochées)
         all_errors = []
-        for command_widget in self.command_components:
+        for i, command_widget in enumerate(self.command_components):
+            # Vérifier si la commande est cochée (si des checkboxes existent)
+            if self.command_checkboxes and i < len(self.command_checkboxes):
+                if not self.command_checkboxes[i].isChecked():
+                    continue  # Ignorer les commandes décochées
+            
             if hasattr(command_widget, "command") and hasattr(
                 command_widget, "get_argument_values"
             ):
@@ -545,9 +561,14 @@ class CommandForm(QWidget):
             msg_box.exec()
             return
 
-        # Construire la liste de toutes les commandes avec leurs noms
+        # Construire la liste des commandes cochées avec leurs noms
         commands_list = []
-        for command_widget in self.command_components:
+        for i, command_widget in enumerate(self.command_components):
+            # Vérifier si la commande est cochée (si des checkboxes existent)
+            if self.command_checkboxes and i < len(self.command_checkboxes):
+                if not self.command_checkboxes[i].isChecked():
+                    continue  # Ignorer les commandes décochées
+            
             if hasattr(command_widget, "_build_full_command"):
                 full_command = command_widget._build_full_command()
                 command_name = (
@@ -557,7 +578,17 @@ class CommandForm(QWidget):
                 )
                 commands_list.append({"name": command_name, "command": full_command})
 
-        # Émettre le signal pour exécuter toutes les commandes
+        # Vérifier qu'au moins une commande est cochée
+        if not commands_list:
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Warning)
+            msg_box.setWindowTitle("Aucune commande sélectionnée")
+            msg_box.setText("Veuillez cocher au moins une commande à exécuter.")
+            msg_box.setStyleSheet(self._stylesheet)
+            msg_box.exec()
+            return
+
+        # Émettre le signal pour exécuter les commandes cochées
         self.commands_to_execute.emit(commands_list)
 
     def _apply_default_style(self, label: QLabel):
