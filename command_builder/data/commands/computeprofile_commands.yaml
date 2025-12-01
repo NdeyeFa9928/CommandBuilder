@@ -1,6 +1,6 @@
 name: "computeprofile"
 description: "Calcule les indicateurs de profils"
-command: "computeprofile {DATABASE_FILE} --config {CONFIG_FILE} {DEBUG_FLAG}"
+command: "computeprofile {DATABASE_FILE} --config {CONFIG_FILE} {DEBUG_FLAG} > log_computeprofile.txt"
 arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"

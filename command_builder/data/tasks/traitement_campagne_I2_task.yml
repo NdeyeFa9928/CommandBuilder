@@ -1,0 +1,29 @@
+name: "Traitement campagne I2"
+description: "Import TDMS + calcul profil + export campagne (TXT + IMAGES)"
+arguments:
+  - code: "PROJECT_NAME"
+    name: "Nom du projet"
+    description: "Nom du projet (utilisé pour le nom de la table et de la base de données)"
+    type: "string"
+    required: 1
+    values:
+    - command: "tdmsdirimport_tc"
+      argument: "PNAME"
+    - command: "campaignexport"
+      argument: "PROJECT_NAME"
+  
+  - code: "DATABASE_FILE"
+    name: "Répertoire de base"
+    description: "Répertoire contenant la base de données SQLite"
+    type: "directory"
+    required: 1
+    values:
+    - command: "tdmsdirimport_tc"
+      argument: "OUTPUT_DIR"
+    - command: "campaignexport"
+      argument: "DATABASE_FILE"
+
+commands:
+  - !include ../commands/tdmsdirimport_commands.yaml
+  - !include ../commands/computeprofile_commands.yaml
+  - !include ../commands/campaignexport_commands.yaml
