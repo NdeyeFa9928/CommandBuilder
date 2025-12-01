@@ -1,4 +1,4 @@
-name: "Traitement campagne E3D"
+name: "Traitement campagne E3D (spécial test) "
 description: "Import TDMS du dossier + export campagne (TXT + IMAGES)"
 arguments:
   - code: "PROJECT_NAME"
