@@ -191,6 +191,67 @@ class HelpWindow(QDialog):
     def _populate_structure(self):
         """Remplit l'onglet Structure."""
         content = """
+        <h2>📐 Référence complète YAML</h2>
+        
+        <div style="background-color: #e3f2fd; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #2196F3;">
+            <h3 style="margin-top: 0;">🎯 Structure d'un fichier de commande</h3>
+            <pre style="background-color: #ffffff; padding: 12px; border-radius: 4px; font-size: 12px; margin: 10px 0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "nom_de_la_commande"           <span style="color: #666;"># 🔴 OBLIGATOIRE - Nom affiché</span>
+<span style="color: #c62828; font-weight: bold;">description:</span> "Description courte"    <span style="color: #666;"># 🔴 OBLIGATOIRE - Texte explicatif</span>
+<span style="color: #c62828; font-weight: bold;">command:</span> "executable {ARG1} {ARG2}"  <span style="color: #666;"># 🔴 OBLIGATOIRE - Commande CLI avec placeholders</span>
+<span style="color: #c62828; font-weight: bold;">arguments:</span>                           <span style="color: #666;"># 🔴 OBLIGATOIRE - Liste (peut être vide [])</span>
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "ARG1"                     <span style="color: #666;"># 🔴 OBLIGATOIRE - Identifiant unique</span>
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Nom affiché"              <span style="color: #666;"># 🔴 OBLIGATOIRE - Label dans l'interface</span>
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Texte d'aide"      <span style="color: #666;"># 🟡 OPTIONNEL - Tooltip</span>
+    <span style="color: #c62828; font-weight: bold;">type:</span> "string"                   <span style="color: #666;"># 🔴 OBLIGATOIRE - string|file|directory|flag|valued_option</span>
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1                      <span style="color: #666;"># 🔴 OBLIGATOIRE - 0 ou 1</span>
+    <span style="color: #1565c0;">default:</span> "valeur_par_defaut"      <span style="color: #666;"># 🟡 OPTIONNEL - Valeur pré-remplie</span>
+    <span style="color: #1565c0;">value:</span> "--flag"                   <span style="color: #666;"># 🟠 OBLIGATOIRE pour type "flag"</span>
+    <span style="color: #1565c0;">validation:</span>                       <span style="color: #666;"># 🟡 OPTIONNEL - Pour type "file"</span>
+      file_extensions: [".csv", ".txt"]  <span style="color: #666;"># Liste des extensions acceptées</span>
+</pre>
+        </div>
+        
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #4caf50;">
+            <h3 style="margin-top: 0;">🎯 Structure d'un fichier de tâche</h3>
+            <pre style="background-color: #ffffff; padding: 12px; border-radius: 4px; font-size: 12px; margin: 10px 0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "nom_de_la_tache"            <span style="color: #666;"># 🔴 OBLIGATOIRE - Nom affiché</span>
+<span style="color: #c62828; font-weight: bold;">description:</span> "Description"          <span style="color: #666;"># 🔴 OBLIGATOIRE - Texte explicatif</span>
+
+<span style="color: #1565c0;">arguments:</span>                          <span style="color: #666;"># 🟡 OPTIONNEL - Arguments partagés entre commandes</span>
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "SHARED_ARG"              <span style="color: #666;"># Même structure qu'un argument normal</span>
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Argument partagé"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "string"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+    <span style="color: #1565c0;">values:</span>                          <span style="color: #666;"># 🔴 OBLIGATOIRE si arguments partagés</span>
+    - <span style="color: #c62828; font-weight: bold;">command:</span> "nom_commande1"      <span style="color: #666;"># Nom de la commande cible</span>
+      <span style="color: #c62828; font-weight: bold;">argument:</span> "ARG_DANS_CMD1"     <span style="color: #666;"># Code de l'argument dans cette commande</span>
+    - <span style="color: #c62828; font-weight: bold;">command:</span> "nom_commande2"
+      <span style="color: #c62828; font-weight: bold;">argument:</span> "ARG_DANS_CMD2"
+
+<span style="color: #c62828; font-weight: bold;">commands:</span>                           <span style="color: #666;"># 🔴 OBLIGATOIRE - Liste des commandes</span>
+  - <span style="color: #9c27b0; font-weight: bold;">!include</span> ../commands/cmd1.yaml  <span style="color: #666;"># Méthode 1 : Inclusion (RECOMMANDÉ)</span>
+  - <span style="color: #9c27b0; font-weight: bold;">!include</span> ../commands/cmd2.yaml
+  
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Commande inline"         <span style="color: #666;"># Méthode 2 : Définition directe</span>
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Description"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "echo test"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span> []
+</pre>
+        </div>
+        
+        <div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ff9800;">
+            <h3 style="margin-top: 0;">📝 Règles importantes</h3>
+            <ul style="line-height: 1.8; margin: 5px 0;">
+                <li><b>Indentation :</b> 2 espaces (pas de tabulations)</li>
+                <li><b>Placeholders :</b> <code>{CODE}</code> en MAJUSCULES dans la commande</li>
+                <li><b>Chemins relatifs :</b> <code>../commands/</code> depuis <code>tasks/</code></li>
+                <li><b>Extensions :</b> <code>.yaml</code> ou <code>.yml</code> (les deux fonctionnent)</li>
+                <li><b>Commentaires :</b> <code># Texte</code> (ignoré par le parser)</li>
+                <li><b>Guillemets :</b> Obligatoires pour les chaînes avec espaces ou caractères spéciaux</li>
+            </ul>
+        </div>
+        
         <h2>📐 Templates prêts à copier</h2>
         
         <div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ff9800;">
@@ -314,6 +375,40 @@ class HelpWindow(QDialog):
     <span style="color: #c62828; font-weight: bold;">arguments:</span> []
         </pre>
         <p style="color: #666; font-size: 13px;">💡 L'argument DATABASE est saisi une seule fois et utilisé par toutes les commandes</p>
+        
+        <h3>Template 7 : Construction de chemins</h3>
+        <div style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2196F3;">
+            <b>💡 Astuce avancée :</b> Vous pouvez combiner plusieurs placeholders pour construire des chemins
+        </div>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #1565c0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "campaignexport"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Export avec construction de chemin"
+<span style="color: #c62828; font-weight: bold;">command:</span> "campaignexport {DATABASE_FILE}\\{PROJECT_NAME}.sqlite {OUTPUT_DIR}"
+<span style="color: #c62828; font-weight: bold;">arguments:</span>
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "DATABASE_FILE"
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Répertoire de base"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "directory"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+  
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "PROJECT_NAME"
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Nom du projet"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "string"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+  
+  - <span style="color: #c62828; font-weight: bold;">code:</span> "OUTPUT_DIR"
+    <span style="color: #c62828; font-weight: bold;">name:</span> "Dossier de sortie"
+    <span style="color: #c62828; font-weight: bold;">type:</span> "directory"
+    <span style="color: #c62828; font-weight: bold;">required:</span> 1
+        </pre>
+        <div style="background-color: #e8f5e9; padding: 10px; border-radius: 4px; margin: 10px 0;">
+        <b>Résultat :</b><br>
+        Si <code>DATABASE_FILE = L:\PROJET\BASE</code> et <code>PROJECT_NAME = I2_S38</code><br>
+        → Commande générée : <code>campaignexport L:\PROJET\BASE\I2_S38.sqlite L:\OUTPUT</code>
+        </div>
+        <p style="color: #666; font-size: 13px;">
+        ✅ Utilisez <code>\\</code> pour Windows ou <code>/</code> pour Linux<br>
+        ✅ Vous pouvez combiner autant de placeholders que nécessaire
+        </p>
         """
         self.structure_text.setHtml(content)
 
