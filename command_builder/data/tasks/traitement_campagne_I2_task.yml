@@ -24,6 +24,8 @@ arguments:
       argument: "OUTPUT_DIR"
     - command: "campaignexport"
       argument: "DATABASE_FILE"
+    - command: "computeprofile"
+      argument: "DATABASE_FILE"
     
 
 commands:

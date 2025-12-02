@@ -10,12 +10,6 @@ arguments:
     validation:
       file_extensions: [".db", ".sqlite", ".sqlite3"]
 
-  - code: "PROJECT_NAME"
-    name: "Nom de la base"
-    description: "Nom de la base (pour construire le chemin de la base de données)"
-    type: "string"
-    required: 1
-
 
   - code: "CONFIG_FILE"
     name: "Configuration"
