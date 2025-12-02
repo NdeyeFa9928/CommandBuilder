@@ -4,6 +4,7 @@ Service d'exécution de commandes Windows.
 
 import subprocess
 import time
+import threading
 from typing import Callable, Optional
 
 from PySide6.QtCore import QObject, QThread, Signal
@@ -37,10 +38,9 @@ class CommandExecutor(QThread):
         process = None
         try:
             # Utiliser CP850 pour la console Windows (OEM)
-            # CP850 est l'encodage standard de la console Windows française
             encoding = "cp850"
 
-            # Exécuter la commande avec subprocess
+            # Créer le processus avec un nouveau groupe de processus pour pouvoir le tuer proprement
             process = subprocess.Popen(
                 self.command,
                 shell=True,
@@ -49,44 +49,36 @@ class CommandExecutor(QThread):
                 text=True,
                 encoding=encoding,
                 errors="replace",
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             )
             
             # Stocker le processus pour pouvoir le tuer depuis cancel()
             self._process = process
 
-            # Lire la sortie ligne par ligne avec vérification fréquente de l'annulation
-            while True:
-                # Vérifier l'annulation AVANT de lire (plus réactif)
-                if self._is_cancelled:
-                    try:
-                        process.terminate()
-                        # Attendre un peu pour que le processus se termine proprement
-                        process.wait(timeout=2)
-                    except subprocess.TimeoutExpired:
-                        # Si le processus ne se termine pas, le forcer
-                        process.kill()
-                    except Exception:
-                        pass
-                    break
-
-                # Vérifier si le processus est terminé
-                poll_result = process.poll()
-                if poll_result is not None:
-                    break
-
-                # Lire stdout avec vérification périodique de l'annulation
+            # Lire la sortie avec un thread séparé pour éviter le blocage
+            def read_output():
                 try:
-                    output = process.stdout.readline()
-                    if output:
-                        self.output_received.emit(output.rstrip())
-                    elif poll_result is not None:
-                        # Processus terminé et plus de sortie
-                        break
-                    else:
-                        # Petite pause pour permettre la vérification de l'annulation
-                        time.sleep(0.05)
+                    for line in iter(process.stdout.readline, ''):
+                        if self._is_cancelled:
+                            break
+                        if line:
+                            self.output_received.emit(line.rstrip())
                 except Exception:
+                    pass
+
+            # Démarrer le thread de lecture
+            reader_thread = threading.Thread(target=read_output, daemon=True)
+            reader_thread.start()
+
+            # Attendre la fin du processus ou l'annulation
+            while process.poll() is None:
+                if self._is_cancelled:
+                    self._kill_process(process)
                     break
+                time.sleep(0.1)  # Vérifier toutes les 100ms
+
+            # Attendre que le thread de lecture se termine
+            reader_thread.join(timeout=0.5)
 
             # Lire les erreurs restantes (seulement si pas annulé)
             if not self._is_cancelled:
@@ -109,26 +101,27 @@ class CommandExecutor(QThread):
         finally:
             # S'assurer que le processus est bien terminé
             if process is not None and process.poll() is None:
-                try:
-                    process.kill()
-                except Exception:
-                    pass
+                self._kill_process(process)
+
+    def _kill_process(self, process):
+        """Tue le processus de manière forcée."""
+        try:
+            process.terminate()
+            try:
+                process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=0.5)
+        except Exception:
+            pass
 
     def cancel(self):
         """Annule l'exécution de la commande."""
         self._is_cancelled = True
         
-        # Tuer le processus immédiatement pour débloquer readline()
+        # Tuer le processus immédiatement
         if self._process is not None and self._process.poll() is None:
-            try:
-                self._process.terminate()
-                # Attendre un peu
-                time.sleep(0.1)
-                # Si toujours vivant, forcer
-                if self._process.poll() is None:
-                    self._process.kill()
-            except Exception:
-                pass
+            self._kill_process(self._process)
 
 
 class CommandExecutorService:
@@ -185,7 +178,8 @@ class CommandExecutorService:
         """Annule l'exécution en cours."""
         if self.current_executor and self.current_executor.isRunning():
             self.current_executor.cancel()
-            self.current_executor.wait()
+            # Attendre avec timeout pour ne pas bloquer l'UI
+            self.current_executor.wait(1000)  # Max 1 seconde
 
     def request_stop(self):
         """

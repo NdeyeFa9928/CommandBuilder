@@ -5,7 +5,7 @@ Module contenant la classe ConsoleOutput qui représente la sortie console.
 import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -43,6 +43,8 @@ class ConsoleOutput(QWidget):
         self.commands_queue = []  # File d'attente des commandes à exécuter
         self.current_command_index = 0  # Index de la commande en cours
         self.command_start_time = None  # Timestamp de début de commande
+        self._last_output_time = None  # Dernier moment où une sortie a été reçue
+        self._progress_timer = None  # Timer pour afficher la progression
         self._load_ui()
         self._load_stylesheet()
         self._connect_signals()
@@ -228,13 +230,55 @@ class ConsoleOutput(QWidget):
         # Stocker le timestamp de début
         self.command_start_time = datetime.datetime.now()
 
+        # Réinitialiser le suivi de progression
+        self._last_output_time = datetime.datetime.now()
+        self._start_progress_timer()
+
         # Exécuter la commande
         self.executor_service.execute_command(
             command,
-            on_output=lambda line: self.append_text(line),
+            on_output=self._on_command_output,
             on_error=lambda line: self.append_error(line),
             on_finished=lambda code: self._on_single_command_finished(code),
         )
+
+    def _on_command_output(self, line: str):
+        """
+        Gère la réception d'une ligne de sortie.
+        Met à jour le timestamp de dernière sortie.
+        """
+        self._last_output_time = datetime.datetime.now()
+        self.append_text(line)
+
+    def _start_progress_timer(self):
+        """Démarre le timer de progression."""
+        self._stop_progress_timer()
+        self._progress_timer = QTimer(self)
+        self._progress_timer.timeout.connect(self._check_progress)
+        self._progress_timer.start(1000)  # Vérifier toutes les secondes
+
+    def _stop_progress_timer(self):
+        """Arrête le timer de progression."""
+        if self._progress_timer is not None:
+            self._progress_timer.stop()
+            self._progress_timer.deleteLater()
+            self._progress_timer = None
+
+    def _check_progress(self):
+        """
+        Vérifie si la commande produit des sorties.
+        Affiche un message périodique si aucune sortie depuis un moment.
+        """
+        if self._last_output_time is None:
+            return
+
+        elapsed = (datetime.datetime.now() - self._last_output_time).total_seconds()
+        
+        # Si aucune sortie depuis plus de 3 secondes, afficher un message
+        if elapsed >= 3:
+            self.append_text("[INFO] Commande en cours d'exécution...")
+            # Réinitialiser le timestamp pour afficher le prochain message dans 3s
+            self._last_output_time = datetime.datetime.now()
 
     def _on_single_command_finished(self, return_code: int):
         """
@@ -243,6 +287,9 @@ class ConsoleOutput(QWidget):
         Args:
             return_code: Le code de retour de la commande
         """
+        # Arrêter le timer de progression
+        self._stop_progress_timer()
+
         # Calculer la durée d'exécution
         end_time = datetime.datetime.now()
         duration = (end_time - self.command_start_time).total_seconds()
@@ -305,6 +352,9 @@ class ConsoleOutput(QWidget):
         """
         Appelé lorsque l'utilisateur arrête manuellement l'exécution.
         """
+        # Arrêter le timer de progression
+        self._stop_progress_timer()
+
         end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.append_text("")
@@ -326,5 +376,8 @@ class ConsoleOutput(QWidget):
         """
         Appelé lorsque l'utilisateur clique sur le bouton Stop.
         """
+        # Arrêter le timer de progression
+        self._stop_progress_timer()
+
         self.append_text("\n[STOP] Arrêt demandé par l'utilisateur...")
         self.executor_service.request_stop()
