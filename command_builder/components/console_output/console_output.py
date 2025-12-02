@@ -45,7 +45,6 @@ class ConsoleOutput(QWidget):
         self.command_start_time = None  # Timestamp de début de commande
         self._last_output_time = None  # Dernier moment où une sortie a été reçue
         self._progress_timer = None  # Timer pour afficher la progression
-        self._progress_shown = False  # Indique si un message de progression a été affiché
         self._load_ui()
         self._load_stylesheet()
         self._connect_signals()
@@ -233,7 +232,6 @@ class ConsoleOutput(QWidget):
 
         # Réinitialiser le suivi de progression
         self._last_output_time = datetime.datetime.now()
-        self._progress_shown = False
         self._start_progress_timer()
 
         # Exécuter la commande
@@ -257,7 +255,7 @@ class ConsoleOutput(QWidget):
         self._stop_progress_timer()
         self._progress_timer = QTimer(self)
         self._progress_timer.timeout.connect(self._check_progress)
-        self._progress_timer.start(3000)  # Vérifier toutes les 5 secondes
+        self._progress_timer.start(1000)  # Vérifier toutes les secondes
 
     def _stop_progress_timer(self):
         """Arrête le timer de progression."""
@@ -269,17 +267,18 @@ class ConsoleOutput(QWidget):
     def _check_progress(self):
         """
         Vérifie si la commande produit des sorties.
-        Affiche un message si aucune sortie depuis un moment.
+        Affiche un message périodique si aucune sortie depuis un moment.
         """
         if self._last_output_time is None:
             return
 
         elapsed = (datetime.datetime.now() - self._last_output_time).total_seconds()
         
-        # Si aucune sortie depuis plus de 5 secondes, afficher un message
-        if elapsed >= 5 and not self._progress_shown:
+        # Si aucune sortie depuis plus de 3 secondes, afficher un message
+        if elapsed >= 3:
             self.append_text("[INFO] Commande en cours d'exécution...")
-            self._progress_shown = True
+            # Réinitialiser le timestamp pour afficher le prochain message dans 3s
+            self._last_output_time = datetime.datetime.now()
 
     def _on_single_command_finished(self, return_code: int):
         """
