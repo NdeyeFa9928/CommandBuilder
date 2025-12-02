@@ -104,6 +104,105 @@ class TestArgumentValidationTypes:
         assert WithArguments.validate_single_argument(arg, "")[0]
 
 
+class TestFileExtensionValidation:
+    """Tests de validation des extensions de fichier."""
+
+    def test_file_with_valid_extension_succeeds(self):
+        """Test qu'un fichier avec une extension valide réussit."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier TDMS",
+            type="file",
+            required=1,
+            validation={"file_extensions": [".tdms"]},
+        )
+        is_valid, error = WithArguments.validate_single_argument(arg, "data.tdms")
+        assert is_valid
+        assert error is None
+
+    def test_file_with_invalid_extension_fails(self):
+        """Test qu'un fichier avec une extension invalide échoue."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier TDMS",
+            type="file",
+            required=1,
+            validation={"file_extensions": [".tdms"]},
+        )
+        is_valid, error = WithArguments.validate_single_argument(arg, "data.csv")
+        assert not is_valid
+        assert ".tdms" in error
+
+    def test_file_with_multiple_valid_extensions(self):
+        """Test qu'un fichier avec plusieurs extensions valides fonctionne."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier",
+            type="file",
+            required=1,
+            validation={"file_extensions": [".csv", ".txt", ".json"]},
+        )
+        # Toutes les extensions valides
+        assert WithArguments.validate_single_argument(arg, "data.csv")[0]
+        assert WithArguments.validate_single_argument(arg, "data.txt")[0]
+        assert WithArguments.validate_single_argument(arg, "data.json")[0]
+
+        # Extension invalide
+        is_valid, error = WithArguments.validate_single_argument(arg, "data.xml")
+        assert not is_valid
+        assert ".csv" in error or ".txt" in error or ".json" in error
+
+    def test_file_extension_case_insensitive(self):
+        """Test que la validation des extensions est insensible à la casse."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier TDMS",
+            type="file",
+            required=1,
+            validation={"file_extensions": [".tdms"]},
+        )
+        # Différentes casses
+        assert WithArguments.validate_single_argument(arg, "data.TDMS")[0]
+        assert WithArguments.validate_single_argument(arg, "data.Tdms")[0]
+        assert WithArguments.validate_single_argument(arg, "data.tdms")[0]
+
+    def test_file_without_validation_accepts_any_extension(self):
+        """Test qu'un fichier sans validation accepte toute extension."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier",
+            type="file",
+            required=1,
+        )
+        assert WithArguments.validate_single_argument(arg, "data.anything")[0]
+        assert WithArguments.validate_single_argument(arg, "data.csv")[0]
+        assert WithArguments.validate_single_argument(arg, "data")[0]
+
+    def test_file_with_empty_extensions_list_accepts_any(self):
+        """Test qu'une liste d'extensions vide accepte tout."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier",
+            type="file",
+            required=1,
+            validation={"file_extensions": []},
+        )
+        assert WithArguments.validate_single_argument(arg, "data.anything")[0]
+
+    def test_optional_file_empty_value_succeeds(self):
+        """Test qu'un fichier optionnel vide réussit même avec validation."""
+        arg = Argument(
+            code="FILE",
+            name="Fichier",
+            type="file",
+            required=0,
+            validation={"file_extensions": [".tdms"]},
+        )
+        is_valid, error = WithArguments.validate_single_argument(arg, "")
+        assert is_valid
+        assert error is None
+
+
 class TestCommandValidationIntegration:
     """Tests d'intégration de la validation au niveau Command."""
 

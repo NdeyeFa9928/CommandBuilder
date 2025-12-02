@@ -1,4 +1,0 @@
-name: "Importer TDMS"
-description: "Importe les données d'un fichier TDMS"
-commands:
-  - !include ../commands/tdmsimport_commands.yaml
