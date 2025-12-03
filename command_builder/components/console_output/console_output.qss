@@ -107,3 +107,11 @@ QPushButton:disabled {
     color: #555555;
     border: 1px solid #3a3f55;
 }
+
+/* Style pour le timer d'exécution */
+#labelTimer {
+    color: #ffffff;
+    font-family: "Consolas", monospace;
+    font-size: 12px;
+    padding-right: 5px;
+}
