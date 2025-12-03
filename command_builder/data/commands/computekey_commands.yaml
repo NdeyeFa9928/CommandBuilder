@@ -20,6 +20,6 @@ arguments:
   - code: "TABLE_NAME"
     name: "Nom de la table"
     description: "Nom de la table de projet (optionnel)"
-    type: "string"
+    type: "valued_option"
+    value: --ptable 
     required: 0
-    default: ""

@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMessageBox,
-    QPushButton,
     QScrollArea,
     QSizePolicy,
     QVBoxLayout,
@@ -116,11 +115,43 @@ class CommandForm(QWidget):
         if main_layout:
             main_layout.addWidget(self.scroll_area)
 
-        # Créer le bouton Exécuter dans le conteneur du formulaire
-        self.btn_execute = QPushButton("Exécuter", self.form_container)
-        self.btn_execute.setObjectName("btnExecute")
-        self.btn_execute.clicked.connect(self._on_execute_clicked)
-        self.btn_execute.hide()  # Masquer par défaut
+        # Afficher le message d'accueil initial
+        self._show_welcome_message()
+
+    def _show_welcome_message(self):
+        """Affiche un message d'accueil quand aucune tâche n'est sélectionnée."""
+        # Créer un conteneur centré
+        welcome_widget = QWidget()
+        welcome_widget.setObjectName("welcomeWidget")
+        welcome_layout = QVBoxLayout(welcome_widget)
+        welcome_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_layout.setSpacing(15)
+
+        # Icône ou emoji
+        icon_label = QLabel("📋")
+        icon_label.setStyleSheet("font-size: 30px;")
+        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_layout.addWidget(icon_label)
+
+        # Message principal
+        title_label = QLabel("Sélectionnez une tâche")
+        title_label.setStyleSheet(
+            "font-size: 18px; font-weight: bold; color: #4a90e2;"
+        )
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_layout.addWidget(title_label)
+
+        # Message secondaire
+        subtitle_label = QLabel(
+            "Choisissez une tâche dans la liste à gauche\npour configurer et exécuter ses commandes."
+        )
+        subtitle_label.setStyleSheet("font-size: 12px; color: #888888;")
+        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_layout.addWidget(subtitle_label)
+
+        # Ajouter au layout principal
+        self.commands_layout.addWidget(welcome_widget)
+        self.commands_layout.addStretch()
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -211,14 +242,6 @@ class CommandForm(QWidget):
             # Ajouter le layout de la commande au layout vertical principal
             self.commands_layout.addLayout(command_container_layout)
 
-        # Ajouter un layout horizontal pour le bouton aligné à droite
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        if self.btn_execute:
-            self.btn_execute.show()  # Afficher le bouton
-            button_layout.addWidget(self.btn_execute)
-        self.commands_layout.addLayout(button_layout)
-
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
         
@@ -279,14 +302,6 @@ class CommandForm(QWidget):
 
             # Ajouter le layout de la commande au layout vertical principal
             self.commands_layout.addLayout(command_container_layout)
-
-        # Ajouter un layout horizontal pour le bouton aligné à droite
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        if self.btn_execute:
-            self.btn_execute.show()  # Afficher le bouton
-            button_layout.addWidget(self.btn_execute)
-        self.commands_layout.addLayout(button_layout)
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
@@ -428,10 +443,7 @@ class CommandForm(QWidget):
         while self.commands_layout.count() > 0:
             item = self.commands_layout.takeAt(0)
             if item.widget():
-                # Ne pas supprimer le bouton Exécuter
-                widget = item.widget()
-                if widget != self.btn_execute:
-                    widget.deleteLater()
+                item.widget().deleteLater()
             elif item.layout():
                 # Nettoyer les layouts imbriqués (comme les QHBoxLayout)
                 self._clear_layout(item.layout())
@@ -439,10 +451,6 @@ class CommandForm(QWidget):
             elif item.spacerItem():
                 # Supprimer le spacer
                 pass
-
-        # Masquer le bouton après le nettoyage
-        if self.btn_execute:
-            self.btn_execute.hide()
 
         # Vider les listes des composants
         self.command_components.clear()
@@ -494,10 +502,7 @@ class CommandForm(QWidget):
         while layout.count() > 0:
             item = layout.takeAt(0)
             if item.widget():
-                # Ne pas supprimer le bouton Exécuter
-                widget = item.widget()
-                if widget != self.btn_execute:
-                    widget.deleteLater()
+                item.widget().deleteLater()
             elif item.layout():
                 self._clear_layout(item.layout())
                 item.layout().deleteLater()

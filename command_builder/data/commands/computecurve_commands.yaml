@@ -1,6 +1,6 @@
 name: "computecurve"
 description: "Calcule les virages"
-command: "computecurve {DATABASE_FILE} --config {CONFIG_FILE}"
+command: "computecurve {DATABASE_FILE}\\{PROJECT_NAME}.sqlite --config {CONFIG_FILE}"
 arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"
@@ -9,7 +9,8 @@ arguments:
     required: 1
     validation:
       file_extensions: [".db", ".sqlite", ".sqlite3"]
-  
+
+
   - code: "CONFIG_FILE"
     name: "Configuration"
     description: "Fichier de configuration"

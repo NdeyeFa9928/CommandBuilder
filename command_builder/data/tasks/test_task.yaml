@@ -1,4 +1,0 @@
-name: "Tests simples Windows"
-description: "Commandes de test Windows simples (ipconfig, dir)"
-commands:
-  - !include ../commands/test_commands.yaml

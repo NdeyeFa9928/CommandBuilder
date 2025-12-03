@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QFormLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDialog, QFormLayout, QLabel, QTextEdit, QVBoxLayout, QWidget
 
 from command_builder.components.argument_component import ArgumentComponent
 from command_builder.models.command import Command
@@ -58,6 +58,11 @@ class CommandComponent(QWidget):
         self.label_command_cli = ui.findChild(QLabel, "labelCommandCli")
         self.arguments_form_layout = ui.findChild(QFormLayout, "argumentsFormLayout")
         self.arguments_container = ui.findChild(QWidget, "argumentsContainer")
+
+        # Rendre le label de commande cliquable
+        if self.label_command_cli:
+            self.label_command_cli.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.label_command_cli.mousePressEvent = self._on_command_clicked
 
     def _load_stylesheet(self):
         """Charge la feuille de style QSS."""
@@ -319,3 +324,42 @@ class CommandComponent(QWidget):
         label.setProperty("hasDefault", False)
         label.style().unpolish(label)
         label.style().polish(label)
+
+    def _on_command_clicked(self, event):
+        """
+        Affiche la commande complète dans une popup quand on clique dessus.
+        """
+        full_command = self._build_full_command()
+
+        # Créer une dialog pour afficher la commande complète
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Commande complète")
+        dialog.setMinimumSize(600, 200)
+        dialog.setMaximumSize(900, 400)
+
+        layout = QVBoxLayout(dialog)
+
+        # Utiliser un QTextEdit en lecture seule pour permettre la sélection
+        text_edit = QTextEdit()
+        text_edit.setPlainText(full_command)
+        text_edit.setReadOnly(True)
+        text_edit.setStyleSheet("""
+            QTextEdit {
+                font-family: "Consolas", "Courier New", monospace;
+                font-size: 12px;
+                color: #58d68d;
+                background-color: #1e2330;
+                border: 1px solid #3a3f55;
+                border-radius: 4px;
+                padding: 10px;
+            }
+        """)
+
+        layout.addWidget(text_edit)
+
+        # Ajouter un label d'aide
+        help_label = QLabel("💡 Vous pouvez sélectionner et copier le texte (Ctrl+C)")
+        help_label.setStyleSheet("color: #888888; font-size: 11px;")
+        layout.addWidget(help_label)
+
+        dialog.exec()

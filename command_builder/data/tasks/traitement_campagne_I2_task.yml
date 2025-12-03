@@ -11,6 +11,8 @@ arguments:
       argument: "PNAME"
     - command: "campaignexport"
       argument: "PROJECT_NAME"
+    - command: "computeprofile"
+      argument: "PROJECT_NAME"
   
   - code: "DATABASE_FILE"
     name: "Répertoire de base"
@@ -22,6 +24,9 @@ arguments:
       argument: "OUTPUT_DIR"
     - command: "campaignexport"
       argument: "DATABASE_FILE"
+    - command: "computeprofile"
+      argument: "DATABASE_FILE"
+    
 
 commands:
   - !include ../commands/tdmsdirimport_commands.yaml

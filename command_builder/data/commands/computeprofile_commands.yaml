@@ -1,14 +1,19 @@
 name: "computeprofile"
 description: "Calcule les indicateurs de profils"
-command: "computeprofile {DATABASE_FILE} --config {CONFIG_FILE} {DEBUG_FLAG} > log_computeprofile.txt"
+command: "computeprofile {DATABASE_FILE}\\{PROJECT_NAME}.sqlite --config {CONFIG_FILE} {DEBUG_FLAG} > log_computeprofile.txt"
 arguments:
   - code: "DATABASE_FILE"
     name: "Base de données"
     description: "Fichier SQLite à traiter"
-    type: "file"
+    type: "directory"
     required: 1
-    validation:
-      file_extensions: [".db", ".sqlite", ".sqlite3"]
+
+
+  - code: "PROJECT_NAME"
+    name: "Nom de la base"
+    description: "Nom de la base (pour construire le chemin de la base de données)"
+    type: "string"
+    required: 1
   
   - code: "CONFIG_FILE"
     name: "Configuration"

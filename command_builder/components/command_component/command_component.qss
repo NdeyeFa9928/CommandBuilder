@@ -24,6 +24,10 @@ QLabel#labelCommandCli {
     margin-bottom: 10px;
 }
 
+QLabel#labelCommandCli:hover {
+    border-color: #4a90e2;
+}
+
 QWidget#argumentsContainer {
     background-color: transparent;
     padding: 5px 0px;

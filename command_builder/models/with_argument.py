@@ -33,8 +33,27 @@ class WithArguments:
         if not hasattr(arg, "required") or not hasattr(arg, "name"):
             return True, None
 
+        # Vérifier si l'argument est obligatoire et vide
         if (arg.required == 1 or arg.required is True) and not value.strip():
             return False, f"Le champ '{arg.name}' est obligatoire"
+
+        # Si la valeur est vide, pas besoin de valider davantage
+        if not value.strip():
+            return True, None
+
+        # Valider les extensions de fichier pour les types file
+        if hasattr(arg, "type") and arg.type == "file" and value.strip():
+            if hasattr(arg, "validation") and arg.validation:
+                file_extensions = arg.validation.get("file_extensions", [])
+                if file_extensions:
+                    # Vérifier que le fichier a une extension valide
+                    value_lower = value.lower()
+                    has_valid_extension = any(
+                        value_lower.endswith(ext.lower()) for ext in file_extensions
+                    )
+                    if not has_valid_extension:
+                        extensions_str = ", ".join(file_extensions)
+                        return False, f"Le fichier '{arg.name}' doit avoir une extension valide : {extensions_str}"
 
         return True, None
 
