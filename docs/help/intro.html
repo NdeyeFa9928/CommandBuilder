@@ -1,0 +1,116 @@
+<h2>📘 Guide YAML - L'essentiel</h2>
+
+<div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196F3;">
+    <h3 style="margin-top: 0;">Principe</h3>
+    <p style="font-size: 14px; line-height: 1.6;">
+    CommandBuilder utilise deux types de fichiers YAML :<br>
+    <b>1. Fichiers de commandes</b> (réutilisables) : définissent une commande CLI<br>
+    <b>2. Fichiers de tâches</b> (workflows) : groupent plusieurs commandes à exécuter en séquence
+    </p>
+</div>
+
+<h3>📁 Structure des fichiers</h3>
+<div style="background-color: #f5f5f5; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 13px;">
+<b>Commandes :</b> <code>command_builder/data/commands/ma_commande.yaml</code><br>
+<b>Tâches :</b> <code>command_builder/data/tasks/ma_tache.yaml</code><br>
+<b>Recommandation :</b> <span style="color: #d32f2f; font-weight: bold;">Un fichier = Une commande ou une tâche</span>
+</div>
+
+<h3>🎯 Structure minimale (copier-coller)</h3>
+<pre style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border-left: 4px solid #4caf50; font-size: 13px;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Ma tâche"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Ce que fait cette tâche"
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - <span style="color: #c62828; font-weight: bold;">name:</span> "Commande 1"
+    <span style="color: #c62828; font-weight: bold;">description:</span> "Description"
+    <span style="color: #c62828; font-weight: bold;">command:</span> "executable.exe {ARG1} {ARG2}"
+    <span style="color: #c62828; font-weight: bold;">arguments:</span>
+      - <span style="color: #c62828; font-weight: bold;">code:</span> "ARG1"
+        <span style="color: #c62828; font-weight: bold;">name:</span> "Nom affiché"
+        <span style="color: #c62828; font-weight: bold;">type:</span> "file"
+        <span style="color: #c62828; font-weight: bold;">required:</span> 1
+</pre>
+
+<h3>⚡ Points clés</h3>
+<table border="0" cellpadding="8" cellspacing="0" style="width: 100%; margin: 10px 0;">
+    <tr>
+        <td style="background-color: #fff3e0; border-radius: 4px; padding: 10px;">
+            <b>1. Placeholders</b><br>
+            <code>{CODE}</code> dans la commande → remplacé par la valeur saisie
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #e8f5e9; border-radius: 4px; padding: 10px;">
+            <b>2. Types d'arguments</b><br>
+            <code>string</code> | <code>file</code> | <code>directory</code> | <code>flag</code> | <code>valued_option</code>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #e3f2fd; border-radius: 4px; padding: 10px;">
+            <b>3. Required</b><br>
+            <code>required: 1</code> = obligatoire (astérisque rouge)<br>
+            <code>required: 0</code> = optionnel
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #f3e5f5; border-radius: 4px; padding: 10px;">
+            <b>4. Arguments partagés</b><br>
+            Saisir UNE FOIS une valeur utilisée par PLUSIEURS commandes
+        </td>
+    </tr>
+</table>
+
+<h3>🖥️ Comprendre l'interface</h3>
+<table border="0" cellpadding="10" cellspacing="0" style="width: 100%; margin: 10px 0;">
+    <tr>
+        <td style="background-color: #ffebee; border-radius: 4px; width: 50%;">
+            <b style="color: #c62828;">🔴 Astérisque rouge (*)</b><br>
+            <span style="font-size: 13px;">Champ obligatoire (<code>required: 1</code>)<br>
+            Affiché APRÈS le nom : "Base de données : *"</span>
+        </td>
+        <td style="background-color: #c8e6c9; border-radius: 4px; width: 50%;">
+            <b style="color: #1b5e20;">🟢 Texte vert</b><br>
+            <span style="font-size: 13px;">Valeur pré-remplie (par défaut)<br>
+            Modifiable par l'utilisateur</span>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #e3f2fd; border-radius: 4px;">
+            <b style="color: #1565c0;">🔵 Couleur du label</b><br>
+            <span style="font-size: 13px;">Noir = champ vide<br>
+            Bleu = champ rempli</span>
+        </td>
+        <td style="background-color: #fff3e0; border-radius: 4px;">
+            <b style="color: #f57c00;">📋 Étapes d'exécution</b><br>
+            <span style="font-size: 13px;">Les commandes s'exécutent dans l'ordre<br>
+            Si erreur → arrêt immédiat</span>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #e8f5e9; border-radius: 4px;">
+            <b style="color: #2e7d32;">✅ Case à cocher</b><br>
+            <span style="font-size: 13px;">Type <code>flag</code> ou <code>valued_option</code><br>
+            Coché = inclus dans la commande</span>
+        </td>
+        <td style="background-color: #f3e5f5; border-radius: 4px;">
+            <b style="color: #6a1b9a;">📂 Listes</b><br>
+            <span style="font-size: 13px;">Gauche = tâches disponibles<br>
+            Cliquez pour voir ses commandes</span>
+        </td>
+    </tr>
+</table>
+
+<h3>📖 Onglets de cette aide</h3>
+<ul style="line-height: 1.6;">
+    <li><b>Structure</b> → Templates complets (fichiers, !include)</li>
+    <li><b>Arguments</b> → Les 5 types expliqués</li>
+    <li><b>Arguments Partagés</b> → Éviter la répétition</li>
+    <li><b>Exemples</b> → Cas réels avec !include</li>
+</ul>
+
+<h3>⚡ Points clés supplémentaires</h3>
+<ul style="line-height: 1.6; color: #d32f2f;">
+    <li><b>Valeurs par défaut des tâches</b> → Prioritaires sur celles des commandes</li>
+    <li><b>!include</b> → Réutilisez les commandes dans plusieurs tâches</li>
+    <li><b>Modification post-build</b> → Les fichiers YAML sont modifiables sans recompilation</li>
+</ul>
