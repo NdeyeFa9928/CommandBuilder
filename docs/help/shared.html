@@ -1,0 +1,115 @@
+<h2>🔗 Arguments partagés entre commandes</h2>
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;">
+    <h3 style="margin-top: 0;">💡 Pourquoi utiliser des arguments partagés ?</h3>
+    <p style="font-size: 14px; line-height: 1.6;">
+    Quand plusieurs commandes utilisent <b>la même valeur</b> (ex: répertoire de base, fichier de sortie),<br>
+    → <b>Définir une seule fois</b> au niveau de la tâche<br>
+    → L'utilisateur saisit <b>une seule fois</b> ✅<br>
+    → La valeur est <b>automatiquement injectée</b> dans les commandes concernées<br>
+    → Les valeurs par défaut de la tâche <b>remplacent</b> celles des commandes
+    </p>
+</div>
+
+<h3>📝 Syntaxe : Section <code>arguments</code> avec <code>values</code></h3>
+<div style="background-color: #fff3e0; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #ff9800;">
+    <b>⚠️ IMPORTANT :</b> La section s'appelle <code>arguments</code> (pas <code>shared_arguments</code>)<br>
+    Chaque argument contient une liste <code>values</code> qui indique où l'injecter.
+</div>
+
+<h3>🎯 Exemple réel : Traitement de campagne</h3>
+<p style="color: #666; font-size: 13px;">Cas d'usage : Import TDMS vers une base, puis export de cette base vers TXT/Images</p>
+<pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #c62828; font-weight: bold;">name:</span> "Traitement campagne"
+<span style="color: #c62828; font-weight: bold;">description:</span> "Import TDMS du dossier + export campagne (TXT + IMAGES)"
+
+<span style="color: #1565c0; font-weight: bold;">arguments:</span>  <span style="color: #666;"># ← Arguments partagés de la tâche</span>
+  - <span style="color: #c62828;">code:</span> "base"  <span style="color: #666;"># ← Code de l'argument partagé</span>
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">description:</span> "Répertoire contenant la base de données"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "L:\\PROJET\\BASE"
+    <span style="color: #1565c0; font-weight: bold;">values:</span>  <span style="color: #666;"># ← Liste des injections</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"  <span style="color: #666;"># ← Nom de la commande</span>
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"       <span style="color: #666;"># ← Code de l'argument cible</span>
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"    <span style="color: #666;"># ← Injecté ici aussi</span>
+
+<span style="color: #c62828; font-weight: bold;">commands:</span>
+  - !include ../commands/tdmsdirimport_commands.yaml
+  - !include ../commands/campaignexport_commands.yaml
+</pre>
+
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #2196F3;">
+    <b>🔍 Comment ça fonctionne :</b>
+    <ol style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">
+        <li>L'utilisateur saisit <b>une seule fois</b> le répertoire de base : <code>L:\PROJET\BASE</code></li>
+        <li>Cette valeur est injectée dans <code>OUTPUT_DIR</code> de <code>tdmsdirimport_tc</code></li>
+        <li>Cette même valeur est injectée dans <code>DATABASE_FILE</code> de <code>campaignexport</code></li>
+        <li>Résultat : <b>cohérence garantie</b> entre les deux commandes ✅</li>
+    </ol>
+</div>
+
+<h3>🔄 Cas avec plusieurs arguments partagés</h3>
+<pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #1565c0;">arguments:</span>
+  - <span style="color: #c62828;">code:</span> "projet"  <span style="color: #666;"># ← Argument partagé 1</span>
+    <span style="color: #c62828;">name:</span> "Nom du projet"
+    <span style="color: #c62828;">type:</span> "string"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">default:</span> "E3D_S29"
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "PNAME"
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "PROJECT_NAME"
+  
+  - <span style="color: #c62828;">code:</span> "base_dir"  <span style="color: #666;"># ← Argument partagé 2</span>
+    <span style="color: #c62828;">name:</span> "Répertoire de base"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "tdmsdirimport_tc"
+        <span style="color: #c62828;">argument:</span> "OUTPUT_DIR"
+      - <span style="color: #c62828;">command:</span> "campaignexport"
+        <span style="color: #c62828;">argument:</span> "DATABASE_FILE"
+</pre>
+
+<h3>🔀 Combinaison : Arguments partagés + Arguments locaux</h3>
+<p style="color: #666; font-size: 13px;">Les commandes peuvent avoir leurs propres arguments EN PLUS des arguments partagés :</p>
+<pre style="background-color: #f5f5f5; padding: 12px; border-radius: 4px; font-size: 12px; border-left: 3px solid #9C27B0;">
+<span style="color: #1565c0;">arguments:</span>  <span style="color: #666;"># ← Partagés (niveau tâche)</span>
+  - <span style="color: #c62828;">code:</span> "base"
+    <span style="color: #c62828;">name:</span> "Base de données"
+    <span style="color: #c62828;">type:</span> "directory"
+    <span style="color: #c62828;">required:</span> 1
+    <span style="color: #1565c0;">values:</span>
+      - <span style="color: #c62828;">command:</span> "export_cmd"
+        <span style="color: #c62828;">argument:</span> "DATABASE"
+
+<span style="color: #c62828;">commands:</span>
+  - <span style="color: #c62828;">name:</span> "export_cmd"
+    <span style="color: #c62828;">command:</span> "export.exe {DATABASE} {FORMAT}"
+    <span style="color: #c62828;">arguments:</span>  <span style="color: #666;"># ← Locaux (spécifiques à cette commande)</span>
+      - <span style="color: #c62828;">code:</span> "FORMAT"
+        <span style="color: #c62828;">name:</span> "Format de sortie"
+        <span style="color: #c62828;">type:</span> "string"
+        <span style="color: #c62828;">required:</span> 0
+        <span style="color: #1565c0;">default:</span> "CSV"
+</pre>
+<p style="color: #666; margin: 5px 0;">
+✅ <code>DATABASE</code> = partagé (saisi une fois, utilisé partout)<br>
+✅ <code>FORMAT</code> = local (spécifique à la commande export_cmd)
+</p>
+
+<div style="background-color: #ffebee; padding: 12px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #f44336;">
+    <b>⚠️ Règles importantes :</b>
+    <ul style="margin: 5px 0; padding-left: 20px;">
+        <li>Section <code>arguments</code> (pas <code>shared_arguments</code>)</li>
+        <li>Chaque argument doit avoir une liste <code>values</code></li>
+        <li>Dans <code>values</code> : <code>command</code> = nom de la commande, <code>argument</code> = code de l'argument cible</li>
+        <li>Les valeurs <code>default</code> de la tâche <b>remplacent</b> celles des commandes</li>
+        <li>Un argument partagé peut être injecté dans <b>plusieurs commandes</b></li>
+    </ul>
+</div>

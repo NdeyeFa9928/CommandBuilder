@@ -9,6 +9,9 @@ from PySide6.QtWidgets import QDialog
 class HelpWindow(QDialog):
     """Fenêtre d'aide affichant la documentation YAML complète."""
 
+    # Chemin vers les fichiers HTML de documentation
+    HELP_DOCS_DIR = Path(__file__).parent.parent.parent.parent / "docs" / "help"
+
     def __init__(self, parent=None):
         """Initialise la fenêtre d'aide.
 
@@ -66,8 +69,28 @@ class HelpWindow(QDialog):
         self._populate_shared()
         self._populate_examples()
 
+    def _load_html_file(self, filename: str) -> str:
+        """Charge un fichier HTML depuis le dossier docs/help.
+
+        Args:
+            filename: Nom du fichier HTML (ex: 'intro.html')
+
+        Returns:
+            Contenu HTML du fichier ou chaîne vide si non trouvé
+        """
+        html_path = self.HELP_DOCS_DIR / filename
+        if html_path.exists():
+            with open(html_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return ""
+
     def _populate_intro(self):
         """Remplit l'onglet Introduction."""
+        content = self._load_html_file("intro.html")
+        if content:
+            self.intro_text.setHtml(content)
+            return
+        # Fallback si le fichier n'existe pas
         content = """
         <h2>📘 Guide YAML - L'essentiel</h2>
         
@@ -190,6 +213,11 @@ class HelpWindow(QDialog):
 
     def _populate_structure(self):
         """Remplit l'onglet Structure."""
+        content = self._load_html_file("structure.html")
+        if content:
+            self.structure_text.setHtml(content)
+            return
+        # Fallback si le fichier n'existe pas
         content = """
         <h2>📐 Référence complète YAML</h2>
         
@@ -414,6 +442,11 @@ class HelpWindow(QDialog):
 
     def _populate_arguments(self):
         """Remplit l'onglet Arguments."""
+        content = self._load_html_file("arguments.html")
+        if content:
+            self.arguments_text.setHtml(content)
+            return
+        # Fallback si le fichier n'existe pas
         content = """
         <h2>🔧 Les 5 types d'arguments</h2>
         
@@ -533,6 +566,11 @@ class HelpWindow(QDialog):
 
     def _populate_shared(self):
         """Remplit l'onglet Arguments Partagés."""
+        content = self._load_html_file("shared.html")
+        if content:
+            self.shared_text.setHtml(content)
+            return
+        # Fallback si le fichier n'existe pas
         content = r"""
         <h2>🔗 Arguments partagés entre commandes</h2>
         
@@ -659,6 +697,11 @@ class HelpWindow(QDialog):
 
     def _populate_examples(self):
         """Remplit l'onglet Exemples Complets."""
+        content = self._load_html_file("examples.html")
+        if content:
+            self.examples_text.setHtml(content)
+            return
+        # Fallback si le fichier n'existe pas
         content = r"""
         <h2>📚 Exemples réels de votre projet</h2>
         
