@@ -56,15 +56,21 @@ class TestElapsedTimer:
 
         assert console_output._elapsed_timer is None
 
-    def test_stop_elapsed_timer_resets_label(self, console_output):
-        """Vérifie que le label est réinitialisé à 00:00 à l'arrêt du timer."""
+    def test_stop_elapsed_timer_keeps_time_displayed(self, console_output):
+        """Vérifie que le label garde le temps affiché à l'arrêt du timer."""
+        # Simuler un temps écoulé
+        console_output._execution_start_time = datetime.datetime.now() - datetime.timedelta(
+            seconds=30
+        )
         console_output._start_elapsed_timer()
-        # Le label devrait contenir quelque chose
-        assert console_output.label_timer.text() != ""
+        
+        # Mettre à jour l'affichage
+        console_output._update_elapsed_display()
+        text_before = console_output.label_timer.text()
 
         console_output._stop_elapsed_timer()
-        # Le label devrait être réinitialisé à 00:00
-        assert "00:00" in console_output.label_timer.text()
+        # Le label devrait garder le temps affiché (pas réinitialisé)
+        assert console_output.label_timer.text() == text_before
 
     def test_update_elapsed_display_shows_time(self, console_output):
         """Vérifie que l'affichage montre le temps écoulé."""
@@ -102,7 +108,7 @@ class TestElapsedTimer:
         console_output._on_all_commands_finished()
 
         assert console_output._elapsed_timer is None
-        assert "00:00" in console_output.label_timer.text()
+        # Le temps reste affiché (pas réinitialisé à 00:00)
 
     def test_timer_stopped_on_user_stop(self, console_output):
         """Vérifie que le timer est arrêté lors d'un arrêt utilisateur."""
@@ -112,7 +118,7 @@ class TestElapsedTimer:
         console_output._on_execution_stopped_by_user()
 
         assert console_output._elapsed_timer is None
-        assert "00:00" in console_output.label_timer.text()
+        # Le temps reste affiché (pas réinitialisé à 00:00)
 
     def test_timer_stopped_on_error(self, console_output):
         """Vérifie que le timer est arrêté en cas d'erreur."""
@@ -122,7 +128,27 @@ class TestElapsedTimer:
         console_output._on_execution_stopped_with_error()
 
         assert console_output._elapsed_timer is None
-        assert "00:00" in console_output.label_timer.text()
+        # Le temps reste affiché (pas réinitialisé à 00:00)
+
+    def test_timer_resets_on_new_execution(self, console_output):
+        """Vérifie que le timer se réinitialise au démarrage d'une nouvelle exécution."""
+        # Simuler un temps écoulé précédent
+        console_output._execution_start_time = datetime.datetime.now() - datetime.timedelta(
+            seconds=120  # 2 minutes
+        )
+        console_output._update_elapsed_display()
+        
+        # Vérifier que le temps affiché est ~2 minutes
+        assert "02:0" in console_output.label_timer.text()
+        
+        # Démarrer une nouvelle exécution
+        console_output._start_elapsed_timer()
+        
+        # Le timer devrait être réinitialisé à ~00:00
+        assert "00:0" in console_output.label_timer.text()
+        
+        # Nettoyer
+        console_output._stop_elapsed_timer()
 
     def test_timer_started_on_execute_commands(self, console_output):
         """Vérifie que le timer démarre lors de l'exécution des commandes."""
