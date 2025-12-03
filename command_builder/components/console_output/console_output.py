@@ -263,13 +263,12 @@ class ConsoleOutput(QWidget):
         self._update_elapsed_display()
 
     def _stop_elapsed_timer(self):
-        """Arrête le chronomètre visuel."""
+        """Arrête le chronomètre visuel (garde le temps affiché)."""
         if self._elapsed_timer is not None:
             self._elapsed_timer.stop()
             self._elapsed_timer.deleteLater()
             self._elapsed_timer = None
-        # Réinitialiser le label à 00:00
-        self._reset_timer_display()
+        # Ne pas réinitialiser le label - l'utilisateur peut voir le temps total
 
     def _reset_timer_display(self):
         """Réinitialise l'affichage du timer à 00:00."""
