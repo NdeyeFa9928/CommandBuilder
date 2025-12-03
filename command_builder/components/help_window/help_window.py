@@ -1,16 +1,33 @@
 """Fenêtre d'aide avec documentation complète YAML."""
 
+import sys
 from pathlib import Path
 
 from PySide6 import QtUiTools
 from PySide6.QtWidgets import QDialog
 
 
+def get_help_docs_dir() -> Path:
+    """Retourne le chemin vers le dossier docs/help.
+
+    Fonctionne en mode développement et en mode bundlé (PyInstaller).
+    """
+    if getattr(sys, "frozen", False):
+        # Mode bundlé (PyInstaller)
+        if hasattr(sys, "_MEIPASS"):
+            return Path(sys._MEIPASS) / "docs" / "help"
+        else:
+            return Path(sys.executable).parent / "docs" / "help"
+    else:
+        # Mode développement
+        return Path(__file__).parent.parent.parent.parent / "docs" / "help"
+
+
 class HelpWindow(QDialog):
     """Fenêtre d'aide affichant la documentation YAML complète."""
 
     # Chemin vers les fichiers HTML de documentation
-    HELP_DOCS_DIR = Path(__file__).parent.parent.parent.parent / "docs" / "help"
+    HELP_DOCS_DIR = get_help_docs_dir()
 
     def __init__(self, parent=None):
         """Initialise la fenêtre d'aide.
