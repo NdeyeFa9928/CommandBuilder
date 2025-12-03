@@ -22,13 +22,10 @@ QLabel#labelCommandCli {
     border-radius: 4px;
     padding: 8px 10px;
     margin-bottom: 10px;
-    min-height: 20px;
-    max-height: 60px;
 }
 
 QLabel#labelCommandCli:hover {
     border-color: #4a90e2;
-    cursor: pointer;
 }
 
 QWidget#argumentsContainer {
