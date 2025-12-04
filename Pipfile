@@ -12,6 +12,7 @@ mermaid-py = "*"
 pydantic = "*"
 pyyaml = "*"
 pyside6 = "*"
+markdown = "*"
 
 [dev-packages]
 pyinstaller = "*"
