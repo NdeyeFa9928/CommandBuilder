@@ -59,11 +59,11 @@ class TestElapsedTimer:
     def test_stop_elapsed_timer_keeps_time_displayed(self, console_output):
         """Vérifie que le label garde le temps affiché à l'arrêt du timer."""
         # Simuler un temps écoulé
-        console_output._execution_start_time = datetime.datetime.now() - datetime.timedelta(
-            seconds=30
+        console_output._execution_start_time = (
+            datetime.datetime.now() - datetime.timedelta(seconds=30)
         )
         console_output._start_elapsed_timer()
-        
+
         # Mettre à jour l'affichage
         console_output._update_elapsed_display()
         text_before = console_output.label_timer.text()
@@ -74,8 +74,11 @@ class TestElapsedTimer:
 
     def test_update_elapsed_display_shows_time(self, console_output):
         """Vérifie que l'affichage montre le temps écoulé."""
-        console_output._execution_start_time = datetime.datetime.now() - datetime.timedelta(
-            seconds=65  # 1 minute et 5 secondes
+        console_output._execution_start_time = (
+            datetime.datetime.now()
+            - datetime.timedelta(
+                seconds=65  # 1 minute et 5 secondes
+            )
         )
 
         console_output._update_elapsed_display()
@@ -133,20 +136,23 @@ class TestElapsedTimer:
     def test_timer_resets_on_new_execution(self, console_output):
         """Vérifie que le timer se réinitialise au démarrage d'une nouvelle exécution."""
         # Simuler un temps écoulé précédent
-        console_output._execution_start_time = datetime.datetime.now() - datetime.timedelta(
-            seconds=120  # 2 minutes
+        console_output._execution_start_time = (
+            datetime.datetime.now()
+            - datetime.timedelta(
+                seconds=120  # 2 minutes
+            )
         )
         console_output._update_elapsed_display()
-        
+
         # Vérifier que le temps affiché est ~2 minutes
         assert "02:0" in console_output.label_timer.text()
-        
+
         # Démarrer une nouvelle exécution
         console_output._start_elapsed_timer()
-        
+
         # Le timer devrait être réinitialisé à ~00:00
         assert "00:0" in console_output.label_timer.text()
-        
+
         # Nettoyer
         console_output._stop_elapsed_timer()
 

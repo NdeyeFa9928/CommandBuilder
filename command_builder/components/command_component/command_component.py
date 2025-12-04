@@ -6,7 +6,14 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QDialog, QFormLayout, QLabel, QTextEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QLabel,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from command_builder.components.argument_component import ArgumentComponent
 from command_builder.models.command import Command

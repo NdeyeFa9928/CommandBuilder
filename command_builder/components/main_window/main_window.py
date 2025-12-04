@@ -10,7 +10,6 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
-    QLabel,
     QMainWindow,
     QSizePolicy,
     QSplitter,

@@ -5,7 +5,7 @@ Tests unitaires pour le composant ArgumentComponent.
 from unittest.mock import Mock, patch
 
 import pytest
-from PySide6.QtWidgets import QApplication, QLabel, QLineEdit, QPushButton
+from PySide6.QtWidgets import QApplication, QLineEdit, QPushButton
 
 from command_builder.components.argument_component import ArgumentComponent
 from command_builder.models.arguments import Argument

@@ -3,8 +3,8 @@ Service d'exécution de commandes Windows.
 """
 
 import subprocess
-import time
 import threading
+import time
 from typing import Callable, Optional
 
 from PySide6.QtCore import QObject, QThread, Signal
@@ -51,14 +51,14 @@ class CommandExecutor(QThread):
                 errors="replace",
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             )
-            
+
             # Stocker le processus pour pouvoir le tuer depuis cancel()
             self._process = process
 
             # Lire la sortie avec un thread séparé pour éviter le blocage
             def read_output():
                 try:
-                    for line in iter(process.stdout.readline, ''):
+                    for line in iter(process.stdout.readline, ""):
                         if self._is_cancelled:
                             break
                         if line:
@@ -118,7 +118,7 @@ class CommandExecutor(QThread):
     def cancel(self):
         """Annule l'exécution de la commande."""
         self._is_cancelled = True
-        
+
         # Tuer le processus immédiatement
         if self._process is not None and self._process.poll() is None:
             self._kill_process(self._process)

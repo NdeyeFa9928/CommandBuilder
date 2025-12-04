@@ -28,7 +28,7 @@ class ConsoleOutput(QWidget):
 
     # Signal émis lorsque toutes les commandes sont terminées
     all_commands_finished = Signal()
-    
+
     # Signal émis quand le bouton Exécuter est cliqué
     execute_requested = Signal()
 
@@ -92,15 +92,15 @@ class ConsoleOutput(QWidget):
         self.button_stop.clicked.connect(self._on_stop_clicked)
         self.button_effacer.clicked.connect(self.clear)
         self.button_exporter.clicked.connect(self.export_console)
-    
+
     def _on_execute_clicked(self):
         """Gère le clic sur le bouton Exécuter."""
         self.execute_requested.emit()
-    
+
     def set_execute_enabled(self, enabled: bool):
         """
         Active ou désactive le bouton Exécuter.
-        
+
         Args:
             enabled: True pour activer, False pour désactiver
         """
@@ -288,7 +288,9 @@ class ConsoleOutput(QWidget):
 
         # Alterner le sablier pour l'animation
         hourglass = self._hourglass_frames[self._hourglass_index]
-        self._hourglass_index = (self._hourglass_index + 1) % len(self._hourglass_frames)
+        self._hourglass_index = (self._hourglass_index + 1) % len(
+            self._hourglass_frames
+        )
 
         # Mettre à jour le label
         if self.label_timer:

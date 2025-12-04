@@ -141,9 +141,7 @@ class HelpWindow(QDialog):
     HELP_DOCS_DIR = get_help_docs_dir()
 
     # Instance du convertisseur Markdown
-    _md_converter = markdown.Markdown(
-        extensions=["tables", "fenced_code", "nl2br"]
-    )
+    _md_converter = markdown.Markdown(extensions=["tables", "fenced_code", "nl2br"])
 
     def __init__(self, parent=None):
         """Initialise la fenêtre d'aide.

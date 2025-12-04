@@ -23,5 +23,4 @@ __all__ = [
     "CommandComponent",
     "HelpButton",
     "HelpWindow",
-    
 ]

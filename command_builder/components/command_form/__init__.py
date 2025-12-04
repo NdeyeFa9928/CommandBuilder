@@ -3,3 +3,5 @@ Module pour le composant CommandForm qui gère l'affichage et l'édition des com
 """
 
 from .command_form import CommandForm
+
+__all__ = ["CommandForm"]

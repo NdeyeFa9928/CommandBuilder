@@ -2,7 +2,6 @@
 Module contenant les mixins et interfaces pour les modèles.
 """
 
-from abc import ABC
 from typing import Any, Dict, List, Optional
 
 
@@ -53,7 +52,10 @@ class WithArguments:
                     )
                     if not has_valid_extension:
                         extensions_str = ", ".join(file_extensions)
-                        return False, f"Le fichier '{arg.name}' doit avoir une extension valide : {extensions_str}"
+                        return (
+                            False,
+                            f"Le fichier '{arg.name}' doit avoir une extension valide : {extensions_str}",
+                        )
 
         return True, None
 

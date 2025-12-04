@@ -1,7 +1,7 @@
 """Service de gestion des erreurs YAML."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import yaml
 from pydantic import ValidationError
