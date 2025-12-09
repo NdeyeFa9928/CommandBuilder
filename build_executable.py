@@ -86,11 +86,11 @@ def collect_data_files(base_dir):
                 dest_dir = rel_path.parent
                 data_files.append((str(rel_path), str(dest_dir)))
 
-    # Add help documentation HTML files
+    # Add help documentation Markdown files
     help_docs_dir = base_dir / "docs" / "help"
     if help_docs_dir.exists():
-        for html_file in help_docs_dir.glob("*.html"):
-            rel_path = html_file.relative_to(base_dir)
+        for md_file in help_docs_dir.glob("*.md"):
+            rel_path = md_file.relative_to(base_dir)
             dest_dir = rel_path.parent
             data_files.append((str(rel_path), str(dest_dir)))
 
@@ -239,6 +239,9 @@ def build_executable(dev_mode=False):
             f"--name={exe_name}",
             f"--distpath={dist_dir}",
             "--clean",
+            "--hidden-import=markdown",
+            "--hidden-import=markdown.extensions",
+            "--collect-submodules=markdown",
         ]
     )
 
