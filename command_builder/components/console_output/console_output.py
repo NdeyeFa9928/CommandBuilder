@@ -98,6 +98,15 @@ class ConsoleOutput(QWidget):
         """Gère le clic sur le bouton Exécuter."""
         self.execute_requested.emit()
 
+    def is_executing(self):
+        """
+        Vérifie si une commande est en cours d'exécution.
+        
+        Returns:
+            True si une exécution est en cours, False sinon
+        """
+        return self.button_stop.isEnabled()
+
     def set_execute_enabled(self, enabled: bool):
         """
         Active ou désactive le bouton Exécuter.
