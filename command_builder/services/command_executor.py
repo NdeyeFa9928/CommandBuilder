@@ -2,6 +2,7 @@
 Service d'exécution de commandes Windows.
 """
 
+import os
 import subprocess
 import threading
 import time
@@ -104,16 +105,40 @@ class CommandExecutor(QThread):
                 self._kill_process(process)
 
     def _kill_process(self, process):
-        """Tue le processus de manière forcée."""
+        """Tue le processus et tous ses enfants de manière forcée.
+        
+        Sur Windows, utilise taskkill /F /T pour tuer l'arbre de processus complet,
+        ce qui libère correctement les fichiers ouverts par les processus enfants.
+        """
         try:
-            process.terminate()
+            pid = process.pid
+            
+            # Sur Windows, utiliser taskkill pour tuer l'arbre de processus
+            # /F = Force, /T = Tree (tue aussi les processus enfants)
+            if os.name == 'nt':
+                subprocess.run(
+                    ['taskkill', '/F', '/T', '/PID', str(pid)],
+                    capture_output=True,
+                    timeout=5
+                )
+            else:
+                # Sur Unix, utiliser kill avec le groupe de processus
+                import signal
+                os.killpg(os.getpgid(pid), signal.SIGKILL)
+            
+            # Attendre que le processus se termine
             try:
-                process.wait(timeout=0.5)
+                process.wait(timeout=1)
             except subprocess.TimeoutExpired:
+                # Fallback: forcer avec kill()
                 process.kill()
                 process.wait(timeout=0.5)
         except Exception:
-            pass
+            # Dernier recours
+            try:
+                process.kill()
+            except Exception:
+                pass
 
     def cancel(self):
         """Annule l'exécution de la commande."""
