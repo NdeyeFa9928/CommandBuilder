@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
     QMainWindow,
+    QMessageBox,
     QSizePolicy,
     QSplitter,
     QVBoxLayout,
@@ -219,9 +220,9 @@ class MainWindow(QMainWindow):
             self.task_list.command_selected.connect(self._on_command_selected)
 
         if self.command_form and self.console_output:
-            # Connecter directement le formulaire à la console pour l'exécution
+            # Connecter le formulaire via un intercepteur pour vérifier les exécutions en cours
             self.command_form.commands_to_execute.connect(
-                self.console_output.execute_commands
+                self._on_commands_to_execute
             )
             # Connecter le bouton Exécuter de la console au formulaire
             self.console_output.execute_requested.connect(
@@ -231,6 +232,41 @@ class MainWindow(QMainWindow):
             self.command_form.task_loaded.connect(
                 lambda: self.console_output.set_execute_enabled(True)
             )
+
+    def _on_commands_to_execute(self, commands_list):
+        """
+        Intercepte la demande d'exécution pour vérifier si une commande est déjà en cours.
+        
+        Args:
+            commands_list: Liste des commandes à exécuter
+        """
+        if self.console_output.is_executing():
+            # Une commande est en cours, demander confirmation
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Warning)
+            msg_box.setWindowTitle("Exécution en cours")
+            msg_box.setText("Une commande est actuellement en cours d'exécution.")
+            msg_box.setInformativeText(
+                "Voulez-vous arrêter l'exécution en cours et lancer les nouvelles commandes ?"
+            )
+            msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msg_box.setDefaultButton(QMessageBox.No)
+            
+            # Personnaliser les textes des boutons
+            msg_box.button(QMessageBox.Yes).setText("Arrêter et exécuter")
+            msg_box.button(QMessageBox.No).setText("Annuler")
+            
+            result = msg_box.exec()
+            
+            if result == QMessageBox.Yes:
+                # Arrêter l'exécution en cours
+                self.console_output._on_stop_clicked()
+                # Lancer les nouvelles commandes après un court délai
+                QTimer.singleShot(500, lambda: self.console_output.execute_commands(commands_list))
+            # Si No, on ne fait rien
+        else:
+            # Pas d'exécution en cours, lancer directement
+            self.console_output.execute_commands(commands_list)
 
     def _show_help_window(self):
         """Affiche la fenêtre d'aide YAML."""
