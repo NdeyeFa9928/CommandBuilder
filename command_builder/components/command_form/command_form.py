@@ -64,6 +64,7 @@ class CommandForm(QWidget):
         self.command_checkboxes = []  # Liste des checkboxes pour activer/désactiver les commandes
         self.task_argument_components = []  # Liste des ArgumentComponent pour les arguments de tâche
         self.shared_argument_values = {}  # Valeurs des arguments partagés
+        self._values_cache = {}  # Cache des valeurs par tâche {task_name: {arg_code: value}}
         self._command_widget_factory = (
             command_widget_factory or self._default_command_widget_factory
         )
@@ -165,6 +166,87 @@ class CommandForm(QWidget):
         else:
             self._stylesheet = ""
 
+    def _save_current_values(self):
+        """
+        Sauvegarde les valeurs actuelles dans le cache avant de changer de tâche.
+        """
+        if not self.current_task:
+            return
+
+        task_name = self.current_task.name
+        cached_values = {}
+
+        # Sauvegarder les valeurs des arguments partagés
+        for arg_data in self.task_argument_components:
+            component = arg_data["component"]
+            if hasattr(component, "get_argument") and hasattr(component, "get_value"):
+                arg = component.get_argument()
+                value = component.get_value()
+                if value:  # Ne sauvegarder que les valeurs non vides
+                    cached_values[f"shared_{arg.code}"] = value
+
+        # Sauvegarder les valeurs des arguments de chaque commande
+        for i, command_widget in enumerate(self.command_components):
+            if hasattr(command_widget, "command") and hasattr(command_widget, "argument_components"):
+                cmd_name = command_widget.command.name
+                for arg_code, arg_data in command_widget.argument_components.items():
+                    component = arg_data["component"]
+                    if hasattr(component, "get_value"):
+                        value = component.get_value()
+                        if value:  # Ne sauvegarder que les valeurs non vides
+                            cached_values[f"cmd_{cmd_name}_{arg_code}"] = value
+
+        # Sauvegarder l'état des checkboxes
+        for i, checkbox in enumerate(self.command_checkboxes):
+            cached_values[f"checkbox_{i}"] = checkbox.isChecked()
+
+        self._values_cache[task_name] = cached_values
+
+    def _restore_cached_values(self):
+        """
+        Restaure les valeurs depuis le cache après avoir chargé une tâche.
+        """
+        if not self.current_task:
+            return
+
+        task_name = self.current_task.name
+        if task_name not in self._values_cache:
+            return
+
+        cached_values = self._values_cache[task_name]
+
+        # Restaurer les valeurs des arguments partagés
+        for arg_data in self.task_argument_components:
+            component = arg_data["component"]
+            if hasattr(component, "get_argument") and hasattr(component, "set_value"):
+                arg = component.get_argument()
+                cache_key = f"shared_{arg.code}"
+                if cache_key in cached_values:
+                    component.set_value(cached_values[cache_key])
+                    # Mettre à jour shared_argument_values
+                    self.shared_argument_values[arg.code] = cached_values[cache_key]
+
+        # Restaurer les valeurs des arguments de chaque commande
+        for command_widget in self.command_components:
+            if hasattr(command_widget, "command") and hasattr(command_widget, "argument_components"):
+                cmd_name = command_widget.command.name
+                for arg_code, arg_data in command_widget.argument_components.items():
+                    component = arg_data["component"]
+                    cache_key = f"cmd_{cmd_name}_{arg_code}"
+                    if cache_key in cached_values and hasattr(component, "set_value"):
+                        component.set_value(cached_values[cache_key])
+
+        # Restaurer l'état des checkboxes
+        for i, checkbox in enumerate(self.command_checkboxes):
+            cache_key = f"checkbox_{i}"
+            if cache_key in cached_values:
+                checkbox.setChecked(cached_values[cache_key])
+
+        # Propager les valeurs partagées aux commandes
+        if self.shared_argument_values and self.current_task:
+            self.current_task.apply_shared_arguments(self.shared_argument_values)
+            self._refresh_command_displays()
+
     def set_task(self, task: Task):
         """
         Configure le formulaire pour afficher une tâche complète avec ses arguments partagés.
@@ -172,6 +254,9 @@ class CommandForm(QWidget):
         Args:
             task: La tâche à afficher
         """
+        # Sauvegarder les valeurs de la tâche actuelle avant de changer
+        self._save_current_values()
+
         self.current_task = task
         self.current_commands = task.commands
         self.current_command = None
@@ -244,6 +329,9 @@ class CommandForm(QWidget):
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
+
+        # Restaurer les valeurs depuis le cache si disponibles
+        self._restore_cached_values()
 
         # Émettre le signal pour activer le bouton Exécuter
         self.task_loaded.emit()
