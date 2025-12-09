@@ -2,9 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
-from command_builder.models.yaml_error import YamlError
 from command_builder.services.yaml_error_handler import YamlErrorHandler
 
 

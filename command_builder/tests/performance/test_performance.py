@@ -1,7 +1,6 @@
 """Tests de performance pour CommandBuilder."""
 
 import time
-from pathlib import Path
 
 import pytest
 

@@ -2,7 +2,7 @@
 CommandBuilder - GUI Assistant for Windows CLI Commands
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "CommandBuilder Team"
 __description__ = (
     "GUI Assistant for composing Windows CLI commands without syntax errors"

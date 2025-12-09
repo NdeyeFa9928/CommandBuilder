@@ -3,7 +3,7 @@ Module contenant la classe CommandForm qui représente le formulaire de commande
 """
 
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtUiTools import QUiLoader
@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 
 from command_builder.components.argument_component import ArgumentComponent
 from command_builder.components.command_component import CommandComponent
-from command_builder.models.arguments import Argument, TaskArgument
+from command_builder.models.arguments import Argument
 from command_builder.models.command import Command
 from command_builder.models.task import Task
 
@@ -135,9 +135,7 @@ class CommandForm(QWidget):
 
         # Message principal
         title_label = QLabel("Sélectionnez une tâche")
-        title_label.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #4a90e2;"
-        )
+        title_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #4a90e2;")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         welcome_layout.addWidget(title_label)
 
@@ -217,7 +215,9 @@ class CommandForm(QWidget):
             # Créer une checkbox pour activer/désactiver la commande
             checkbox = QCheckBox()
             checkbox.setChecked(True)  # Cochée par défaut
-            checkbox.setToolTip("Décochez pour ignorer cette commande lors de l'exécution")
+            checkbox.setToolTip(
+                "Décochez pour ignorer cette commande lors de l'exécution"
+            )
             checkbox.setStyleSheet("QCheckBox { font-size: 12px; }")
             self.command_checkboxes.append(checkbox)
             title_layout.addWidget(checkbox)
@@ -244,7 +244,7 @@ class CommandForm(QWidget):
 
         # Ajouter un spacer à la fin
         self.commands_layout.addStretch()
-        
+
         # Émettre le signal pour activer le bouton Exécuter
         self.task_loaded.emit()
 
@@ -540,7 +540,7 @@ class CommandForm(QWidget):
             if self.command_checkboxes and i < len(self.command_checkboxes):
                 if not self.command_checkboxes[i].isChecked():
                     continue  # Ignorer les commandes décochées
-            
+
             if hasattr(command_widget, "command") and hasattr(
                 command_widget, "get_argument_values"
             ):
@@ -573,7 +573,7 @@ class CommandForm(QWidget):
             if self.command_checkboxes and i < len(self.command_checkboxes):
                 if not self.command_checkboxes[i].isChecked():
                     continue  # Ignorer les commandes décochées
-            
+
             if hasattr(command_widget, "_build_full_command"):
                 full_command = command_widget._build_full_command()
                 command_name = (

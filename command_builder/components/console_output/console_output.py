@@ -3,6 +3,7 @@ Module contenant la classe ConsoleOutput qui représente la sortie console.
 """
 
 import datetime
+import subprocess
 from pathlib import Path
 
 from PySide6.QtCore import QTimer, Signal
@@ -28,7 +29,7 @@ class ConsoleOutput(QWidget):
 
     # Signal émis lorsque toutes les commandes sont terminées
     all_commands_finished = Signal()
-    
+
     # Signal émis quand le bouton Exécuter est cliqué
     execute_requested = Signal()
 
@@ -92,15 +93,15 @@ class ConsoleOutput(QWidget):
         self.button_stop.clicked.connect(self._on_stop_clicked)
         self.button_effacer.clicked.connect(self.clear)
         self.button_exporter.clicked.connect(self.export_console)
-    
+
     def _on_execute_clicked(self):
         """Gère le clic sur le bouton Exécuter."""
         self.execute_requested.emit()
-    
+
     def set_execute_enabled(self, enabled: bool):
         """
         Active ou désactive le bouton Exécuter.
-        
+
         Args:
             enabled: True pour activer, False pour désactiver
         """
@@ -169,6 +170,55 @@ class ConsoleOutput(QWidget):
             except Exception as e:
                 self.append_error(f"Erreur lors de l'exportation: {str(e)}")
 
+    def _cleanup_orphan_processes(self, commands_list):
+        """
+        Tue les processus orphelins liés aux exécutables des commandes.
+        
+        Exclut les exécutables critiques (python, cmd, powershell) pour éviter
+        de tuer l'application elle-même ou des shells système.
+        """
+        # Exécutables à ne JAMAIS tuer (risque de casser l'app ou le système)
+        EXCLUSIONS = {"python.exe", "pythonw.exe", "cmd.exe", "powershell.exe", "pwsh.exe"}
+
+        executables = set()
+        for cmd_info in commands_list:
+            command = cmd_info.get("command", "")
+            parts = command.strip().split()
+
+            if not parts:
+                continue
+
+            exe_name = parts[0]
+            # Nettoyer le nom (enlever le chemin si présent)
+            exe_name = exe_name.split("\\")[-1].split("/")[-1]
+
+            # Ajouter .exe seulement si pas d'extension ET pas un script Python
+            if not exe_name.lower().endswith(".exe") and "python" not in exe_name.lower():
+                exe_name += ".exe"
+
+            # Exclure les exécutables critiques
+            if exe_name.lower() not in EXCLUSIONS:
+                executables.add(exe_name)
+
+        killed_any = False
+
+        for exe in executables:
+            try:
+                result = subprocess.run(
+                    ["taskkill", "/F", "/IM", exe],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    self.append_text(f"[CLEANUP] Processus {exe} arrêté")
+                    killed_any = True
+            except Exception:
+                pass  # Ignorer les erreurs (processus non trouvé, etc.)
+
+        if killed_any:
+            self.append_text("")
+
     def execute_commands(self, commands_list):
         """
         Exécute toutes les commandes de la liste séquentiellement.
@@ -178,6 +228,9 @@ class ConsoleOutput(QWidget):
         """
         if not commands_list:
             return
+
+        # Nettoyer les processus orphelins avant de commencer
+        self._cleanup_orphan_processes(commands_list)
 
         # Réinitialiser le flag d'arrêt
         self.executor_service.reset_stop_flag()
@@ -288,7 +341,9 @@ class ConsoleOutput(QWidget):
 
         # Alterner le sablier pour l'animation
         hourglass = self._hourglass_frames[self._hourglass_index]
-        self._hourglass_index = (self._hourglass_index + 1) % len(self._hourglass_frames)
+        self._hourglass_index = (self._hourglass_index + 1) % len(
+            self._hourglass_frames
+        )
 
         # Mettre à jour le label
         if self.label_timer:

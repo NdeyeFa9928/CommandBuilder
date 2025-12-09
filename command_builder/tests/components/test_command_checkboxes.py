@@ -6,9 +6,9 @@ import pytest
 from PySide6.QtWidgets import QApplication, QCheckBox
 
 from command_builder.components.command_form import CommandForm
+from command_builder.models.arguments import Argument
 from command_builder.models.command import Command
 from command_builder.models.task import Task
-from command_builder.models.arguments import Argument, TaskArgument
 
 
 @pytest.fixture
@@ -24,25 +24,19 @@ def sample_task():
         name="command1",
         description="First command",
         command="cmd1 {ARG1}",
-        arguments=[
-            Argument(code="ARG1", name="Argument 1", type="string", required=1)
-        ],
+        arguments=[Argument(code="ARG1", name="Argument 1", type="string", required=1)],
     )
     cmd2 = Command(
         name="command2",
         description="Second command",
         command="cmd2 {ARG2}",
-        arguments=[
-            Argument(code="ARG2", name="Argument 2", type="string", required=1)
-        ],
+        arguments=[Argument(code="ARG2", name="Argument 2", type="string", required=1)],
     )
     cmd3 = Command(
         name="command3",
         description="Third command",
         command="cmd3 {ARG3}",
-        arguments=[
-            Argument(code="ARG3", name="Argument 3", type="string", required=1)
-        ],
+        arguments=[Argument(code="ARG3", name="Argument 3", type="string", required=1)],
     )
 
     task = Task(
@@ -92,8 +86,12 @@ def test_only_checked_commands_validated(app, sample_task, monkeypatch):
     form.command_checkboxes[1].setChecked(False)
 
     # Remplir les arguments de la première et troisième commande
-    form.command_components[0].argument_components["ARG1"]["component"].set_value("value1")
-    form.command_components[2].argument_components["ARG3"]["component"].set_value("value3")
+    form.command_components[0].argument_components["ARG1"]["component"].set_value(
+        "value1"
+    )
+    form.command_components[2].argument_components["ARG3"]["component"].set_value(
+        "value3"
+    )
     # Ne pas remplir ARG2 (commande décochée)
 
     # Capturer les commandes émises
@@ -146,8 +144,12 @@ def test_unchecked_command_not_validated(app, sample_task):
     form.command_checkboxes[0].setChecked(False)
 
     # Remplir seulement les commandes 2 et 3
-    form.command_components[1].argument_components["ARG2"]["component"].set_value("value2")
-    form.command_components[2].argument_components["ARG3"]["component"].set_value("value3")
+    form.command_components[1].argument_components["ARG2"]["component"].set_value(
+        "value2"
+    )
+    form.command_components[2].argument_components["ARG3"]["component"].set_value(
+        "value3"
+    )
     # Ne pas remplir ARG1 (mais commande décochée donc pas d'erreur)
 
     # Capturer les commandes émises
@@ -210,9 +212,15 @@ def test_partial_execution_scenario(app, sample_task):
     form.set_task(sample_task)
 
     # Remplir tous les arguments
-    form.command_components[0].argument_components["ARG1"]["component"].set_value("value1")
-    form.command_components[1].argument_components["ARG2"]["component"].set_value("value2")
-    form.command_components[2].argument_components["ARG3"]["component"].set_value("value3")
+    form.command_components[0].argument_components["ARG1"]["component"].set_value(
+        "value1"
+    )
+    form.command_components[1].argument_components["ARG2"]["component"].set_value(
+        "value2"
+    )
+    form.command_components[2].argument_components["ARG3"]["component"].set_value(
+        "value3"
+    )
 
     # Simuler que la commande 1 a déjà été exécutée avec succès
     # L'utilisateur décoche la commande 1
