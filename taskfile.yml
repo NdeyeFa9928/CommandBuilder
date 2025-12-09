@@ -53,7 +53,7 @@ tasks:
     desc: Check formatting and style without fixing
     cmds:
       - cmd: pipenv run ruff format --check .
-      - cmd: pipenv run ruff check .*
+      - cmd: pipenv run ruff check .
 
 
   fix:
