@@ -239,8 +239,8 @@ class TestArgumentComponentBrowseDialog:
 
         component._on_browse_clicked()
 
-        # Vérifier que le chemin a été défini
-        component.line_edit.setText.assert_called_once_with("C:/test/file.txt")
+        # Vérifier que le chemin a été défini (normalisé avec backslashes)
+        component.line_edit.setText.assert_called_once_with("C:\\test\\file.txt")
 
     @patch.object(ArgumentComponent, "_load_ui")
     @patch.object(ArgumentComponent, "_load_stylesheet")
