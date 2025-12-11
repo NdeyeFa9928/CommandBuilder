@@ -3,6 +3,7 @@ Module contenant la classe ConsoleOutput qui représente la sortie console.
 """
 
 import datetime
+import os
 import subprocess
 from pathlib import Path
 
@@ -213,11 +214,14 @@ class ConsoleOutput(QWidget):
 
         for exe in executables:
             try:
+                # CREATE_NO_WINDOW empêche l'apparition d'une console flash
+                creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
                 result = subprocess.run(
                     ["taskkill", "/F", "/IM", exe],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
+                    creationflags=creationflags
                 )
                 if result.returncode == 0:
                     self.append_text(f"[CLEANUP] Processus {exe} arrêté")
