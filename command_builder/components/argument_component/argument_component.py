@@ -24,10 +24,10 @@ def normalize_path_for_display(path: str) -> str:
     """
     Normalise un chemin pour l'affichage dans l'interface.
     Convertit les / en \\ pour un affichage Windows natif.
-    
+
     Args:
         path: Le chemin à normaliser
-        
+
     Returns:
         Le chemin avec des backslashes
     """
@@ -120,7 +120,9 @@ class ArgumentComponent(QWidget):
             # Cocher si une valeur par défaut existe
             if self.argument.default:
                 self.checkbox.setChecked(True)
-                self.line_edit.setText(normalize_path_for_display(self.argument.default))
+                self.line_edit.setText(
+                    normalize_path_for_display(self.argument.default)
+                )
                 self._has_default_value = True
             self.line_edit.setPlaceholderText(
                 self.argument.description or self.argument.name
@@ -134,7 +136,9 @@ class ArgumentComponent(QWidget):
                 self.argument.description or self.argument.name
             )
             if self.argument.default:
-                self.line_edit.setText(normalize_path_for_display(self.argument.default))
+                self.line_edit.setText(
+                    normalize_path_for_display(self.argument.default)
+                )
                 self._has_default_value = True
             self.line_edit.textChanged.connect(self._on_value_changed)
             # Afficher le bouton parcourir pour les fichiers/dossiers

@@ -187,7 +187,9 @@ class CommandForm(QWidget):
 
         # Sauvegarder les valeurs des arguments de chaque commande
         for i, command_widget in enumerate(self.command_components):
-            if hasattr(command_widget, "command") and hasattr(command_widget, "argument_components"):
+            if hasattr(command_widget, "command") and hasattr(
+                command_widget, "argument_components"
+            ):
                 cmd_name = command_widget.command.name
                 for arg_code, arg_data in command_widget.argument_components.items():
                     component = arg_data["component"]
@@ -228,7 +230,9 @@ class CommandForm(QWidget):
 
         # Restaurer les valeurs des arguments de chaque commande
         for command_widget in self.command_components:
-            if hasattr(command_widget, "command") and hasattr(command_widget, "argument_components"):
+            if hasattr(command_widget, "command") and hasattr(
+                command_widget, "argument_components"
+            ):
                 cmd_name = command_widget.command.name
                 for arg_code, arg_data in command_widget.argument_components.items():
                     component = arg_data["component"]
