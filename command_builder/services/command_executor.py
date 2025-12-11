@@ -42,6 +42,11 @@ class CommandExecutor(QThread):
             encoding = "cp850"
 
             # Créer le processus avec un nouveau groupe de processus pour pouvoir le tuer proprement
+            # CREATE_NO_WINDOW empêche l'apparition d'une console flash sur Windows
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+            if os.name == "nt":
+                creationflags |= subprocess.CREATE_NO_WINDOW
+
             process = subprocess.Popen(
                 self.command,
                 shell=True,
@@ -50,7 +55,7 @@ class CommandExecutor(QThread):
                 text=True,
                 encoding=encoding,
                 errors="replace",
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                creationflags=creationflags,
             )
 
             # Stocker le processus pour pouvoir le tuer depuis cancel()
@@ -106,26 +111,29 @@ class CommandExecutor(QThread):
 
     def _kill_process(self, process):
         """Tue le processus et tous ses enfants de manière forcée.
-        
+
         Sur Windows, utilise taskkill /F /T pour tuer l'arbre de processus complet,
         ce qui libère correctement les fichiers ouverts par les processus enfants.
         """
         try:
             pid = process.pid
-            
+
             # Sur Windows, utiliser taskkill pour tuer l'arbre de processus
             # /F = Force, /T = Tree (tue aussi les processus enfants)
-            if os.name == 'nt':
+            # CREATE_NO_WINDOW empêche l'apparition d'une console flash
+            if os.name == "nt":
                 subprocess.run(
-                    ['taskkill', '/F', '/T', '/PID', str(pid)],
+                    ["taskkill", "/F", "/T", "/PID", str(pid)],
                     capture_output=True,
-                    timeout=5
+                    timeout=5,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
                 )
             else:
                 # Sur Unix, utiliser kill avec le groupe de processus
                 import signal
+
                 os.killpg(os.getpgid(pid), signal.SIGKILL)
-            
+
             # Attendre que le processus se termine
             try:
                 process.wait(timeout=1)

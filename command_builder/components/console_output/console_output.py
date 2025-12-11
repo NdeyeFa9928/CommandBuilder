@@ -3,6 +3,7 @@ Module contenant la classe ConsoleOutput qui représente la sortie console.
 """
 
 import datetime
+import os
 import subprocess
 from pathlib import Path
 
@@ -101,7 +102,7 @@ class ConsoleOutput(QWidget):
     def is_executing(self):
         """
         Vérifie si une commande est en cours d'exécution.
-        
+
         Returns:
             True si une exécution est en cours, False sinon
         """
@@ -182,12 +183,18 @@ class ConsoleOutput(QWidget):
     def _cleanup_orphan_processes(self, commands_list):
         """
         Tue les processus orphelins liés aux exécutables des commandes.
-        
+
         Exclut les exécutables critiques (python, cmd, powershell) pour éviter
         de tuer l'application elle-même ou des shells système.
         """
         # Exécutables à ne JAMAIS tuer (risque de casser l'app ou le système)
-        EXCLUSIONS = {"python.exe", "pythonw.exe", "cmd.exe", "powershell.exe", "pwsh.exe"}
+        EXCLUSIONS = {
+            "python.exe",
+            "pythonw.exe",
+            "cmd.exe",
+            "powershell.exe",
+            "pwsh.exe",
+        }
 
         executables = set()
         for cmd_info in commands_list:
@@ -202,7 +209,10 @@ class ConsoleOutput(QWidget):
             exe_name = exe_name.split("\\")[-1].split("/")[-1]
 
             # Ajouter .exe seulement si pas d'extension ET pas un script Python
-            if not exe_name.lower().endswith(".exe") and "python" not in exe_name.lower():
+            if (
+                not exe_name.lower().endswith(".exe")
+                and "python" not in exe_name.lower()
+            ):
                 exe_name += ".exe"
 
             # Exclure les exécutables critiques
@@ -213,11 +223,14 @@ class ConsoleOutput(QWidget):
 
         for exe in executables:
             try:
+                # CREATE_NO_WINDOW empêche l'apparition d'une console flash
+                creationflags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
                 result = subprocess.run(
                     ["taskkill", "/F", "/IM", exe],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
+                    creationflags=creationflags,
                 )
                 if result.returncode == 0:
                     self.append_text(f"[CLEANUP] Processus {exe} arrêté")

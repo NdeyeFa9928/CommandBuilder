@@ -20,6 +20,22 @@ from PySide6.QtWidgets import (
 from command_builder.models.arguments import Argument
 
 
+def normalize_path_for_display(path: str) -> str:
+    """
+    Normalise un chemin pour l'affichage dans l'interface.
+    Convertit les / en \\ pour un affichage Windows natif.
+
+    Args:
+        path: Le chemin à normaliser
+
+    Returns:
+        Le chemin avec des backslashes
+    """
+    if not path:
+        return path
+    return path.replace("/", "\\")
+
+
 class ArgumentComponent(QWidget):
     """
     Composant représentant un argument individuel.
@@ -104,7 +120,9 @@ class ArgumentComponent(QWidget):
             # Cocher si une valeur par défaut existe
             if self.argument.default:
                 self.checkbox.setChecked(True)
-                self.line_edit.setText(self.argument.default)
+                self.line_edit.setText(
+                    normalize_path_for_display(self.argument.default)
+                )
                 self._has_default_value = True
             self.line_edit.setPlaceholderText(
                 self.argument.description or self.argument.name
@@ -118,7 +136,9 @@ class ArgumentComponent(QWidget):
                 self.argument.description or self.argument.name
             )
             if self.argument.default:
-                self.line_edit.setText(self.argument.default)
+                self.line_edit.setText(
+                    normalize_path_for_display(self.argument.default)
+                )
                 self._has_default_value = True
             self.line_edit.textChanged.connect(self._on_value_changed)
             # Afficher le bouton parcourir pour les fichiers/dossiers
@@ -176,7 +196,8 @@ class ArgumentComponent(QWidget):
             path, _ = QFileDialog.getOpenFileName(self, "Sélectionner un fichier")
 
         if path and self.line_edit:
-            self.line_edit.setText(path)
+            # Normaliser le chemin pour affichage Windows (/ → \)
+            self.line_edit.setText(normalize_path_for_display(path))
 
     def get_value(self) -> str:
         """
@@ -231,7 +252,7 @@ class ArgumentComponent(QWidget):
         else:
             # Pour les types classiques
             if self.line_edit:
-                self.line_edit.setText(value)
+                self.line_edit.setText(normalize_path_for_display(value))
                 self._has_default_value = is_default
 
     def get_argument(self) -> Argument:

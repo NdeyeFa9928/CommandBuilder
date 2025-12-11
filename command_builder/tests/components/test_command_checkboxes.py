@@ -3,6 +3,8 @@ Tests pour la fonctionnalité de sélection des commandes via checkboxes.
 """
 
 import pytest
+from unittest.mock import patch
+
 from PySide6.QtWidgets import QApplication, QCheckBox
 
 from command_builder.components.command_form import CommandForm
@@ -77,7 +79,8 @@ def test_checkboxes_have_tooltip(app, sample_task):
         assert "ignorer" in cb.toolTip().lower() or "décochez" in cb.toolTip().lower()
 
 
-def test_only_checked_commands_validated(app, sample_task, monkeypatch):
+@patch("command_builder.components.command_form.command_form.QMessageBox")
+def test_only_checked_commands_validated(mock_msgbox, app, sample_task):
     """Vérifie que seules les commandes cochées sont validées."""
     form = CommandForm()
     form.set_task(sample_task)
@@ -111,7 +114,8 @@ def test_only_checked_commands_validated(app, sample_task, monkeypatch):
     assert emitted_commands[1]["name"] == "command3"
 
 
-def test_error_if_no_command_checked(app, sample_task):
+@patch("command_builder.components.command_form.command_form.QMessageBox")
+def test_error_if_no_command_checked(mock_msgbox, app, sample_task):
     """Vérifie qu'une erreur est affichée si aucune commande n'est cochée."""
     form = CommandForm()
     form.set_task(sample_task)
@@ -135,7 +139,8 @@ def test_error_if_no_command_checked(app, sample_task):
     assert len(emitted_commands) == 0
 
 
-def test_unchecked_command_not_validated(app, sample_task):
+@patch("command_builder.components.command_form.command_form.QMessageBox")
+def test_unchecked_command_not_validated(mock_msgbox, app, sample_task):
     """Vérifie qu'une commande décochée n'est pas validée (même si arguments manquants)."""
     form = CommandForm()
     form.set_task(sample_task)
@@ -203,7 +208,8 @@ def test_checkboxes_cleared_on_task_change(app, sample_task):
     assert len(form.command_checkboxes) == 2
 
 
-def test_partial_execution_scenario(app, sample_task):
+@patch("command_builder.components.command_form.command_form.QMessageBox")
+def test_partial_execution_scenario(mock_msgbox, app, sample_task):
     """
     Scénario réel : Une tâche avec 3 commandes plante à la commande 2.
     L'utilisateur décoche la commande 1 (déjà réussie) et relance.
