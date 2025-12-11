@@ -23,6 +23,9 @@ from command_builder.components.command_component import CommandComponent
 from command_builder.models.arguments import Argument
 from command_builder.models.command import Command
 from command_builder.models.task import Task
+from command_builder.services.command_builder_service import CommandBuilderService
+from command_builder.services.command_validator import CommandValidator
+from command_builder.services.form_state_manager import FormStateManager
 
 
 class CommandForm(QWidget):
@@ -64,7 +67,7 @@ class CommandForm(QWidget):
         self.command_checkboxes = []  # Liste des checkboxes pour activer/désactiver les commandes
         self.task_argument_components = []  # Liste des ArgumentComponent pour les arguments de tâche
         self.shared_argument_values = {}  # Valeurs des arguments partagés
-        self._values_cache = {}  # Cache des valeurs par tâche {task_name: {arg_code: value}}
+        self._state_manager = FormStateManager()  # Gestionnaire d'état du formulaire
         self._command_widget_factory = (
             command_widget_factory or self._default_command_widget_factory
         )
@@ -169,82 +172,36 @@ class CommandForm(QWidget):
     def _save_current_values(self):
         """
         Sauvegarde les valeurs actuelles dans le cache avant de changer de tâche.
+        Délègue au FormStateManager.
         """
         if not self.current_task:
             return
 
-        task_name = self.current_task.name
-        cached_values = {}
-
-        # Sauvegarder les valeurs des arguments partagés
-        for arg_data in self.task_argument_components:
-            component = arg_data["component"]
-            if hasattr(component, "get_argument") and hasattr(component, "get_value"):
-                arg = component.get_argument()
-                value = component.get_value()
-                if value:  # Ne sauvegarder que les valeurs non vides
-                    cached_values[f"shared_{arg.code}"] = value
-
-        # Sauvegarder les valeurs des arguments de chaque commande
-        for i, command_widget in enumerate(self.command_components):
-            if hasattr(command_widget, "command") and hasattr(
-                command_widget, "argument_components"
-            ):
-                cmd_name = command_widget.command.name
-                for arg_code, arg_data in command_widget.argument_components.items():
-                    component = arg_data["component"]
-                    if hasattr(component, "get_value"):
-                        value = component.get_value()
-                        if value:  # Ne sauvegarder que les valeurs non vides
-                            cached_values[f"cmd_{cmd_name}_{arg_code}"] = value
-
-        # Sauvegarder l'état des checkboxes
-        for i, checkbox in enumerate(self.command_checkboxes):
-            cached_values[f"checkbox_{i}"] = checkbox.isChecked()
-
-        self._values_cache[task_name] = cached_values
+        self._state_manager.save_state(
+            task_name=self.current_task.name,
+            task_argument_components=self.task_argument_components,
+            command_components=self.command_components,
+            command_checkboxes=self.command_checkboxes,
+        )
 
     def _restore_cached_values(self):
         """
         Restaure les valeurs depuis le cache après avoir chargé une tâche.
+        Délègue au FormStateManager.
         """
         if not self.current_task:
             return
 
-        task_name = self.current_task.name
-        if task_name not in self._values_cache:
-            return
+        # Restaurer les valeurs via le gestionnaire d'état
+        restored_shared_values = self._state_manager.restore_state(
+            task_name=self.current_task.name,
+            task_argument_components=self.task_argument_components,
+            command_components=self.command_components,
+            command_checkboxes=self.command_checkboxes,
+        )
 
-        cached_values = self._values_cache[task_name]
-
-        # Restaurer les valeurs des arguments partagés
-        for arg_data in self.task_argument_components:
-            component = arg_data["component"]
-            if hasattr(component, "get_argument") and hasattr(component, "set_value"):
-                arg = component.get_argument()
-                cache_key = f"shared_{arg.code}"
-                if cache_key in cached_values:
-                    component.set_value(cached_values[cache_key])
-                    # Mettre à jour shared_argument_values
-                    self.shared_argument_values[arg.code] = cached_values[cache_key]
-
-        # Restaurer les valeurs des arguments de chaque commande
-        for command_widget in self.command_components:
-            if hasattr(command_widget, "command") and hasattr(
-                command_widget, "argument_components"
-            ):
-                cmd_name = command_widget.command.name
-                for arg_code, arg_data in command_widget.argument_components.items():
-                    component = arg_data["component"]
-                    cache_key = f"cmd_{cmd_name}_{arg_code}"
-                    if cache_key in cached_values and hasattr(component, "set_value"):
-                        component.set_value(cached_values[cache_key])
-
-        # Restaurer l'état des checkboxes
-        for i, checkbox in enumerate(self.command_checkboxes):
-            cache_key = f"checkbox_{i}"
-            if cache_key in cached_values:
-                checkbox.setChecked(cached_values[cache_key])
+        # Mettre à jour shared_argument_values avec les valeurs restaurées
+        self.shared_argument_values.update(restored_shared_values)
 
         # Propager les valeurs partagées aux commandes
         if self.shared_argument_values and self.current_task:
@@ -621,72 +578,63 @@ class CommandForm(QWidget):
         """
         Gère le clic sur le bouton "Exécuter".
         Valide les arguments obligatoires puis exécute seulement les commandes cochées.
+        
+        Délègue la validation à CommandValidator et la construction à CommandBuilderService.
         """
         if not self.command_components:
             return
 
-        # Valider tous les arguments obligatoires avant l'exécution (seulement pour les commandes cochées)
-        all_errors = []
-        for i, command_widget in enumerate(self.command_components):
-            # Vérifier si la commande est cochée (si des checkboxes existent)
-            if self.command_checkboxes and i < len(self.command_checkboxes):
-                if not self.command_checkboxes[i].isChecked():
-                    continue  # Ignorer les commandes décochées
-
-            if hasattr(command_widget, "command") and hasattr(
-                command_widget, "get_argument_values"
-            ):
-                command = command_widget.command
-                argument_values = command_widget.get_argument_values()
-
-                # Valider les arguments de cette commande
-                is_valid, errors = command.validate_arguments(argument_values)
-                if not is_valid:
-                    # Ajouter le nom de la commande aux erreurs
-                    for error in errors:
-                        all_errors.append(f"[{command.name}] {error}")
+        # Valider tous les arguments obligatoires (délégué au service)
+        is_valid, all_errors = CommandValidator.validate_commands(
+            self.command_components,
+            self.command_checkboxes,
+        )
 
         # Si des erreurs ont été trouvées, afficher un message et ne pas exécuter
-        if all_errors:
-            error_text = "\n".join(f"• {err}" for err in all_errors)
-            msg_box = QMessageBox(self)
-            msg_box.setIcon(QMessageBox.Warning)
-            msg_box.setWindowTitle("Arguments manquants")
-            msg_box.setText("Veuillez remplir tous les champs obligatoires :")
-            msg_box.setInformativeText(error_text)
-            msg_box.setStyleSheet(self._stylesheet)
-            msg_box.exec()
+        if not is_valid:
+            self._show_validation_errors(all_errors)
             return
 
-        # Construire la liste des commandes cochées avec leurs noms
-        commands_list = []
-        for i, command_widget in enumerate(self.command_components):
-            # Vérifier si la commande est cochée (si des checkboxes existent)
-            if self.command_checkboxes and i < len(self.command_checkboxes):
-                if not self.command_checkboxes[i].isChecked():
-                    continue  # Ignorer les commandes décochées
-
-            if hasattr(command_widget, "_build_full_command"):
-                full_command = command_widget._build_full_command()
-                command_name = (
-                    command_widget.command.name
-                    if hasattr(command_widget, "command")
-                    else "Commande"
-                )
-                commands_list.append({"name": command_name, "command": full_command})
+        # Construire la liste des commandes cochées (délégué au service)
+        commands_list = CommandBuilderService.build_commands_list(
+            self.command_components,
+            self.command_checkboxes,
+        )
 
         # Vérifier qu'au moins une commande est cochée
         if not commands_list:
-            msg_box = QMessageBox(self)
-            msg_box.setIcon(QMessageBox.Warning)
-            msg_box.setWindowTitle("Aucune commande sélectionnée")
-            msg_box.setText("Veuillez cocher au moins une commande à exécuter.")
-            msg_box.setStyleSheet(self._stylesheet)
-            msg_box.exec()
+            self._show_no_command_selected_error()
             return
 
         # Émettre le signal pour exécuter les commandes cochées
         self.commands_to_execute.emit(commands_list)
+
+    def _show_validation_errors(self, errors: list):
+        """
+        Affiche une boîte de dialogue avec les erreurs de validation.
+
+        Args:
+            errors: Liste des messages d'erreur
+        """
+        error_text = "\n".join(f"• {err}" for err in errors)
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Arguments manquants")
+        msg_box.setText("Veuillez remplir tous les champs obligatoires :")
+        msg_box.setInformativeText(error_text)
+        msg_box.setStyleSheet(self._stylesheet)
+        msg_box.exec()
+
+    def _show_no_command_selected_error(self):
+        """
+        Affiche une boîte de dialogue indiquant qu'aucune commande n'est sélectionnée.
+        """
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Aucune commande sélectionnée")
+        msg_box.setText("Veuillez cocher au moins une commande à exécuter.")
+        msg_box.setStyleSheet(self._stylesheet)
+        msg_box.exec()
 
     def _apply_default_style(self, label: QLabel):
         """
